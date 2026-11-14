@@ -57,7 +57,14 @@ Sound is generated using dual Web Audio oscillators: a fundamental pure sine wav
 ##### 4. 3D Planetary Visualization
 Built with Three.js and `@react-three/fiber`, our hero visualization features a rotating 3D Earth incorporating NASA Blue Marble surface day textures, surface normal maps, specular ocean roughness, and an independently drifting cloud layer. A custom GLSL Fresnel atmosphere shader dynamically lerps its atmospheric rim glow from polar blue (`< -0.2 °C`) through cyan (`0.0 °C`) to blazing solar red (`+1.28 °C`). Acoustic pulse ripples expand radially across the globe proportional to note frequency.
 
-##### 5. Educational & Analytical Modules
+##### 5. Computer Vision Frame Jukebox & Harmonic Synthesis
+Directly answering the 2026 challenge brief to pair NASA Earth Information Center visual frames with dynamic sonification:
+- **Computer Vision Extraction:** Built-in analyzer runs Sobel 3×3 edge detection (gradient magnitude), 12-bin HSL hue histograms, color warmth ratios ($W/(W+C)$), and spatial brightness centroids over any visual frame (NASA Blue Marble, Black Marble night lights, Warming Stripes, or user uploads).
+- **Visual-to-Sound Translation:** Edge density governs scanline tempo (50ms–140ms per column); hue distribution recommends modal scale quantization (Pentatonic, Dorian, Lydian, Aeolian); warmth ratio modulates urgency timbre; brightness centroid determines spatial stereo panning.
+- **Scientific Anchor Invariant:** To prevent chaotic unmusical noise while preserving scientific validity, the root pitch center remains strictly anchored to NASA GISTEMP temperature anomaly data; visual frame metrics dynamically color harmony, timbre, spatialization, and rhythm.
+- **Offline WAV Soundscape Export:** Direct 24-second stereo synthesis to uncompressed 16-bit 44.1 kHz WAV via `OfflineAudioContext`.
+
+##### 6. Educational & Analytical Modules
 - **Hear Your Birth Year:** Allows users to input their birth year, plays their birth year followed by today's record warmth, and presents a personalized summary of warming during their lifetime.
 - **Classroom / Guided Mode:** An offline 5-step interactive lesson with instant-feedback quizzes teaching anomalies, baselines, and sonification rules.
 - **What Am I Hearing?:** Offline bilingual (English & Hindi) explainer breaking down historical warmth rank (#1 to #146), pre-industrial baseline deltas, and decade averages.
@@ -100,3 +107,8 @@ Roadmap for expanding into multi-sensory Earth observation:
 #### 3. NASA Earth Information Center (EIC) Visual Frames
 - **Product:** Earth Information Center climate dashboard (`earth.gov`) and NASA Scientific Visualization Studio (SVS Entry #5190).
 - **How Used:** Serves as the visual reference paired directly with our real-time sonification algorithms.
+
+#### 4. NASA Black Marble Night Lights Imagery
+- **Product:** Suomi NPP VIIRS Day/Night Band Global Nocturnal City Lights Composite.
+- **How Used:** Rendered on the night hemisphere of our 3D Earth globe and analyzed as a nocturnal electrification frame in the EIC Frame Jukebox.
+- **Citation:** NASA Earth Applied Sciences / Goddard Space Flight Center; Román, M. O., et al., 2018.

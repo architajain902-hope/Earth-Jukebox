@@ -57,5 +57,5 @@ npm run verify
 ```
 Must pass with:
 - ✓ 146 consecutive NASA records validated
-- ✓ 18/18 Vitest unit tests passed
+- ✓ 26/26 Vitest unit tests passed
 - ✓ Production static bundle compiled with 0 errors

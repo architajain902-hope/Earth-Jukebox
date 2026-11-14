@@ -17,6 +17,9 @@ Team: Earth 616 (Bhopal Local Event)
 - NASA Visible Earth / Blue Marble: Global planetary day surface, ocean specular, normal, and cloud maps.
   URL: https://visibleearth.nasa.gov/ (Reto Stöckli, NASA Earth Observatory).
   License: Public Domain / MIT (Three.js asset repository).
+- NASA Black Marble: Global nocturnal city lights composite (Suomi NPP VIIRS Day/Night Band).
+  URL: https://earthobservatory.nasa.gov/features/NightLights (NASA Earth Applied Sciences / GSFC; Román, M. O., et al., 2018).
+  License: Public Domain (U.S. Government Work).
 
 3. OPEN-SOURCE LIBRARIES:
 - React 18.3.1 (MIT License) - UI component hierarchy
@@ -29,4 +32,5 @@ Team: Earth 616 (Bhopal Local Event)
 4. TYPOGRAPHY:
 - Space Grotesk (Florian Karsten) - SIL Open Font License 1.1
 - Space Mono (Colophon Foundry) - SIL Open Font License 1.1
+- JetBrains Mono (JetBrains) - SIL Open Font License 1.1
 - Inter (Rasmus Andersson) - SIL Open Font License 1.1

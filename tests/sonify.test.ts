@@ -53,14 +53,24 @@ describe('Sonification Mapping', () => {
   });
 
   describe('Musical Mode Quantization', () => {
-    it('is strictly monotonic: higher anomaly never produces lower pitch', () => {
-      const temps = [-0.5, -0.4, -0.25, -0.1, 0.0, 0.15, 0.35, 0.6, 0.85, 1.0, 1.25, 1.3];
-      for (let i = 1; i < temps.length; i++) {
-        const prevFreq = anomalyToMusicalFrequency(temps[i - 1], 'dorian');
-        const currFreq = anomalyToMusicalFrequency(temps[i], 'dorian');
-        expect(currFreq).toBeGreaterThanOrEqual(prevFreq);
+    const scales: Array<'pentatonic' | 'dorian' | 'lydian' | 'aeolian'> = [
+      'pentatonic',
+      'dorian',
+      'lydian',
+      'aeolian',
+    ];
+
+    it.each(scales)(
+      'is strictly monotonic for scale %s: higher anomaly never produces lower pitch',
+      (scale) => {
+        const temps = [-0.5, -0.4, -0.25, -0.1, 0.0, 0.15, 0.35, 0.6, 0.85, 1.0, 1.25, 1.3];
+        for (let i = 1; i < temps.length; i++) {
+          const prevFreq = anomalyToMusicalFrequency(temps[i - 1], scale);
+          const currFreq = anomalyToMusicalFrequency(temps[i], scale);
+          expect(currFreq).toBeGreaterThanOrEqual(prevFreq);
+        }
       }
-    });
+    );
 
     it('quantizes to valid frequencies within the 220Hz - 880Hz envelope', () => {
       expect(anomalyToMusicalFrequency(-0.5, 'pentatonic')).toBeCloseTo(220.0, 1);

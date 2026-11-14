@@ -30,18 +30,22 @@ Unlike subjective "climate music", Earth 616 upholds **strict scientific honesty
 
 | Feature | Description | File / Implementation |
 | :--- | :--- | :--- |
-| **🌐 3D Interactive Earth** | Photorealistic rotating WebGL planet featuring NASA Blue Marble day textures, surface normals, ocean specular reflection, and independent orbital clouds. | `src/globe/EarthGlobe.tsx` |
+| **🌐 3D Interactive Earth** | Photorealistic rotating WebGL planet featuring NASA Blue Marble day textures, Black Marble night lights on the dark hemisphere, surface normals, ocean specular reflection, and independent orbital clouds. | `src/globe/EarthGlobe.tsx` |
+| **🎨 EIC Frame Jukebox** | Computer vision engine (Sobel 3×3 edge detection, 12-bin HSL hue histograms, color warmth ratios, spatial centroids) sonifying NASA visual frames into real-time stereo soundscapes with scanline tracking. | `src/vision/frameAnalyzer.ts`, `src/vision/frameSonifier.ts`, `src/ui/JukeboxTab.tsx` |
+| **🎼 Musical Scales & Synthesis** | Multi-voice synthesizer with dual detuned oscillators, 4 musical quantization modes (Pentatonic, Dorian, Lydian, Aeolian) alongside scientific Hz mode, climate urgency vibrato LFO, and 55Hz sub drone bed. | `src/audio/sonify.ts`, `src/audio/engine.ts` |
 | **🔥 Data-Driven Atmosphere** | Custom GLSL Fresnel shader lerps atmospheric rim glow from cool blue (`< -0.2 °C`), through icy cyan, to solar red (`+1.28 °C`). | `src/globe/EarthGlobe.tsx` |
-| **🔊 Real-Time Sonification** | Dual-oscillator engine (fundamental sine + warm 2nd harmonic), anti-click envelope, and `DynamicsCompressorNode` limiter. | `src/audio/sonify.ts`, `src/audio/engine.ts` |
+| **🔊 Real-Time Sonification** | Dual-oscillator engine (fundamental sine + warm 2nd harmonic), anti-click envelope, algorithmic 2.2s space reverb, and `DynamicsCompressorNode` limiter. | `src/audio/sonify.ts`, `src/audio/engine.ts` |
+| **📹 Built-in Clip Recorder** | Direct canvas + Web Audio stream recording via `MediaRecorder` into high-quality WebM clips with live timestamp overlay for presentations and submissions. | `src/utils/screenRecorder.ts` |
+| **🌓 Dual Theme Engine** | Deep Space dark theme and Daylight high-clarity light theme with instant toggle and local storage persistence. | `src/ui/MainExperience.tsx` |
 | **🎂 Hear Your Birth Year** | Input any birth year: auditions your birth year against today's record warmth with a plain-language lifetime warming summary. | `src/ui/BirthYearModal.tsx` |
 | **🎓 Classroom / Guided Mode** | 5-step interactive educational lesson on anomalies, baselines, and historical inflection points with instant-feedback quizzes. | `src/ui/ClassroomModal.tsx` |
 | **🏛️ NASA EIC Portal** | Direct bridge connecting our sonification engine to official NASA Earth Information Center visual frames at `earth.gov`. | `src/ui/EICModal.tsx` |
 | **🎹 Decade Chords** | Auditions 10-year period averages as warm sustained chords with individual yearly notes arpeggiated across 2.5 seconds. | `src/audio/engine.ts` |
-| **📊 Warming Stripes Scrubber** | 146-band Ed Hawkins climate stripes under the timeline acting as a direct click-to-jump scrubber. | `src/ui/TimelineSlider.tsx` |
+| **📊 Warming Stripes Scrubber** | 146-band Ed Hawkins climate stripes under the timeline acting as a direct click-to-jump scrubber with milestone chips. | `src/ui/TimelineSlider.tsx` |
 | **📈 Vector Anomaly Chart** | Zero-dependency SVG temperature anomaly line chart with baseline zero-line, playhead indicator, and hover inspection. | `src/ui/TemperatureChart.tsx` |
 | **🎧 "What Am I Hearing?"** | Offline bilingual (**English / हिन्दी**) explainer computing historical rank (#1 to #146), pre-industrial deltas, and decade normals. | `src/ui/ExplainerModal.tsx` |
 | **⚖️ Comparative Mode** | Audition any two historical years back-to-back with live $\Delta ^\circ\text{C}$ and $\Delta\text{ Hz}$ delta calculations. | `src/ui/CompareModal.tsx` |
-| **💾 Media Exporter** | Synthesize and download the 146-year time-lapse as an uncompressed 16-bit WAV file (`OfflineAudioContext`) or chart as PNG. | `src/audio/exportWav.ts`, `src/ui/ExportModal.tsx` |
+| **💾 Media Exporter** | Synthesize and download the 146-year time-lapse or custom frame soundscapes as uncompressed 16-bit WAV files (`OfflineAudioContext`) or chart as PNG. | `src/audio/exportWav.ts`, `src/vision/frameSonifier.ts`, `src/ui/ExportModal.tsx` |
 | **🔗 Shareable State URLs** | Bookmarks and shares exact year, speed, and mode configurations via URL query parameters (`?year=...`). | `src/utils/urlState.ts` |
 | **▶ 100-Second Auto-Tour** | Scripted guided run with synchronized on-screen English subtitles for presentations and judge evaluations. | `src/ui/AutoTour.tsx` |
 
@@ -77,7 +81,7 @@ To guarantee absolute scientific reproducibility, anyone can reproduce our bundl
 # 1. Download and validate live NASA GISTEMP v4 dataset
 npm run fetch-data
 
-# 2. Run automated test suite (18/18 tests verifying formulas and parsing)
+# 2. Run automated test suite (26/26 tests verifying formulas, color math, monotonicity, and parsing)
 npm run test
 
 # 3. Execute unified quality gate (validates dataset, tests, and builds static bundle)
@@ -120,6 +124,7 @@ All scientific measurements originate from the **NASA Goddard Institute for Spac
 
 - 📄 **Portal Narrative:** [SUBMISSION.md](SUBMISSION.md)
 - 📋 **Submission Checklist:** [SUBMISSION_CHECKLIST.md](SUBMISSION_CHECKLIST.md)
+- 🎨 **Artistic & Technical Rationale:** [docs/ARTISTIC_AND_TECHNICAL_RATIONALE.md](docs/ARTISTIC_AND_TECHNICAL_RATIONALE.md)
 - 🔬 **References & Citations:** [REFERENCES.md](REFERENCES.md) & [REFERENCES_PORTAL.txt](REFERENCES_PORTAL.txt)
 - 🛡️ **Originality Disclosure:** [ORIGINAL_WORK.md](ORIGINAL_WORK.md)
 - 🤖 **AI Assistance Disclosure:** [AI_DISCLOSURE.md](AI_DISCLOSURE.md)

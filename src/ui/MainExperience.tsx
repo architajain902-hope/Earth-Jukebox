@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
 import { Stars, OrbitControls } from '@react-three/drei';
 import type { GistempDataset } from '../data/types';
@@ -6,13 +7,14 @@ import { audioEngine } from '../audio/engine';
 import { anomalyToFrequency, frequencyToNoteName } from '../audio/sonify';
 import { getRecordForYear } from '../data/loadData';
 import { setUrlState, copyShareableLink, type AppUrlState } from '../utils/urlState';
+import { demoScreenRecorder } from '../utils/screenRecorder';
 import EarthGlobe from '../globe/EarthGlobe';
 import YearDisplay from './YearDisplay';
 import TimelineSlider from './TimelineSlider';
 import TemperatureChart from './TemperatureChart';
 import TransportControls, { type SpeedOption } from './TransportControls';
 import AudioVisualizer from './AudioVisualizer';
-import QuickJumps from './QuickJumps';
+import JukeboxTab from './JukeboxTab';
 import DataBadge from './DataBadge';
 import ExplainerModal from './ExplainerModal';
 import CompareModal from './CompareModal';
@@ -42,6 +44,9 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
   const minYear = years[0] ?? 1880;
   const maxYear = years[years.length - 1] ?? 2025;
 
+  // View mode: 'globe' (3D planetary view) vs 'jukebox' (EIC visual frames)
+  const [viewMode, setViewMode] = useState<'globe' | 'jukebox'>('globe');
+
   // Selected year state (default from URL or 2024)
   const [selectedYear, setSelectedYear] = useState<number>(initialParams?.year ?? 2024);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -50,6 +55,18 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
   const [volume, setVolume] = useState<number>(0.65);
   const [muted, setMuted] = useState<boolean>(false);
   const [looping, setLooping] = useState<boolean>(false);
+
+  // Sound mode: 'musical' (harmonious scales) vs 'scientific' (exact raw pitch)
+  const [soundMode, setSoundMode] = useState<'musical' | 'scientific'>('musical');
+
+  // Theme: Deep Space ('dark') vs Daylight ('light')
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    return (localStorage.getItem('earth_jukebox_theme') as 'dark' | 'light') || 'dark';
+  });
+
+  // Demo clip video recording
+  const [isRecording, setIsRecording] = useState<boolean>(false);
+  const [recordElapsedSec, setRecordElapsedSec] = useState<number>(0);
 
   // Pulse animation on the 3D globe
   const [pulseTrigger, setPulseTrigger] = useState<number>(0);
@@ -78,10 +95,21 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
   const timelapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevAnomalyRef = useRef<number | undefined>(undefined);
 
+  // Apply Theme
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('earth_jukebox_theme', theme);
+  }, [theme]);
+
+  // Sync sound mode with audio engine
+  useEffect(() => {
+    audioEngine.soundMode = soundMode;
+  }, [soundMode]);
+
   // Current record
   const currentRecord = getRecordForYear(data, selectedYear) ?? data[data.length - 1];
   const currentAnomaly = currentRecord.anomaly;
-  const currentFreq = anomalyToFrequency(currentAnomaly);
+  const currentFreq = audioEngine.getPitchForAnomaly(currentAnomaly);
   const currentNote = frequencyToNoteName(currentFreq);
 
   // Synchronize URL parameters
@@ -107,20 +135,23 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
   }, [muted]);
 
   // Web Speech API accessibility reader
-  const speakCurrent = useCallback((year: number, anom: number, hz: number) => {
-    if (!speechEnabled || !('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    const signWord = anom >= 0 ? 'plus' : 'minus';
-    const utterance = new SpeechSynthesisUtterance(
-      `Year ${year}, anomaly ${signWord} ${Math.abs(anom).toFixed(2)} degrees Celsius, pitch ${Math.round(hz)} hertz.`
-    );
-    utterance.rate = 1.1;
-    window.speechSynthesis.speak(utterance);
-  }, [speechEnabled]);
+  const speakCurrent = useCallback(
+    (year: number, anom: number, hz: number) => {
+      if (!speechEnabled || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const signWord = anom >= 0 ? 'plus' : 'minus';
+      const utterance = new SpeechSynthesisUtterance(
+        `Year ${year}, anomaly ${signWord} ${Math.abs(anom).toFixed(2)} degrees Celsius, pitch ${Math.round(hz)} hertz.`
+      );
+      utterance.rate = 1.1;
+      window.speechSynthesis.speak(utterance);
+    },
+    [speechEnabled]
+  );
 
-  // Play single year tone (1.2 seconds)
+  // Play single year tone (1.6 seconds rich phrase)
   const handlePlayTone = useCallback(() => {
-    const freq = audioEngine.playTone(currentAnomaly, 1.2);
+    const freq = audioEngine.playTone(currentAnomaly, 1.6);
     setPulseTrigger(Date.now());
     speakCurrent(selectedYear, currentAnomaly, freq);
   }, [currentAnomaly, selectedYear, speakCurrent]);
@@ -140,18 +171,21 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
   }, [data, selectedYear]);
 
   // Trigger sound when jumping years manually
-  const handleYearChange = useCallback((year: number) => {
-    setSelectedYear(year);
-    const rec = getRecordForYear(data, year);
-    if (rec) {
-      if (!isPlaying) {
-        audioEngine.playNote(rec.anomaly, 180, prevAnomalyRef.current, glide);
-        setPulseTrigger(Date.now());
-        prevAnomalyRef.current = rec.anomaly;
-        speakCurrent(year, rec.anomaly, anomalyToFrequency(rec.anomaly));
+  const handleYearChange = useCallback(
+    (year: number) => {
+      setSelectedYear(year);
+      const rec = getRecordForYear(data, year);
+      if (rec) {
+        if (!isPlaying) {
+          audioEngine.playNote(rec.anomaly, 190, prevAnomalyRef.current, glide);
+          setPulseTrigger(Date.now());
+          prevAnomalyRef.current = rec.anomaly;
+          speakCurrent(year, rec.anomaly, audioEngine.getPitchForAnomaly(rec.anomaly));
+        }
       }
-    }
-  }, [data, isPlaying, glide, speakCurrent]);
+    },
+    [data, isPlaying, glide, speakCurrent]
+  );
 
   // Handle Share link copy
   const handleCopyLink = async () => {
@@ -162,13 +196,42 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
     }
   };
 
+  // Screen recording handler
+  const handleToggleRecording = () => {
+    if (isRecording) {
+      demoScreenRecorder.stopRecording();
+      setIsRecording(false);
+    } else {
+      const canvas = document.querySelector('canvas');
+      if (!canvas) {
+        alert('Could not find active canvas for recording.');
+        return;
+      }
+      setIsRecording(true);
+      setRecordElapsedSec(0);
+      demoScreenRecorder.startRecording(
+        canvas,
+        (sec) => setRecordElapsedSec(sec),
+        (_blob, url) => {
+          setIsRecording(false);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Earth616-Submission-Demo-${Date.now()}.webm`;
+          a.click();
+        }
+      );
+    }
+  };
+
   // Timelapse playback loop
   useEffect(() => {
     if (!isPlaying) {
       if (timelapseTimerRef.current) clearTimeout(timelapseTimerRef.current);
+      audioEngine.stopDrone();
       return;
     }
 
+    audioEngine.startDrone(55);
     const intervalMs = SPEED_MS[speed];
 
     const step = (yr: number) => {
@@ -187,6 +250,7 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
           timelapseTimerRef.current = setTimeout(() => step(minYear), intervalMs + 60);
         } else {
           setIsPlaying(false);
+          audioEngine.stopDrone();
           prevAnomalyRef.current = undefined;
         }
       } else {
@@ -198,6 +262,7 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
 
     return () => {
       if (timelapseTimerRef.current) clearTimeout(timelapseTimerRef.current);
+      audioEngine.stopDrone();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPlaying, speed, glide, looping]);
@@ -240,7 +305,12 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
         case 'p':
         case 'P':
           e.preventDefault();
-          setIsPlaying((p) => !p);
+          setIsPlaying((prev) => !prev);
+          break;
+        case 'm':
+        case 'M':
+          e.preventDefault();
+          setMuted((prev) => !prev);
           break;
       }
     };
@@ -249,8 +319,11 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedYear, minYear, maxYear, handleYearChange, handlePlayTone]);
 
-  // Screen reader polite announcement text
-  const liveAnnouncement = `Year ${selectedYear}, anomaly ${currentAnomaly >= 0 ? 'plus' : 'minus'} ${Math.abs(currentAnomaly).toFixed(2)} degrees Celsius, pitch ${Math.round(currentFreq)} hertz.`;
+  const formatRecordTime = (sec: number) => {
+    const mins = Math.floor(sec / 60);
+    const remaining = sec % 60;
+    return `${mins.toString().padStart(2, '0')}:${remaining.toString().padStart(2, '0')}`;
+  };
 
   return (
     <div
@@ -259,54 +332,37 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
         height: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        background: highContrast ? '#000000' : '#0B1D3A',
-        color: '#FFFFFF',
-        position: 'relative',
         overflow: 'hidden',
+        background: theme === 'light' ? '#E2E8F0' : 'var(--color-bg, #040A18)',
+        color: theme === 'light' ? '#0F172A' : '#FFFFFF',
+        fontFamily: 'var(--font-sans)',
+        filter: highContrast ? 'contrast(1.35)' : 'none',
       }}
     >
-      {/* Screen Reader Live Region */}
-      <div
-        aria-live="polite"
-        aria-atomic="true"
-        style={{
-          position: 'absolute',
-          width: 1,
-          height: 1,
-          margin: -1,
-          padding: 0,
-          overflow: 'hidden',
-          clip: 'rect(0, 0, 0, 0)',
-          border: 0,
-        }}
-      >
-        {liveAnnouncement}
-      </div>
-
-      {/* Top Mission Control Bar */}
+      {/* Top Navigation Bar */}
       <header
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '8px 16px',
-          background: 'rgba(11, 29, 58, 0.9)',
-          borderBottom: '1px solid rgba(0, 212, 255, 0.2)',
-          backdropFilter: 'blur(12px)',
+          background: theme === 'light' ? 'rgba(255, 255, 255, 0.85)' : 'rgba(5, 12, 28, 0.8)',
+          borderBottom: '1px solid rgba(0, 212, 255, 0.15)',
+          backdropFilter: 'blur(16px)',
           zIndex: 40,
-          flexShrink: 0,
-          gap: 10,
+          gap: 12,
+          flexWrap: 'wrap',
         }}
       >
-        {/* Title, Badge & EIC Link */}
+        {/* Title, Badge & Primary Mode Switch */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: 22 }}>🌍</span>
             <span
               style={{
                 fontFamily: 'var(--font-sans)',
-                fontWeight: 700,
-                fontSize: 15,
+                fontWeight: 800,
+                fontSize: 16,
                 letterSpacing: 0.5,
               }}
             >
@@ -316,24 +372,88 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
 
           <DataBadge dataset={dataset} />
 
-          {/* NASA EIC Link-up button */}
+          {/* View Mode Switcher: 3D Globe vs Frame Jukebox */}
+          <div
+            style={{
+              display: 'flex',
+              background: 'rgba(4, 10, 24, 0.4)',
+              borderRadius: 6,
+              padding: 2,
+              border: '1px solid rgba(0, 212, 255, 0.25)',
+            }}
+          >
+            <button
+              onClick={() => setViewMode('globe')}
+              style={{
+                ...navBtnStyle,
+                background: viewMode === 'globe' ? 'rgba(0, 212, 255, 0.25)' : 'transparent',
+                borderColor: viewMode === 'globe' ? '#00D4FF' : 'transparent',
+                color: viewMode === 'globe' ? '#00D4FF' : '#94A3B8',
+                fontWeight: viewMode === 'globe' ? 700 : 500,
+              }}
+            >
+              🌐 3D Globe
+            </button>
+            <button
+              onClick={() => setViewMode('jukebox')}
+              style={{
+                ...navBtnStyle,
+                background: viewMode === 'jukebox' ? 'rgba(249, 115, 22, 0.3)' : 'transparent',
+                borderColor: viewMode === 'jukebox' ? '#F97316' : 'transparent',
+                color: viewMode === 'jukebox' ? '#F97316' : '#94A3B8',
+                fontWeight: viewMode === 'jukebox' ? 700 : 500,
+              }}
+              title="NASA Earth Information Center Frame Sonifier Jukebox"
+            >
+              🎨 EIC Frame Jukebox
+            </button>
+          </div>
+        </div>
+
+        {/* Action Controls & Modals */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          {/* Record Demo Clip Button */}
+          <button
+            onClick={handleToggleRecording}
+            style={{
+              ...navBtnStyle,
+              background: isRecording ? 'rgba(239, 68, 68, 0.3)' : 'rgba(255, 255, 255, 0.08)',
+              borderColor: isRecording ? '#EF4444' : 'rgba(255, 255, 255, 0.2)',
+              color: isRecording ? '#EF4444' : '#E2E8F0',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+            }}
+            title="Records a high-quality video/audio clip of your canvas for submission demo"
+          >
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: isRecording ? '#EF4444' : '#94A3B8',
+                boxShadow: isRecording ? '0 0 8px #EF4444' : 'none',
+                animation: isRecording ? 'pulse 1s infinite alternate' : 'none',
+              }}
+            />
+            <span>{isRecording ? `REC ${formatRecordTime(recordElapsedSec)} / 02:00` : '📹 Record Clip'}</span>
+          </button>
+
+          {/* NASA EIC Info */}
           <button
             onClick={() => setShowEIC(true)}
             style={{
               ...navBtnStyle,
-              background: 'rgba(0, 212, 255, 0.15)',
-              borderColor: 'rgba(0, 212, 255, 0.4)',
+              background: 'rgba(0, 212, 255, 0.12)',
+              borderColor: 'rgba(0, 212, 255, 0.35)',
               color: '#00D4FF',
-              fontWeight: 600,
             }}
             title="See it in NASA's Earth Information Center (EIC)"
           >
             🏛️ NASA EIC
           </button>
-        </div>
 
-        {/* Feature Action Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
           {/* Hear Your Birth Year */}
           <button
             onClick={() => setShowBirthYear(true)}
@@ -434,6 +554,18 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
             ℹ️ About
           </button>
 
+          {/* Theme Toggle Button (Day / Space) */}
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            title={theme === 'dark' ? 'Switch to Daylight Theme' : 'Switch to Deep Space Theme'}
+            style={{
+              ...iconToggleStyle,
+              background: theme === 'dark' ? 'rgba(0, 212, 255, 0.15)' : 'rgba(255, 176, 32, 0.2)',
+            }}
+          >
+            {theme === 'dark' ? '🌙' : '☀️'}
+          </button>
+
           {/* Accessibility Toggles */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginLeft: 2 }}>
             <button
@@ -478,127 +610,135 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
         </div>
       </header>
 
-      {/* Main Workspace: 3D Globe + Floating HUD + Right Panel */}
+      {/* Main Workspace */}
       <div style={{ flex: 1, display: 'flex', position: 'relative', overflow: 'hidden' }}>
-        {/* 3D Scene Viewport */}
-        <div style={{ flex: 1, position: 'relative', height: '100%' }}>
-          <Canvas
-            camera={{ position: [0, 0, 3.2], fov: 45 }}
-            style={{ width: '100%', height: '100%', background: 'transparent' }}
-          >
-            <Stars radius={120} depth={60} count={3500} factor={4} saturation={0} fade />
-            <ambientLight intensity={0.18} />
-            <directionalLight position={[6, 3, 5]} intensity={1.5} castShadow />
+        {viewMode === 'jukebox' ? (
+          <JukeboxTab
+            dataset={dataset}
+            selectedYear={selectedYear}
+            onClose={() => setViewMode('globe')}
+            getCanvasElement={() => document.querySelector('canvas')}
+          />
+        ) : (
+          <>
+            {/* 3D Scene Viewport */}
+            <div style={{ flex: 1, position: 'relative', height: '100%' }}>
+              <Canvas
+                gl={{
+                  antialias: true,
+                  toneMapping: THREE.ACESFilmicToneMapping,
+                  toneMappingExposure: 1.15,
+                }}
+                camera={{ position: [0, 0, 3.1], fov: 45 }}
+                style={{ width: '100%', height: '100%', background: 'transparent' }}
+              >
+                <Stars radius={120} depth={60} count={3500} factor={4} saturation={0} fade />
+                <ambientLight intensity={0.12} />
+                <hemisphereLight args={['#1E3A6E', '#040A18', 0.55]} />
+                <directionalLight position={[5.5, 2.0, 4.0]} intensity={1.85} color="#FFF8EE" castShadow />
 
-            <Suspense fallback={null}>
-              <EarthGlobe
-                anomaly={currentAnomaly}
+                <Suspense fallback={null}>
+                  <EarthGlobe
+                    anomaly={currentAnomaly}
+                    isPlaying={isPlaying}
+                    pulseTrigger={pulseTrigger}
+                    pulseFreq={currentFreq}
+                    reduceMotion={reduceMotion}
+                  />
+                </Suspense>
+
+                <OrbitControls
+                  enablePan={false}
+                  minDistance={2.0}
+                  maxDistance={7.0}
+                  autoRotate={!isPlaying && !reduceMotion}
+                  autoRotateSpeed={0.35}
+                  makeDefault
+                />
+              </Canvas>
+
+              {/* Floating Now Playing Card HUD (Top Left) */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 18,
+                  left: 18,
+                  zIndex: 20,
+                  pointerEvents: 'none',
+                }}
+              >
+                <YearDisplay
+                  year={selectedYear}
+                  anomaly={currentAnomaly}
+                  frequency={currentFreq}
+                  noteName={currentNote}
+                  isPlaying={isPlaying}
+                  soundMode={soundMode}
+                  onToggleSoundMode={() =>
+                    setSoundMode(soundMode === 'musical' ? 'scientific' : 'musical')
+                  }
+                />
+              </div>
+            </div>
+
+            {/* Right Sidebar Control Deck */}
+            <aside
+              style={{
+                width: 'clamp(330px, 26vw, 385px)',
+                minWidth: 320,
+                maxHeight: '100%',
+                overflowY: 'auto',
+                padding: '14px 12px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 10,
+                background: theme === 'light' ? 'rgba(248, 250, 252, 0.9)' : 'rgba(7, 18, 38, 0.85)',
+                borderLeft: '1px solid rgba(0, 212, 255, 0.15)',
+                backdropFilter: 'blur(16px)',
+                zIndex: 30,
+                boxSizing: 'border-box',
+              }}
+            >
+              {/* Transport Controls */}
+              <TransportControls
                 isPlaying={isPlaying}
-                pulseTrigger={pulseTrigger}
-                pulseFreq={currentFreq}
-                reduceMotion={reduceMotion}
+                onPlayPause={() => setIsPlaying(!isPlaying)}
+                onPrev={() => handleYearChange(Math.max(minYear, selectedYear - 1))}
+                onNext={() => handleYearChange(Math.min(maxYear, selectedYear + 1))}
+                onPlayTone={handlePlayTone}
+                onPlayDecadeChord={handlePlayDecadeChord}
+                speed={speed}
+                onSpeedChange={setSpeed}
+                glide={glide}
+                onGlideChange={setGlide}
+                volume={volume}
+                onVolumeChange={setVolume}
+                muted={muted}
+                onMuteChange={setMuted}
+                looping={looping}
+                onLoopingChange={setLooping}
               />
-            </Suspense>
 
-            <OrbitControls
-              enablePan={false}
-              minDistance={2.0}
-              maxDistance={7.0}
-              autoRotate={!isPlaying && !reduceMotion}
-              autoRotateSpeed={0.4}
-              makeDefault
-            />
-          </Canvas>
+              {/* Real-time Oscilloscope */}
+              <AudioVisualizer isPlaying={isPlaying} />
 
-          {/* Floating Year Display HUD (Top Left) */}
-          <div
-            style={{
-              position: 'absolute',
-              top: 18,
-              left: 18,
-              zIndex: 20,
-              pointerEvents: 'none',
-            }}
-          >
-            <YearDisplay
-              year={selectedYear}
-              anomaly={currentAnomaly}
-              frequency={currentFreq}
-              noteName={currentNote}
-            />
-          </div>
+              {/* Timeline and Warming Stripes */}
+              <TimelineSlider
+                years={years}
+                selectedYear={selectedYear}
+                data={data}
+                onChange={handleYearChange}
+              />
 
-          {/* Quick Jumps Milestones (Bottom Left / Center) */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 18,
-              left: 18,
-              zIndex: 20,
-            }}
-          >
-            <QuickJumps
-              data={data}
-              selectedYear={selectedYear}
-              onSelectYear={handleYearChange}
-            />
-          </div>
-        </div>
-
-        {/* Right Sidebar Control Deck */}
-        <aside
-          style={{
-            width: 350,
-            maxHeight: '100%',
-            overflowY: 'auto',
-            padding: '14px 12px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 10,
-            background: 'rgba(11, 29, 58, 0.75)',
-            borderLeft: '1px solid rgba(0, 212, 255, 0.15)',
-            backdropFilter: 'blur(16px)',
-            zIndex: 30,
-          }}
-        >
-          {/* Transport Controls */}
-          <TransportControls
-            isPlaying={isPlaying}
-            onPlayPause={() => setIsPlaying(!isPlaying)}
-            onPrev={() => handleYearChange(Math.max(minYear, selectedYear - 1))}
-            onNext={() => handleYearChange(Math.min(maxYear, selectedYear + 1))}
-            onPlayTone={handlePlayTone}
-            onPlayDecadeChord={handlePlayDecadeChord}
-            speed={speed}
-            onSpeedChange={setSpeed}
-            glide={glide}
-            onGlideChange={setGlide}
-            volume={volume}
-            onVolumeChange={setVolume}
-            muted={muted}
-            onMuteChange={setMuted}
-            looping={looping}
-            onLoopingChange={setLooping}
-          />
-
-          {/* Real-time Oscilloscope */}
-          <AudioVisualizer isPlaying={isPlaying} />
-
-          {/* Timeline and Warming Stripes */}
-          <TimelineSlider
-            years={years}
-            selectedYear={selectedYear}
-            data={data}
-            onChange={handleYearChange}
-          />
-
-          {/* Temperature Anomaly Line Chart */}
-          <TemperatureChart
-            data={data}
-            selectedYear={selectedYear}
-            onYearClick={handleYearChange}
-          />
-        </aside>
+              {/* Temperature Anomaly Line Chart */}
+              <TemperatureChart
+                data={data}
+                selectedYear={selectedYear}
+                onYearClick={handleYearChange}
+              />
+            </aside>
+          </>
+        )}
       </div>
 
       {/* Modals & Auto-tour overlay */}
@@ -679,7 +819,7 @@ const navBtnStyle: React.CSSProperties = {
   border: '1px solid rgba(0, 212, 255, 0.3)',
   borderRadius: 6,
   color: '#E0F2FE',
-  fontSize: 11.5,
+  fontSize: 11,
   fontFamily: 'var(--font-mono)',
   padding: '4px 8px',
   cursor: 'pointer',

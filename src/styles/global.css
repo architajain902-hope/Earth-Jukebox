@@ -1,6 +1,6 @@
 /* =========================================================
    Earth 616: The Earth Information Jukebox
-   Global Styles & NASA Aesthetic Theme
+   Global Styles, Dual Themes (Deep Space / Daylight), & NASA System
 ========================================================= */
 
 *, *::before, *::after {
@@ -10,35 +10,94 @@
 }
 
 :root {
-  --navy: #0B1D3A;
-  --navy-dark: #040A14;
-  --blue: #0B3D91;
+  /* Data Colour Tokens (Exact across text, chart, stripes, glow) */
+  --color-cool: #3AA0FF;     /* ~ -0.5 °C */
+  --color-neutral: #9FE8FF;  /* ~ 0.0 °C */
+  --color-warm: #FFB020;     /* ~ +0.6 °C */
+  --color-hot: #FF4D2E;      /* ~ +1.3 °C */
+
+  /* NASA Brand Colours */
+  --nasa-blue: #0B3D91;
   --nasa-red: #FC3D21;
-  --cyan: #00D4FF;
-  --cyan-dim: rgba(0, 212, 255, 0.15);
-  --white: #FFFFFF;
-  --gray-100: #E8EDF5;
-  --gray-300: #9BAEC8;
-  --gray-500: #4A5568;
-  --gray-700: #2D3748;
+  --cyan-accent: #00D4FF;
 
-  --glass-bg: rgba(11, 29, 58, 0.72);
-  --glass-border: rgba(0, 212, 255, 0.22);
-  --panel-radius: 12px;
+  /* Typography */
+  --font-heading: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Space Mono', 'SF Mono', monospace;
 
-  --font-sans: 'Space Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'Space Mono', 'SF Mono', 'Fira Code', monospace;
+  /* Spacing Scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* Radii Scale */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+}
+
+/* ---------------------------------------------------------
+   Dark Theme ("Deep Space" - Default)
+--------------------------------------------------------- */
+:root, [data-theme="dark"] {
+  --bg-gradient: radial-gradient(circle at 50% 30%, #0B1D3A 0%, #050B1A 70%, #020611 100%);
+  --bg-solid: #050B1A;
+  --surface-glass: rgba(11, 29, 58, 0.72);
+  --surface-glass-active: rgba(11, 45, 90, 0.85);
+  --surface-border: rgba(0, 212, 255, 0.22);
+  --surface-border-subtle: rgba(255, 255, 255, 0.12);
+  --text-primary: #FFFFFF;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --card-backdrop: blur(16px);
+  --header-bg: rgba(5, 11, 26, 0.85);
+  --panel-bg: rgba(5, 11, 26, 0.75);
+  --chart-grid: rgba(255, 255, 255, 0.08);
+  --chart-grid-text: #64748B;
+  --chart-zero-line: rgba(255, 255, 255, 0.35);
+  --scroll-track: rgba(4, 10, 20, 0.6);
+  --scroll-thumb: rgba(0, 212, 255, 0.3);
+}
+
+/* ---------------------------------------------------------
+   Light Theme ("Daylight")
+--------------------------------------------------------- */
+[data-theme="light"] {
+  --bg-gradient: radial-gradient(circle at 50% 30%, #FFFFFF 0%, #F4F7FC 65%, #E6EEFA 100%);
+  --bg-solid: #F4F7FC;
+  --surface-glass: rgba(255, 255, 255, 0.82);
+  --surface-glass-active: rgba(235, 243, 255, 0.95);
+  --surface-border: rgba(11, 61, 145, 0.25);
+  --surface-border-subtle: rgba(11, 61, 145, 0.12);
+  --text-primary: #0B1D3A;
+  --text-secondary: #334155;
+  --text-muted: #64748B;
+  --card-backdrop: blur(16px);
+  --header-bg: rgba(244, 247, 252, 0.88);
+  --panel-bg: rgba(255, 255, 255, 0.85);
+  --chart-grid: rgba(11, 29, 58, 0.08);
+  --chart-grid-text: #475569;
+  --chart-zero-line: rgba(11, 61, 145, 0.45);
+  --scroll-track: rgba(226, 232, 240, 0.7);
+  --scroll-thumb: rgba(11, 61, 145, 0.35);
 }
 
 html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: var(--navy-dark);
-  color: var(--white);
-  font-family: var(--font-sans);
+  background: var(--bg-solid);
+  background-image: var(--bg-gradient);
+  color: var(--text-primary);
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.35s ease, color 0.35s ease;
 }
 
 #root {
@@ -49,52 +108,107 @@ html, body {
 
 /* Glassmorphism Panel */
 .glass {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-radius: var(--panel-radius);
+  background: var(--surface-glass);
+  border: 1px solid var(--surface-border);
+  backdrop-filter: var(--card-backdrop);
+  -webkit-backdrop-filter: var(--card-backdrop);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Accessible visible focus ring for keyboard navigation */
+.glass-active {
+  background: var(--surface-glass-active);
+  border-color: var(--cyan-accent);
+}
+
+/* Focus Rings for Accessible Navigation */
 *:focus-visible {
-  outline: 2px solid var(--cyan) !important;
+  outline: 2px solid var(--color-cool) !important;
   outline-offset: 2px !important;
 }
 
-/* Inputs */
+/* Range Inputs */
 input[type="range"] {
-  accent-color: var(--cyan);
+  accent-color: var(--color-hot);
 }
 
 button {
   font-family: inherit;
+  user-select: none;
 }
 
-/* Custom scrollbars */
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(4, 10, 20, 0.6);
+  background: var(--scroll-track);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 212, 255, 0.3);
+  background: var(--scroll-thumb);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 212, 255, 0.5);
+  background: var(--color-cool);
 }
 
-/* Responsive layout adjustments */
+/* Snap horizontal scrolling container for chips */
+.snap-scroll-x {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.snap-scroll-x > * {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+/* Micro-interaction Lift */
+.hover-lift {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Subtle breathing animation for idle waveform */
+@keyframes breathe {
+  0%, 100% { opacity: 0.45; transform: scaleY(0.9); }
+  50% { opacity: 0.85; transform: scaleY(1.1); }
+}
+
+.breathe-anim {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+/* Loading wireframe spin */
+@keyframes globe-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.globe-spinner {
+  animation: globe-spin 8s linear infinite;
+}
+
+/* Responsive Hide Utilities */
 @media (max-width: 900px) {
-  .hide-mobile {
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
+@media (min-width: 901px) {
+  .hide-on-desktop {
     display: none !important;
   }
 }
 
-/* Reduced motion preference support */
+/* Reduced Motion Compliance */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

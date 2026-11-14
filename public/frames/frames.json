@@ -1,0 +1,50 @@
+[
+  {
+    "id": "blue-marble",
+    "title": "NASA Blue Marble: Eastern & Western Hemispheres",
+    "agency": "NASA Earth Observatory / Visible Earth",
+    "date": "2002–Present",
+    "sourceUrl": "https://visibleearth.nasa.gov/images/57723/the-blue-marble",
+    "description": "True-color satellite composite combining MODIS land surface, ocean chlorophyl, clouds, and polar ice sheets into a photorealistic planetary view.",
+    "thumbnail": "/textures/earth_day.jpg",
+    "altText": "Satellite photograph of planet Earth showing blue oceans, white swirling storm cloud formations, green terrestrial vegetation, and brown arid land masses.",
+    "category": "Planetary Atmosphere & Ocean",
+    "defaultScale": "dorian"
+  },
+  {
+    "id": "warming-stripes",
+    "title": "Climate Warming Stripes (1880–2025)",
+    "agency": "NASA GISS / University of Reading (Prof. Ed Hawkins)",
+    "date": "1880–2025",
+    "sourceUrl": "https://data.giss.nasa.gov/gistemp/",
+    "description": "A visual chronometer of Earth's climate history: each vertical stripe represents one consecutive year's temperature anomaly from cool blues to extreme deep red.",
+    "thumbnail": "synthetic-stripes",
+    "altText": "Visual stripe diagram starting with deep blues in 1880, pale cyans in mid-20th century, transitioning rapidly to bright orange and dark crimson bars in recent decades.",
+    "category": "Climate Chronology",
+    "defaultScale": "aeolian"
+  },
+  {
+    "id": "night-lights",
+    "title": "NASA Black Marble: Night Lights & Electrification",
+    "agency": "NASA Earth Applied Sciences / Suomi NPP VIIRS",
+    "date": "2016",
+    "sourceUrl": "https://earthobservatory.nasa.gov/features/NightLights",
+    "description": "Global composite of nocturnal light emissions capturing human civilization, urbanization, energy grids, and coastal fishing fleets under darkness.",
+    "thumbnail": "/textures/earth_lights.png",
+    "altText": "Global satellite view of Earth at night showing golden spiderwebs of city lights across North America, Europe, East Asia, and coastlines against dark oceans.",
+    "category": "Human Dimension & Energy",
+    "defaultScale": "pentatonic"
+  },
+  {
+    "id": "live-globe",
+    "title": "Current 3D Earth Camera View (Live Frame)",
+    "agency": "Earth 616 Real-Time Viewport",
+    "date": "Real-time",
+    "sourceUrl": "https://earth.gov",
+    "description": "Direct frame grab from the active interactive 3D WebGL globe, reflecting the user's selected camera angle, rotation, and current temperature glow.",
+    "thumbnail": "live-canvas",
+    "altText": "Current 3D rendered viewpoint of planet Earth with real-time solar illumination and data-driven atmospheric glow.",
+    "category": "Live Interactive Canvas",
+    "defaultScale": "dorian"
+  }
+]

@@ -117,20 +117,21 @@ export default function TemperatureChart({
       role="region"
       aria-label="Temperature Anomaly Line Chart"
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
         <span
           style={{
             fontFamily: 'var(--font-mono)',
-            fontSize: 11,
+            fontSize: 10.5,
             color: '#94A3B8',
             textTransform: 'uppercase',
-            letterSpacing: 1,
+            letterSpacing: 0.8,
+            whiteSpace: 'nowrap',
           }}
         >
           Global Anomaly (1880–2025)
         </span>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#64748B' }}>
-          °C vs 1951-80
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9.5, color: '#64748B', whiteSpace: 'nowrap' }}>
+          °C vs 1951–80 Baseline
         </span>
       </div>
 

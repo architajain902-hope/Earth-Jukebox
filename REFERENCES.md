@@ -38,14 +38,47 @@
 - **URL:** https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_clouds_1024.png
 - **License:** Public Domain / MIT.
 
+### Earth Black Marble Night Lights (`earth_lights.png`)
+- **Source:** Three.js Examples Asset Repository (`examples/textures/planets/earth_lights_2048.png`), derived from NASA Earth Observatory Suomi NPP VIIRS Day/Night Band.
+- **URL:** https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_lights_2048.png
+- **Original Imagery:** NASA Earth Applied Sciences / NOAA National Geophysical Data Center.
+- **License:** Public Domain / MIT.
+
 ---
 
-## 3. Web Fonts
+## 3. NASA Earth Information Center (EIC) Visual Frames
+
+### NASA Blue Marble Composite
+- **Title:** The Blue Marble Next Generation
+- **Source Agency:** NASA Earth Observatory / Visible Earth
+- **URL:** https://visibleearth.nasa.gov/images/57723/the-blue-marble
+- **Credit:** Reto Stöckli, NASA Earth Observatory
+
+### Climate Warming Stripes
+- **Title:** Global Warming Stripes (1880–2025)
+- **Source Agency:** NASA GISTEMP v4 / Prof. Ed Hawkins, University of Reading
+- **URL:** https://data.giss.nasa.gov/gistemp/
+- **Credit:** Ed Hawkins / National Centre for Atmospheric Science
+
+### Suomi NPP VIIRS Global Night Lights
+- **Title:** Earth at Night: Black Marble
+- **Source Agency:** NASA Earth Applied Sciences / NOAA VIIRS
+- **URL:** https://earthobservatory.nasa.gov/features/NightLights
+- **Credit:** NASA Earth Observatory images by Joshua Stevens, using Suomi NPP VIIRS data from Miguel Román, NASA Goddard
+
+---
+
+## 4. Web Fonts
 
 ### Space Grotesk
 - **Author:** Florian Karsten
 - **License:** SIL Open Font License (OFL) 1.1
 - **URL:** https://fonts.google.com/specimen/Space+Grotesk
+
+### JetBrains Mono
+- **Author:** JetBrains
+- **License:** SIL Open Font License (OFL) 1.1
+- **URL:** https://fonts.google.com/specimen/JetBrains+Mono
 
 ### Space Mono
 - **Author:** Colophon Foundry
@@ -59,7 +92,7 @@
 
 ---
 
-## 4. Software Libraries & Frameworks
+## 5. Software Libraries & Frameworks
 
 | Package | Version | License | Primary Purpose |
 | :--- | :--- | :--- | :--- |
@@ -75,5 +108,5 @@
 
 ---
 
-## 5. AI Assistance Disclosure
+## 6. AI Assistance Disclosure
 In compliance with NASA International Space Apps Challenge regulations, the Earth 616 team discloses that AI programming assistance (Antigravity by Google DeepMind) was utilized during the development of this prototype. All underlying NASA datasets are 100% authentic, verified, and unmanipulated; all sonification algorithms adhere strictly to linear mathematical mappings.

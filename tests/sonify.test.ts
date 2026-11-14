@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { anomalyToFrequency, frequencyToNoteName, ANOMALY_MIN, ANOMALY_MAX, FREQ_MIN, FREQ_MAX } from '../src/audio/sonify';
+import {
+  anomalyToFrequency,
+  anomalyToMusicalFrequency,
+  frequencyToNoteName,
+  ANOMALY_MIN,
+  ANOMALY_MAX,
+  FREQ_MIN,
+  FREQ_MAX,
+} from '../src/audio/sonify';
 
 describe('Sonification Mapping', () => {
   it('maps +0.90 °C to approximately 733.33 Hz', () => {
@@ -42,5 +50,24 @@ describe('Sonification Mapping', () => {
     expect(frequencyToNoteName(880)).toBe('A5');
     expect(frequencyToNoteName(220)).toBe('A3');
     expect(frequencyToNoteName(261.63)).toBe('C4');
+  });
+
+  describe('Musical Mode Quantization', () => {
+    it('is strictly monotonic: higher anomaly never produces lower pitch', () => {
+      const temps = [-0.5, -0.4, -0.25, -0.1, 0.0, 0.15, 0.35, 0.6, 0.85, 1.0, 1.25, 1.3];
+      for (let i = 1; i < temps.length; i++) {
+        const prevFreq = anomalyToMusicalFrequency(temps[i - 1], 'dorian');
+        const currFreq = anomalyToMusicalFrequency(temps[i], 'dorian');
+        expect(currFreq).toBeGreaterThanOrEqual(prevFreq);
+      }
+    });
+
+    it('quantizes to valid frequencies within the 220Hz - 880Hz envelope', () => {
+      expect(anomalyToMusicalFrequency(-0.5, 'pentatonic')).toBeCloseTo(220.0, 1);
+      expect(anomalyToMusicalFrequency(1.3, 'pentatonic')).toBeCloseTo(880.0, 1);
+      const midFreq = anomalyToMusicalFrequency(0.4, 'pentatonic');
+      expect(midFreq).toBeGreaterThanOrEqual(220.0);
+      expect(midFreq).toBeLessThanOrEqual(880.0);
+    });
   });
 });

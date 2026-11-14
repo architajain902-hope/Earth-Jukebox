@@ -6,54 +6,61 @@ import * as THREE from 'three';
 interface EarthGlobeProps {
   anomaly: number;
   isPlaying: boolean;
-  pulseTrigger?: number; // timestamp or counter when a note triggers
-  pulseFreq?: number;    // frequency of note played
+  pulseTrigger?: number;
+  pulseFreq?: number;
   reduceMotion?: boolean;
+  sunPosition?: [number, number, number];
 }
 
-// Maps anomaly to atmosphere color:
-// < -0.2: cool blue (#3AA8FF)
-// -0.2 to 0.2: cyan/white-blue (#8DEBFF)
-// 0.2 to 0.7: warm gold/orange (#FFA439)
-// > 0.7: intense fiery red-orange (#FF381E)
-function getAtmosphereColor(anomaly: number): THREE.Color {
-  if (anomaly <= -0.2) {
-    const t = Math.max(0, (anomaly - (-0.5)) / 0.3); // -0.5 -> 0, -0.2 -> 1
-    return new THREE.Color().lerpColors(new THREE.Color('#1B75D0'), new THREE.Color('#3AA8FF'), t);
-  } else if (anomaly <= 0.2) {
-    const t = (anomaly - (-0.2)) / 0.4;
-    return new THREE.Color().lerpColors(new THREE.Color('#3AA8FF'), new THREE.Color('#A8F5FF'), t);
-  } else if (anomaly <= 0.7) {
-    const t = (anomaly - 0.2) / 0.5;
-    return new THREE.Color().lerpColors(new THREE.Color('#A8F5FF'), new THREE.Color('#FFA439'), t);
+// Fixed 4-token color gradient according to exact specification:
+// -0.5 °C -> #3AA0FF (deep blue)
+//  0.0 °C -> #9FE8FF (neutral cyan)
+// +0.6 °C -> #FFB020 (warm amber)
+// +1.3 °C -> #FF4D2E (orange-red)
+export function getAtmosphereColor(anomaly: number): THREE.Color {
+  const cCool = new THREE.Color('#3AA0FF');
+  const cNeutral = new THREE.Color('#9FE8FF');
+  const cWarm = new THREE.Color('#FFB020');
+  const cHot = new THREE.Color('#FF4D2E');
+
+  if (anomaly <= 0.0) {
+    const t = Math.max(0, Math.min(1, (anomaly - (-0.5)) / 0.5));
+    return new THREE.Color().lerpColors(cCool, cNeutral, t);
+  } else if (anomaly <= 0.6) {
+    const t = Math.max(0, Math.min(1, anomaly / 0.6));
+    return new THREE.Color().lerpColors(cNeutral, cWarm, t);
   } else {
-    const t = Math.min(1, (anomaly - 0.7) / 0.6);
-    return new THREE.Color().lerpColors(new THREE.Color('#FFA439'), new THREE.Color('#FF2B12'), t);
+    const t = Math.max(0, Math.min(1, (anomaly - 0.6) / 0.7));
+    return new THREE.Color().lerpColors(cWarm, cHot, t);
   }
 }
 
-// Custom Fresnel atmosphere glow shader
+// Atmosphere Fresnel Vertex & Fragment Shaders
 const atmosphereVertexShader = `
   varying vec3 vNormal;
-  varying vec3 vPosition;
+  varying vec3 vViewPosition;
   void main() {
     vNormal = normalize(normalMatrix * normal);
-    vPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+    vViewPosition = -mvPosition.xyz;
+    gl_Position = projectionMatrix * mvPosition;
   }
 `;
 
 const atmosphereFragmentShader = `
   uniform vec3 uColor;
   uniform float uIntensity;
+  uniform float uPower;
   varying vec3 vNormal;
-  varying vec3 vPosition;
+  varying vec3 vViewPosition;
 
   void main() {
-    vec3 viewDir = normalize(-vPosition);
-    float rim = 1.0 - max(0.0, dot(viewDir, vNormal));
-    rim = pow(rim, 2.5);
-    gl_FragColor = vec4(uColor, rim * uIntensity);
+    vec3 normal = normalize(vNormal);
+    vec3 viewDir = normalize(vViewPosition);
+    // For BackSide rendering, normal points inward
+    float rim = clamp(1.0 - dot(viewDir, -normal), 0.0, 1.0);
+    float glow = pow(rim, uPower) * uIntensity;
+    gl_FragColor = vec4(uColor, glow);
   }
 `;
 
@@ -63,132 +70,235 @@ export default function EarthGlobe({
   pulseTrigger = 0,
   pulseFreq = 440,
   reduceMotion = false,
+  sunPosition = [5.5, 2.0, 4.0],
 }: EarthGlobeProps) {
-  const earthRef = useRef<THREE.Mesh>(null);
-  const cloudsRef = useRef<THREE.Mesh>(null);
+  // Scene references
+  const tiltGroupRef = useRef<THREE.Group>(null);
+  const earthMeshRef = useRef<THREE.Mesh>(null);
+  const cloudsMeshRef = useRef<THREE.Mesh>(null);
+  const moonOrbitRef = useRef<THREE.Group>(null);
   const atmosphereRef = useRef<THREE.Mesh>(null);
-  const pulseRingRef = useRef<THREE.Mesh>(null);
+  const outerHaloRef = useRef<THREE.Mesh>(null);
+  const pulseRingsRef = useRef<THREE.Group>(null);
 
-  // Pulse animation state
-  const pulseScale = useRef(1.0);
-  const pulseAlpha = useRef(0.0);
+  // Pulse ring animation states (supports multiple simultaneous wavelets)
+  const activePulses = useRef<{ id: number; scale: number; alpha: number; color: THREE.Color; speed: number }[]>([]);
 
-  // Load NASA / Three.js textures
-  const [dayMap, normalMap, specularMap, cloudsMap] = useTexture([
+  // Load verified NASA / Three.js textures
+  const [dayMap, normalMap, specularMap, cloudsMap, lightsMap] = useTexture([
     '/textures/earth_day.jpg',
     '/textures/earth_normal.jpg',
     '/textures/earth_specular.jpg',
-    '/textures/earth_clouds.png'
+    '/textures/earth_clouds.png',
+    '/textures/earth_lights.png',
   ]);
 
-  // Target atmosphere color
-  const targetColor = useMemo(() => getAtmosphereColor(anomaly), [anomaly]);
+  // Texture filter and anisotropy settings
+  useMemo(() => {
+    [dayMap, normalMap, specularMap, cloudsMap, lightsMap].forEach((tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.anisotropy = 8;
+    });
+  }, [dayMap, normalMap, specularMap, cloudsMap, lightsMap]);
 
-  // Atmosphere shader material
+  // Target atmosphere color
+  const targetGlowColor = useMemo(() => getAtmosphereColor(anomaly), [anomaly]);
+  const currentGlowColor = useRef<THREE.Color>(targetGlowColor.clone());
+
+  // Earth surface material with Black Marble night lights blend on shadow side
+  const earthMaterial = useMemo(() => {
+    const mat = new THREE.MeshStandardMaterial({
+      map: dayMap,
+      normalMap: normalMap,
+      normalScale: new THREE.Vector2(0.8, 0.8),
+      roughnessMap: specularMap,
+      roughness: 0.65,
+      metalness: 0.1,
+    });
+
+    // Inject night lights via onBeforeCompile
+    mat.onBeforeCompile = (shader) => {
+      shader.uniforms.uNightLights = { value: lightsMap };
+      shader.uniforms.uSunDir = { value: new THREE.Vector3(...sunPosition).normalize() };
+
+      shader.fragmentShader = `
+        uniform sampler2D uNightLights;
+        uniform vec3 uSunDir;
+        ${shader.fragmentShader}
+      `;
+
+      shader.fragmentShader = shader.fragmentShader.replace(
+        '#include <dithering_fragment>',
+        `
+        #include <dithering_fragment>
+        // Calculate night light emission on the unlit hemisphere
+        vec3 worldNorm = normalize(vNormal);
+        float sunDot = dot(worldNorm, uSunDir);
+        float nightMask = smoothstep(0.15, -0.25, sunDot);
+        vec3 nightColor = texture2D(uNightLights, vMapUv).rgb * vec3(1.0, 0.82, 0.55) * 2.2 * nightMask;
+        gl_FragColor.rgb += nightColor;
+        `
+      );
+    };
+
+    return mat;
+  }, [dayMap, normalMap, specularMap, lightsMap, sunPosition]);
+
+  // Atmosphere inner rim shader
   const atmosphereMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       vertexShader: atmosphereVertexShader,
       fragmentShader: atmosphereFragmentShader,
       uniforms: {
-        uColor: { value: getAtmosphereColor(anomaly) },
-        uIntensity: { value: 1.15 }
+        uColor: { value: targetGlowColor.clone() },
+        uIntensity: { value: 1.1 },
+        uPower: { value: 3.2 },
       },
       side: THREE.BackSide,
       blending: THREE.AdditiveBlending,
       transparent: true,
-      depthWrite: false
+      depthWrite: false,
     });
   }, []);
 
-  // Trigger pulse whenever pulseTrigger changes
+  // Faint second outer halo
+  const outerHaloMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      vertexShader: atmosphereVertexShader,
+      fragmentShader: atmosphereFragmentShader,
+      uniforms: {
+        uColor: { value: targetGlowColor.clone() },
+        uIntensity: { value: 0.35 },
+        uPower: { value: 2.2 },
+      },
+      side: THREE.BackSide,
+      blending: THREE.AdditiveBlending,
+      transparent: true,
+      depthWrite: false,
+    });
+  }, []);
+
+  // Trigger pulse wave on note play
   useEffect(() => {
     if (pulseTrigger > 0) {
-      pulseScale.current = 1.02;
-      pulseAlpha.current = 0.85;
-    }
-  }, [pulseTrigger]);
-
-  useFrame((_, delta) => {
-    // Rotation (unless reduced motion)
-    if (!reduceMotion) {
-      const rotSpeed = isPlaying ? 0.05 : 0.08;
-      if (earthRef.current) {
-        earthRef.current.rotation.y += delta * rotSpeed;
-      }
-      if (cloudsRef.current) {
-        // Clouds drift slightly faster to create realistic atmospheric movement
-        cloudsRef.current.rotation.y += delta * (rotSpeed * 1.18);
-      }
-    }
-
-    // Atmosphere color lerp
-    if (atmosphereRef.current) {
-      const mat = atmosphereRef.current.material as THREE.ShaderMaterial;
-      if (mat.uniforms?.uColor) {
-        mat.uniforms.uColor.value.lerp(targetColor, 0.05);
-      }
-    }
-
-    // Animate pulse ring ripple
-    if (pulseRingRef.current && pulseAlpha.current > 0.01) {
-      // Frequency scales the max size of ripple (higher freq = larger/faster ripple)
+      // Frequency scales propagation speed and reach
       const freqFactor = (pulseFreq - 220) / (880 - 220); // 0 to 1
-      const expandSpeed = 0.6 + freqFactor * 0.8;
+      activePulses.current.push({
+        id: Date.now() + Math.random(),
+        scale: 1.01,
+        alpha: 0.8,
+        color: targetGlowColor.clone(),
+        speed: 0.5 + freqFactor * 0.7,
+      });
+      // Limit to 4 pulses max
+      if (activePulses.current.length > 4) {
+        activePulses.current.shift();
+      }
+    }
+  }, [pulseTrigger, pulseFreq, targetGlowColor]);
 
-      pulseScale.current += delta * expandSpeed;
-      pulseAlpha.current = Math.max(0, pulseAlpha.current - delta * 1.5);
+  // Animation frame loop
+  useFrame((_, delta) => {
+    // 1. Earth & Clouds continuous rotation with axial tilt
+    if (!reduceMotion) {
+      // Base rotation: 1 revolution per ~75 seconds (0.084 rad/s)
+      const baseSpeed = isPlaying ? 0.11 : 0.07;
+      if (earthMeshRef.current) {
+        earthMeshRef.current.rotation.y += delta * baseSpeed;
+      }
+      if (cloudsMeshRef.current) {
+        // Clouds drift slightly faster (simulating atmospheric trade winds)
+        cloudsMeshRef.current.rotation.y += delta * (baseSpeed * 1.18);
+      }
+      if (moonOrbitRef.current) {
+        // Tiny moon orbits slowly around Earth
+        moonOrbitRef.current.rotation.y += delta * 0.025;
+      }
+    }
 
-      pulseRingRef.current.scale.set(pulseScale.current, pulseScale.current, pulseScale.current);
-      const mat = pulseRingRef.current.material as THREE.MeshBasicMaterial;
-      mat.opacity = pulseAlpha.current;
+    // 2. Smooth 600ms transition for atmosphere glow color
+    currentGlowColor.current.lerp(targetGlowColor, delta * 3.5);
+    if (atmosphereMaterial.uniforms?.uColor) {
+      atmosphereMaterial.uniforms.uColor.value.copy(currentGlowColor.current);
+    }
+    if (outerHaloMaterial.uniforms?.uColor) {
+      outerHaloMaterial.uniforms.uColor.value.copy(currentGlowColor.current);
+    }
+
+    // 3. Update pulse ring wavelets
+    for (let i = activePulses.current.length - 1; i >= 0; i--) {
+      const pulse = activePulses.current[i];
+      pulse.scale += delta * pulse.speed;
+      pulse.alpha -= delta * 1.2;
+      if (pulse.alpha <= 0.01) {
+        activePulses.current.splice(i, 1);
+      }
     }
   });
 
+  // Earth's real axial tilt: 23.44 degrees = 0.4091 radians
+  const axialTiltRad = (23.44 * Math.PI) / 180;
+
   return (
     <group>
-      {/* 3D Earth Mesh */}
-      <mesh ref={earthRef} castShadow receiveShadow>
-        <sphereGeometry args={[1, 64, 64]} />
-        <meshStandardMaterial
-          map={dayMap}
-          normalMap={normalMap}
-          normalScale={new THREE.Vector2(0.6, 0.6)}
-          roughnessMap={specularMap}
-          roughness={0.7}
-          metalness={0.15}
-        />
-      </mesh>
+      {/* Group with Earth's 23.4° Axial Tilt */}
+      <group ref={tiltGroupRef} rotation={[0, 0, -axialTiltRad]}>
+        {/* Main Earth Sphere (Lit by Sun + Night lights on dark side) */}
+        <mesh ref={earthMeshRef} castShadow receiveShadow>
+          <sphereGeometry args={[1, 64, 64]} />
+          <primitive object={earthMaterial} attach="material" />
+        </mesh>
 
-      {/* Drifting Cloud Layer */}
-      <mesh ref={cloudsRef}>
-        <sphereGeometry args={[1.015, 64, 64]} />
-        <meshStandardMaterial
-          map={cloudsMap}
-          transparent={true}
-          opacity={0.38}
-          blending={THREE.NormalBlending}
-          depthWrite={false}
-        />
-      </mesh>
+        {/* Drifting Clouds Shell (Transparent Alpha Layer) */}
+        <mesh ref={cloudsMeshRef}>
+          <sphereGeometry args={[1.014, 64, 64]} />
+          <meshStandardMaterial
+            map={cloudsMap}
+            transparent={true}
+            opacity={0.34}
+            blending={THREE.NormalBlending}
+            roughness={1.0}
+            depthWrite={false}
+          />
+        </mesh>
 
-      {/* Atmospheric Glow Shell */}
-      <mesh ref={atmosphereRef} scale={[1.18, 1.18, 1.18]}>
-        <sphereGeometry args={[1, 48, 48]} />
-        <primitive object={atmosphereMaterial} />
-      </mesh>
+        {/* Primary Atmosphere Feathered Fresnel Shell (Scale 1.045) */}
+        <mesh ref={atmosphereRef} scale={[1.045, 1.045, 1.045]}>
+          <sphereGeometry args={[1, 64, 64]} />
+          <primitive object={atmosphereMaterial} attach="material" />
+        </mesh>
 
-      {/* Sound Note Pulse Ripple Ring */}
-      <mesh ref={pulseRingRef} scale={[1.02, 1.02, 1.02]}>
-        <sphereGeometry args={[1, 32, 32]} />
-        <meshBasicMaterial
-          color={targetColor}
-          wireframe={true}
-          transparent={true}
-          opacity={0}
-          depthWrite={false}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
+        {/* Soft Second Outer Halo (Scale 1.072) */}
+        <mesh ref={outerHaloRef} scale={[1.072, 1.072, 1.072]}>
+          <sphereGeometry args={[1, 48, 48]} />
+          <primitive object={outerHaloMaterial} attach="material" />
+        </mesh>
+
+        {/* Acoustic Pulse Ripples */}
+        <group ref={pulseRingsRef}>
+          {activePulses.current.map((p) => (
+            <mesh key={p.id} scale={[p.scale, p.scale, p.scale]}>
+              <sphereGeometry args={[1, 32, 32]} />
+              <meshBasicMaterial
+                color={p.color}
+                wireframe={true}
+                transparent={true}
+                opacity={p.alpha}
+                depthWrite={false}
+                blending={THREE.AdditiveBlending}
+              />
+            </mesh>
+          ))}
+        </group>
+
+        {/* Tiny Orbiting Moon */}
+        <group ref={moonOrbitRef}>
+          <mesh position={[3.6, 0.4, 0]} scale={[0.12, 0.12, 0.12]}>
+            <sphereGeometry args={[1, 24, 24]} />
+            <meshStandardMaterial color="#A8AAB2" roughness={0.9} metalness={0.05} />
+          </mesh>
+        </group>
+      </group>
     </group>
   );
 }

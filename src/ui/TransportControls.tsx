@@ -51,19 +51,76 @@ export default function TransportControls({
       role="region"
       aria-label="Audio Playback and Time-lapse Controls"
     >
-      {/* Top row: Transport buttons */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+      {/* Top row: Main Playback Transport */}
+      <div style={{ display: 'grid', gridTemplateColumns: '44px 1fr 44px 44px', gap: 6, alignItems: 'center' }}>
         {/* Previous year */}
         <button
           onClick={onPrev}
           title="Previous year (Left Arrow)"
           aria-label="Previous Year"
           className="btn-icon"
-          style={btnStyle}
+          style={{ ...btnStyle, padding: '8px 0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
           ⏮
         </button>
 
+        {/* Play / Pause Time-lapse */}
+        <button
+          onClick={onPlayPause}
+          title={isPlaying ? 'Pause time-lapse (P)' : 'Play time-lapse (P)'}
+          aria-label={isPlaying ? 'Pause time-lapse' : 'Play time-lapse'}
+          style={{
+            ...btnStyle,
+            background: isPlaying ? 'rgba(252, 61, 33, 0.45)' : 'rgba(11, 61, 145, 0.8)',
+            borderColor: isPlaying ? '#FC3D21' : '#00D4FF',
+            color: '#FFFFFF',
+            fontWeight: 700,
+            fontSize: 13,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            padding: '8px 12px',
+          }}
+        >
+          <span>{isPlaying ? '⏸' : '▶'}</span>
+          <span>{isPlaying ? 'Pause 1880–2025' : 'Play 1880–2025'}</span>
+        </button>
+
+        {/* Next year */}
+        <button
+          onClick={onNext}
+          title="Next year (Right Arrow)"
+          aria-label="Next Year"
+          className="btn-icon"
+          style={{ ...btnStyle, padding: '8px 0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          ⏭
+        </button>
+
+        {/* Loop toggle */}
+        <button
+          onClick={() => onLoopingChange(!looping)}
+          title={looping ? 'Looping active: will repeat time-lapse automatically' : 'Looping inactive'}
+          aria-label="Toggle loop"
+          aria-pressed={looping}
+          style={{
+            ...btnStyle,
+            padding: '8px 0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: looping ? 'rgba(0, 212, 255, 0.25)' : 'rgba(11, 29, 58, 0.5)',
+            borderColor: looping ? '#00D4FF' : 'rgba(255, 255, 255, 0.15)',
+            color: looping ? '#00D4FF' : '#94A3B8',
+          }}
+        >
+          🔁
+        </button>
+      </div>
+
+      {/* Row 2: Sonify Actions (Single Year Tone & Decade Chord) */}
+      <div style={{ display: 'grid', gridTemplateColumns: onPlayDecadeChord ? '1fr 1fr' : '1fr', gap: 6 }}>
         {/* Play Single Year Tone */}
         <button
           onClick={onPlayTone}
@@ -75,15 +132,16 @@ export default function TransportControls({
             borderColor: 'rgba(0, 212, 255, 0.4)',
             color: '#00D4FF',
             padding: '6px 10px',
-            fontSize: 12,
+            fontSize: 11.5,
             fontFamily: 'var(--font-mono)',
             display: 'flex',
             alignItems: 'center',
-            gap: 4,
+            justifyContent: 'center',
+            gap: 6,
           }}
         >
           <span>🎵</span>
-          <span>Tone</span>
+          <span>Play Tone</span>
         </button>
 
         {/* Play Decade Chord */}
@@ -98,67 +156,18 @@ export default function TransportControls({
               borderColor: 'rgba(249, 115, 22, 0.45)',
               color: '#F97316',
               padding: '6px 10px',
-              fontSize: 12,
+              fontSize: 11.5,
               fontFamily: 'var(--font-mono)',
               display: 'flex',
               alignItems: 'center',
-              gap: 4,
+              justifyContent: 'center',
+              gap: 6,
             }}
           >
             <span>🎹</span>
-            <span>Decade</span>
+            <span>Decade Chord</span>
           </button>
         )}
-
-        {/* Play / Pause Time-lapse */}
-        <button
-          onClick={onPlayPause}
-          title={isPlaying ? 'Pause time-lapse (P)' : 'Play time-lapse (P)'}
-          aria-label={isPlaying ? 'Pause time-lapse' : 'Play time-lapse'}
-          style={{
-            ...btnStyle,
-            minWidth: 90,
-            background: isPlaying ? 'rgba(252, 61, 33, 0.35)' : 'rgba(11, 61, 145, 0.7)',
-            borderColor: isPlaying ? '#FC3D21' : '#00D4FF',
-            color: '#FFFFFF',
-            fontWeight: 700,
-            fontSize: 14,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 6,
-          }}
-        >
-          <span>{isPlaying ? '⏸' : '▶'}</span>
-          <span>{isPlaying ? 'Pause' : 'Play'}</span>
-        </button>
-
-        {/* Next year */}
-        <button
-          onClick={onNext}
-          title="Next year (Right Arrow)"
-          aria-label="Next Year"
-          className="btn-icon"
-          style={btnStyle}
-        >
-          ⏭
-        </button>
-
-        {/* Loop toggle */}
-        <button
-          onClick={() => onLoopingChange(!looping)}
-          title={looping ? 'Looping enabled' : 'Looping disabled'}
-          aria-label="Toggle loop"
-          aria-pressed={looping}
-          style={{
-            ...btnStyle,
-            background: looping ? 'rgba(0, 212, 255, 0.25)' : 'rgba(11, 29, 58, 0.5)',
-            borderColor: looping ? '#00D4FF' : 'rgba(255, 255, 255, 0.15)',
-            color: looping ? '#00D4FF' : '#94A3B8',
-          }}
-        >
-          🔁
-        </button>
       </div>
 
       {/* Middle row: Speed & Glide */}

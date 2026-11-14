@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import type { AnomalyRecord } from '../data/types';
+import { getRecordForYear } from '../data/loadData';
 
 interface TimelineSliderProps {
   years: number[];
@@ -14,35 +15,30 @@ function getStripeColor(anomaly: number): string {
   const t = Math.max(0, Math.min(1, (anomaly + 0.5) / 1.8));
 
   if (t < 0.25) {
-    // Deep navy/indigo to medium ocean blue
     const s = t / 0.25;
     const r = Math.round(8 + s * 16);
     const g = Math.round(48 + s * 70);
     const b = Math.round(135 + s * 75);
     return `rgb(${r}, ${g}, ${b})`;
   } else if (t < 0.45) {
-    // Medium blue to pale cyan/light blue
     const s = (t - 0.25) / 0.2;
     const r = Math.round(24 + s * 140);
     const g = Math.round(118 + s * 80);
     const b = Math.round(210 + s * 30);
     return `rgb(${r}, ${g}, ${b})`;
   } else if (t < 0.55) {
-    // Pale neutral / near zero
     const s = (t - 0.45) / 0.1;
     const r = Math.round(164 + s * 80);
     const g = Math.round(198 + s * 45);
     const b = Math.round(240 - s * 30);
     return `rgb(${r}, ${g}, ${b})`;
   } else if (t < 0.75) {
-    // Light peach/amber to orange
     const s = (t - 0.55) / 0.2;
     const r = Math.round(244 + s * 11);
     const g = Math.round(243 - s * 110);
     const b = Math.round(210 - s * 150);
     return `rgb(${r}, ${g}, ${b})`;
   } else {
-    // Warm orange to deep crimson/burgundy
     const s = (t - 0.75) / 0.25;
     const r = Math.round(255 - s * 40);
     const g = Math.round(133 - s * 110);
@@ -50,6 +46,18 @@ function getStripeColor(anomaly: number): string {
     return `rgb(${r}, ${g}, ${b})`;
   }
 }
+
+const MILESTONES = [
+  { year: 1880, label: '1880 Start' },
+  { year: 1910, label: '1910 Coolest' },
+  { year: 1940, label: '1940 Peak' },
+  { year: 1976, label: '1976 Last Cool' },
+  { year: 1998, label: '1998 Super El Niño' },
+  { year: 2016, label: '2016 +1.0°C' },
+  { year: 2023, label: '2023 Record' },
+  { year: 2024, label: '2024 +1.45°C' },
+  { year: 2025, label: '2025 Current' },
+];
 
 export default function TimelineSlider({
   years,
@@ -95,10 +103,11 @@ export default function TimelineSlider({
     <div
       className="glass"
       style={{
-        padding: '14px 16px',
+        padding: '12px 14px',
         display: 'flex',
         flexDirection: 'column',
         gap: 8,
+        borderRadius: 10,
       }}
       role="region"
       aria-label="Timeline and Warming Stripes Scrubber"
@@ -108,13 +117,13 @@ export default function TimelineSlider({
         <span
           style={{
             fontFamily: 'var(--font-mono)',
-            fontSize: 11,
+            fontSize: 10,
             color: '#94A3B8',
             textTransform: 'uppercase',
-            letterSpacing: 1,
+            letterSpacing: 0.8,
           }}
         >
-          Timeline
+          Timeline Scrubber (1880–2025)
         </span>
         <span
           style={{
@@ -146,6 +155,7 @@ export default function TimelineSlider({
           accentColor: '#FC3D21',
           cursor: 'pointer',
           height: 6,
+          margin: '2px 0',
         }}
       />
 
@@ -156,7 +166,7 @@ export default function TimelineSlider({
         title="Warming stripes scrubber. Click anywhere to jump to that year."
         style={{
           display: 'flex',
-          height: 26,
+          height: 24,
           borderRadius: 6,
           overflow: 'hidden',
           cursor: 'pointer',
@@ -204,19 +214,47 @@ export default function TimelineSlider({
         })}
       </div>
 
-      {/* Slider endpoints */}
+      {/* Milestones row (Horizontally scrollable snap row beneath stripes) */}
       <div
+        className="snap-scroll-x"
         style={{
           display: 'flex',
-          justifyContent: 'space-between',
-          fontFamily: 'var(--font-mono)',
-          fontSize: 10,
-          color: '#64748B',
+          gap: 6,
+          overflowX: 'auto',
+          paddingBottom: 2,
+          paddingTop: 2,
+          scrollbarWidth: 'none',
         }}
+        role="group"
+        aria-label="Key Historical Climate Milestones"
       >
-        <span>{minYear}</span>
-        <span>1951 (Baseline Start)</span>
-        <span>{maxYear}</span>
+        {MILESTONES.map((m) => {
+          const isCurrent = m.year === selectedYear;
+          const rec = getRecordForYear(data, m.year);
+          const anomText = rec ? `${rec.anomaly >= 0 ? '+' : ''}${rec.anomaly.toFixed(2)}°C` : '';
+          return (
+            <button
+              key={m.year}
+              onClick={() => onChange(m.year)}
+              title={`${m.label}: ${anomText}`}
+              style={{
+                flexShrink: 0,
+                padding: '3px 8px',
+                borderRadius: 4,
+                fontSize: 10,
+                fontFamily: 'var(--font-mono)',
+                cursor: 'pointer',
+                background: isCurrent ? 'rgba(252, 61, 33, 0.35)' : 'rgba(11, 29, 58, 0.6)',
+                border: isCurrent ? '1px solid #FC3D21' : '1px solid rgba(255, 255, 255, 0.12)',
+                color: isCurrent ? '#FFFFFF' : '#CBD5E1',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {m.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Sonification Mapping Rule in UI */}

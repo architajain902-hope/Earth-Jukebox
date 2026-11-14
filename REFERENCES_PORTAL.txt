@@ -1,0 +1,32 @@
+NASA SPACE APPS CHALLENGE 2026 - REFERENCES & CITATIONS
+Project: Earth 616: The Earth Information Jukebox
+Team: Earth 616 (Bhopal Local Event)
+
+1. SCIENTIFIC DATASETS:
+- NASA GISS Surface Temperature Analysis (GISTEMP v4): Global Land-Ocean Temperature Index (GLB.Ts+dSST.csv), 1880–2025.
+  URL: https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv
+  Citation: GISTEMP Team, 2024: GISS Surface Temperature Analysis (GISTEMP), version 4. NASA Goddard Institute for Space Studies. Dataset accessed November 2024 at https://data.giss.nasa.gov/gistemp/.
+  Secondary Citation: Lenssen, N., G. Schmidt, J. Hansen, M. Menne, A. Perkins, R. Ruedy, and D. Shindell, 2019: Improvements in the GISTEMP uncertainty model. J. Geophys. Res. Atmos., 124, no. 12, 6307–6326, doi:10.1029/2018JD029522.
+  License: Public Domain (U.S. Government Work).
+
+2. NASA VISUALIZATIONS & EARTH INFORMATION CENTER:
+- NASA Earth Information Center (EIC): Visual frames and climate indicators.
+  URL: https://earth.gov and https://earth.gov/explore
+- NASA Scientific Visualization Studio (SVS): GISTEMP Global Temperature Anomalies (1880–2024), SVS Entry #5190.
+  URL: https://svs.gsfc.nasa.gov/5190/
+- NASA Visible Earth / Blue Marble: Global planetary day surface, ocean specular, normal, and cloud maps.
+  URL: https://visibleearth.nasa.gov/ (Reto Stöckli, NASA Earth Observatory).
+  License: Public Domain / MIT (Three.js asset repository).
+
+3. OPEN-SOURCE LIBRARIES:
+- React 18.3.1 (MIT License) - UI component hierarchy
+- Three.js 0.169.0 (MIT License) - WebGL 3D graphics & shaders
+- @react-three/fiber 8.17.10 & @react-three/drei 9.117.3 (MIT License) - 3D scene integration
+- Framer Motion 11.11.17 (MIT License) - UI animation & transitions
+- Vite 5.4.11 & Vitest 2.1.5 (MIT License) - Bundling & unit testing
+- TypeScript 5.6.3 (Apache-2.0 License) - Type safety
+
+4. TYPOGRAPHY:
+- Space Grotesk (Florian Karsten) - SIL Open Font License 1.1
+- Space Mono (Colophon Foundry) - SIL Open Font License 1.1
+- Inter (Rasmus Andersson) - SIL Open Font License 1.1

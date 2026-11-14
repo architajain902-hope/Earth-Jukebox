@@ -1,63 +1,73 @@
 # Earth 616: The Earth Information Jukebox
-## 90-Second Demonstration Video Script (Under 2 Minutes)
+## Official Demonstration Video Script (Under 2:00)
 
-*Video duration: ~1 minute 25 seconds*  
-*Matches the built-in "Auto-Tour" automated sequence.*
-
----
-
-### [0:00 - 0:10] Introduction & Hook
-**Visual:**  
-Camera flies in from deep space toward a photorealistic, rotating 3D Earth surrounded by stars. The title card *"Earth 616: The Earth Information Jukebox"* appears.
-
-**Narration (Speaker):**  
-"Welcome to Earth 616: The Earth Information Jukebox. For the NASA Space Apps Challenge 2026, we asked a simple question: What does 146 years of planetary climate change actually sound like?"
+*Target Video Duration: 1 minute 52 seconds (8-second safety margin below 2:00)*  
+*Pacing matches the built-in 100-second Auto-Tour in the live application.*  
+*English subtitle file provided in `demo.srt`.*
 
 ---
 
-### [0:10 - 0:25] The Core Scientific Rule & 1880 Baseline
+### [0:00 - 0:12] Hook & Vision
 **Visual:**  
-Camera settles on the globe. The year counter rolls to **1880**. Anomaly shows `-0.18 °C`. A deep, warm musical tone plays at **337 Hz** (musical note E4). On the globe, a gentle cyan acoustic wave ripples outward.
+Camera flies in through a deep space starfield toward a photorealistic, rotating 3D Earth. The title card appears: *"Earth 616: The Earth Information Jukebox"*.
 
-**Narration (Speaker):**  
-"Earth 616 is built on strict scientific honesty. Every pitch you hear is calculated directly from authentic NASA GISTEMP records. Our rule is simple: higher temperature anomaly produces a higher pitch. In 1880, at the dawn of modern meteorological records, the tone is deep and the planet's atmosphere glows cool blue."
+**Spoken Narration (Speaker):**  
+"What if we could not only see, but hear how Earth is changing? Welcome to Earth 616: The Earth Information Jukebox, built for the NASA International Space Apps Challenge 2026."
 
 ---
 
-### [0:25 - 0:40] Scrubbing Through History (1940 Warm Spell)
+### [0:12 - 0:30] Scientific Honesty & The Pitch Rule
 **Visual:**  
-The timeline scrubber smoothly advances to **1940**. The year display rolls forward; anomaly reads `+0.12 °C`. The synthesized pitch audibly rises to **447 Hz** (A4).
+Camera settles on the rotating globe. The year counter displays **1880** with anomaly **−0.18 °C**. A deep, warm synthesized sine tone sounds at **337 Hz** (note E4). An atmospheric Fresnel glow shimmers cool blue around the planet, and a gentle cyan acoustic pulse ripples outward.
 
-**Narration (Speaker):**  
-"Users can freely scrub the timeline or use our warming stripes scrubber. Reaching 1940, we hear the mid-century warm spell as the pitch rises, accompanied by real-time waveform visualizers on our mission control deck."
+**Spoken Narration (Speaker):**  
+"Unlike artistic interpretations or climate-inspired music, Earth 616 is built on strict scientific honesty. Every pitch is synthesized in real time from authentic NASA GISTEMP records from 1880 to 2025. Our rule is simple: higher temperature anomaly produces a higher pitch. In 1880, the tone is deep and Earth’s atmosphere glows cool blue."
 
 ---
 
-### [0:40 - 1:05] The Rapid Ascent: 1976 to 2025 Time-Lapse
+### [0:30 - 0:52] Interactive Exploration & Historical Transitions
 **Visual:**  
-The transport controls engage the time-lapse mode. Years accelerate rapidly from 1976 through 2025. With portamento glide active, the notes ascend steadily in pitch:
-- **1998:** Super El Niño spike (`+0.61 °C`, 627 Hz)
-- **2016:** Anomaly crosses `+1.00 °C` (770 Hz)
-- **2024:** All-time record anomaly `+1.28 °C` (873 Hz, near top of A5 scale)  
-The 3D Earth's atmospheric glow dynamically shifts from cyan to blazing orange and fiery red.
+The cursor scrubs the timeline and warming stripes strip to **1940**. Anomaly reads **+0.12 °C**; pitch rises to **447 Hz**. Next, the user clicks *"🎂 Birth Year"*, entering **2000**. The app plays 2000 (+0.39 °C, 546 Hz) followed immediately by **2024** (+1.28 °C, 873 Hz), showing the dramatic shift during a single lifetime.
 
-**Narration (Speaker):**  
-"Now, let's play the accelerated time-lapse from 1976 to 2025. Listen closely as decades pass in seconds. The steady upward climb in pitch is undeniable. By 2024, at plus 1.28 degrees Celsius anomaly, the pitch reaches near the top of our scale, and Earth's atmosphere transforms into a burning red glow."
+**Spoken Narration (Speaker):**  
+"Users can scrub 146 years of warming stripes or open 'Hear Your Birth Year' to hear how much the planet warmed in their own lifetime. Notice our real-time oscilloscope visualizer reacting live with every harmonic wave."
 
 ---
 
-### [1:05 - 1:20] "What Am I Hearing?" & Accessibility
+### [0:52 - 1:15] The Rapid Time-Lapse (1976–2025)
 **Visual:**  
-The "What Am I Hearing?" explainer modal opens on year 2024, displaying the #1 rank, comparison against pre-industrial averages, and an instant switch to Hindi (हिन्दी). We see the screen reader announcement and keyboard navigation indicators.
+The transport controls engage the accelerated time-lapse mode with portamento glide enabled. Years rapidly count upward from 1976 to 2025:
+- **1998:** Super El Niño heat anomaly spikes pitch (+0.61 °C, 627 Hz)
+- **2016:** Anomaly crosses +1.0 °C (770 Hz)
+- **2024:** Record warmth (+1.28 °C, 873 Hz)  
+The 3D Earth's atmospheric glow dynamically transitions from cyan to blazing amber and fiery solar red.
 
-**Narration (Speaker):**  
-"Curious listeners can open 'What Am I Hearing?' for an immediate, offline scientific breakdown of historical rank, pre-industrial baselines, and a bilingual English-Hindi explainer. Fully accessible with screen reader support and keyboard control, Earth 616 is designed for everyone."
+**Spoken Narration (Speaker):**  
+"Now, let's play the accelerated chronological time-lapse. Decades pass in seconds as the pitch ascends relentlessly. By 2024, with a record anomaly of plus 1.28 degrees Celsius, the tone reaches near the top of our scale, and Earth’s atmosphere transforms into a burning red glow."
 
 ---
 
-### [1:20 - 1:30] Conclusion & Outro
+### [1:15 - 1:32] "What Am I Hearing?" & Universal Accessibility
 **Visual:**  
-The comparison modal and future datasets teaser card appear ("Wind, precipitation, and wildfire sonification"). Earth rotates into the distance with team credits: *"Team Earth 616 · NASA Space Apps Challenge 2026 · Open Source under MIT"*.
+The user opens the *"What Am I Hearing?"* explainer, revealing the #1 historical rank, pre-industrial baseline deltas, and switches language to **Hindi (हिन्दी)**. The camera highlights keyboard focus rings, `aria-live` screen-reader captions, and the Web Speech narration toggle.
 
-**Narration (Speaker):**  
+**Spoken Narration (Speaker):**  
+"Curious listeners can open 'What Am I Hearing?' for an instant offline scientific breakdown with a full Hindi bilingual toggle. Designed for universal accessibility, Earth 616 is fully navigable by keyboard with live screen-reader announcements."
+
+---
+
+### [1:32 - 1:46] Scientific Validity & Future Roadmap
+**Visual:**  
+The *"Data & Method"* panel opens, displaying live mathematical formula calculations and 100% data validation. The *"Future Earth"* roadmap card showcases planned wind vector, precipitation, and wildfire sonification.
+
+**Spoken Narration (Speaker):**  
+"All 146 consecutive years are verified with 18 automated unit tests. Our roadmap extends this framework to NASA wind, precipitation, and wildfire datasets."
+
+---
+
+### [1:46 - 1:52] Closing
+**Visual:**  
+Earth rotates gracefully into space. The final screen shows: *"Team Earth 616 · NASA Space Apps Challenge 2026 · Open Source under MIT · Live Demo Link"*.
+
+**Spoken Narration (Speaker):**  
 "Earth 616: Turning NASA climate science into an experience you can see, touch, and hear. Thank you."

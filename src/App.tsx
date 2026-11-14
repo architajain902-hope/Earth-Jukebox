@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { loadGistempData } from './data/loadData';
 import type { GistempDataset } from './data/types';
 import { audioEngine } from './audio/engine';
+import { getUrlState } from './utils/urlState';
 import MainExperience from './ui/MainExperience';
 
 type ScreenState = 'loading' | 'start' | 'experience' | 'error';
@@ -11,8 +12,17 @@ export default function App() {
   const [screen, setScreen] = useState<ScreenState>('loading');
   const [dataset, setDataset] = useState<GistempDataset | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [initialParams, setInitialParams] = useState<{
+    year?: number;
+    speed?: 'slow' | 'normal' | 'fast';
+    mode?: 'jukebox' | 'classroom' | 'birthyear';
+  }>({});
 
   useEffect(() => {
+    // Read URL state
+    const urlState = getUrlState();
+    setInitialParams(urlState);
+
     loadGistempData()
       .then((data) => {
         setDataset(data);
@@ -123,7 +133,7 @@ export default function App() {
             transition={{ duration: 0.5 }}
             style={{ width: '100%', height: '100%' }}
           >
-            <MainExperience dataset={dataset} />
+            <MainExperience dataset={dataset} initialParams={initialParams} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -143,7 +153,7 @@ function StartOverlay({
   return (
     <div
       style={{
-        maxWidth: 620,
+        maxWidth: 660,
         textAlign: 'center',
         padding: '36px 28px',
         position: 'relative',
@@ -160,58 +170,81 @@ function StartOverlay({
         }}
       />
 
-      <div style={{ fontSize: 72, marginBottom: 16 }}>🌍</div>
+      <div style={{ fontSize: 68, marginBottom: 12 }}>🌍</div>
 
       <div
         style={{
           fontFamily: 'var(--font-mono)',
           color: '#00D4FF',
-          fontSize: 12,
+          fontSize: 11,
           letterSpacing: 3,
           textTransform: 'uppercase',
-          marginBottom: 10,
+          marginBottom: 8,
         }}
       >
-        NASA Space Apps Challenge 2026
+        NASA International Space Apps Challenge 2026
       </div>
 
       <h1
         style={{
-          fontSize: 'clamp(32px, 5vw, 52px)',
+          fontSize: 'clamp(32px, 5vw, 48px)',
           fontWeight: 800,
           letterSpacing: -1,
           lineHeight: 1.1,
-          marginBottom: 10,
+          marginBottom: 8,
           color: '#FFFFFF',
         }}
       >
-        Earth 616
+        Earth 616: The Earth Information Jukebox
       </h1>
 
-      <h2
+      {/* Story-First Hook */}
+      <div
         style={{
-          fontSize: 'clamp(16px, 2.5vw, 22px)',
-          fontWeight: 500,
-          color: '#94A3B8',
-          marginBottom: 20,
+          fontSize: 'clamp(17px, 2.5vw, 22px)',
+          fontWeight: 600,
+          color: '#38BDF8',
+          marginBottom: 16,
+          fontStyle: 'italic',
         }}
       >
-        The Earth Information Jukebox
-      </h2>
+        "What if we could not only see, but hear how Earth is changing?"
+      </div>
 
       <p
         style={{
-          fontSize: 15,
+          fontSize: 14.5,
           color: '#CBD5E1',
           lineHeight: 1.6,
-          maxWidth: 520,
-          margin: '0 auto 28px',
+          maxWidth: 540,
+          margin: '0 auto 20px',
         }}
       >
-        Hear and see 146 years of NASA surface temperature records (1880–2025).
-        Every musical pitch is mathematically generated from real temperature anomaly measurements.
-        <strong> Higher temperature = Higher pitch.</strong>
+        Translating 146 years of NASA surface temperature anomaly records (1880–2025) into real-time sound on an interactive 3D globe.
+        <strong> Higher temperature = Higher pitch.</strong> 100% synthesized from real NASA data.
       </p>
+
+      {/* Headphones Hint Badge */}
+      <div
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6,
+          padding: '5px 12px',
+          borderRadius: 20,
+          background: 'rgba(0, 212, 255, 0.12)',
+          border: '1px solid rgba(0, 212, 255, 0.3)',
+          fontFamily: 'var(--font-mono)',
+          fontSize: 11,
+          color: '#00D4FF',
+          marginBottom: 20,
+        }}
+      >
+        <span>🎧</span>
+        <span>Headphones recommended for full acoustic immersion</span>
+      </div>
+
+      <br />
 
       {/* Dataset Verification Tag */}
       <div
@@ -219,14 +252,14 @@ function StartOverlay({
           display: 'inline-flex',
           alignItems: 'center',
           gap: 8,
-          padding: '8px 16px',
+          padding: '6px 14px',
           borderRadius: 8,
           background: 'rgba(11, 29, 58, 0.7)',
-          border: '1px solid rgba(0, 212, 255, 0.3)',
+          border: '1px solid rgba(0, 212, 255, 0.25)',
           fontFamily: 'var(--font-mono)',
           fontSize: 11,
           color: '#94A3B8',
-          marginBottom: 32,
+          marginBottom: 28,
         }}
       >
         <span>📊 {dataset.data.length} Years Verified</span>
@@ -242,7 +275,7 @@ function StartOverlay({
         <button
           onClick={onStart}
           style={{
-            padding: '16px 44px',
+            padding: '16px 46px',
             fontSize: 17,
             fontWeight: 700,
             color: '#FFFFFF',

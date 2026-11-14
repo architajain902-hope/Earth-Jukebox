@@ -2,142 +2,134 @@
 
 > **NASA International Space Apps Challenge 2026**  
 > *Challenge:* The Earth Information Jukebox  
+> *Event:* Bhopal, India (Local Event)  
 > *Team:* **Earth 616**  
-> *Scientific Core:* Authentic NASA GISTEMP v4 Surface Temperature Sonification (1880–2025)
+> *Live Demo:* **[https://earth-jukebox.vercel.app](https://earth-jukebox.vercel.app)** *(or your deployment URL)*  
+> *Demo Video:* **[Watch the 100-Second Demonstration Video](#)** *(Public / Unlisted link)*
 
 ---
 
-## 1. Overview & Vision
-**Earth 616: The Earth Information Jukebox** transforms 146 years of NASA planetary surface temperature measurements into an immersive, mathematically rigorous audio-visual instrument. 
+![Earth 616 Cover](docs/cover.png)
 
-Unlike artistic interpretations or "climate-inspired music", Earth 616 enforces **strict scientific honesty**:
-- Every audible tone is calculated deterministically from real temperature anomaly measurements.
-- Higher global temperature produces a strictly higher musical pitch.
-- Zero randomized notes, no subjective arrangement, no fabricated data points.
+---
+
+## 1. The Core Idea: What if We Could Hear How Earth is Changing?
+
+Earth observation visualizations created by NASA are visually stunning, but they can feel abstract on 2D charts and remain inaccessible to visually impaired audiences.
+
+**Earth 616: The Earth Information Jukebox** pairs **NASA Earth Information Center (EIC) visual frames** with **dynamic real-time sonification**. Every year's authentic NASA surface temperature anomaly from 1880 to 2025 is mapped to an exact, deterministic musical pitch: **higher temperature = higher pitch**.
+
+Unlike subjective "climate music", Earth 616 upholds **strict scientific honesty**:
+- Zero randomized notes or artistic approximations.
+- 100% synthesized in real time via the browser's native **Web Audio API** (zero audio files).
+- All numbers, ranks, and baselines are computed dynamically from real NASA GISTEMP v4 data.
 
 ---
 
 ## 2. Interactive Features
 
-### 🌐 Dynamic 3D Earth Globe (Hero Visual)
-- Continuously rotating photorealistic 3D planet rendered in WebGL using Three.js and `@react-three/fiber`.
-- Day surface texture, ocean specular reflection map, surface normal relief map, and an independent, drifting cloud layer.
-- Realistic solar lighting showcasing the rotating day/night terminator.
-- **Data-Driven Atmospheric Fresnel Glow:** Custom GLSL shaders dynamically transition the atmospheric haze from deep polar blue (negative anomalies) to icy cyan, warm amber, and fiery solar red (+1.28 °C record years).
-- **Acoustic Pulse Ripple:** Each time a temperature note plays, an acoustic wavefront ripple propagates outward across the globe, with its expansion diameter scaling with note frequency.
-- Interactive OrbitControls with automatic rotation resumption after 3 seconds of user inactivity.
-
-### 🎵 Sonification Engine (Web Audio API)
-- Zero external sound files — 100% synthesized in real-time in the browser.
-- Warm sinusoidal fundamental tone blended with a soft second harmonic for natural resonance.
-- Anti-click envelope shaping (60ms attack, exponential release) connected to a safety limiter (`DynamicsCompressorNode`).
-- **Single-Year Tone:** 1.2-second full harmonic analysis.
-- **Time-Lapse Mode:** Automated chronological playback through 1880–2025 at selectable speeds (*Slow 400ms*, *Normal 220ms*, *Fast 100ms*).
-- **Portamento Glide Toggle:** Smooth musical frequency interpolation between consecutive years.
-- **Live Oscilloscope:** Real-time canvas waveform visualizer powered by `AnalyserNode`.
-
-### 📊 Mission Control HUD & Analytics
-- **Animated Year Display:** Large rolling counter showcasing the selected year, formatted anomaly (e.g., `+1.28 °C`), frequency in Hz, and nearest musical note name.
-- **Warming Stripes Visual Scrubber:** Ed Hawkins-style warming stripes under the timeline slider acting as a direct click-to-jump scrubber.
-- **Interactive SVG Line Chart:** Vector graph of global anomalies (1880–2025) with baseline zero-line, interactive hover tooltips, and a moving playhead.
-- **Quick Milestones:** Rapid jump chips for landmark climate years (1880, 1940, 1976, 1998, 2016, 2023, 2024, 2025) verified from loaded data.
-- **"What Am I Hearing?" Scientific Explainer:** Modal providing dynamic breakdown of the selected year's rank among all 146 years, comparison against the 1951–1980 baseline, comparison against pre-industrial (1880–1900) averages, and decade normal. Includes an instant **English / Hindi (हिन्दी)** bilingual toggle.
-- **Compare Mode:** Select any two historical years and play their tones back-to-back to directly perceive shifts in temperature and frequency.
-- **Automated 90-Second Demo Tour:** Scripted screen-recording mode with on-screen English subtitles guiding judges through key historical transitions.
+| Feature | Description | File / Implementation |
+| :--- | :--- | :--- |
+| **🌐 3D Interactive Earth** | Photorealistic rotating WebGL planet featuring NASA Blue Marble day textures, surface normals, ocean specular reflection, and independent orbital clouds. | `src/globe/EarthGlobe.tsx` |
+| **🔥 Data-Driven Atmosphere** | Custom GLSL Fresnel shader lerps atmospheric rim glow from cool blue (`< -0.2 °C`), through icy cyan, to solar red (`+1.28 °C`). | `src/globe/EarthGlobe.tsx` |
+| **🔊 Real-Time Sonification** | Dual-oscillator engine (fundamental sine + warm 2nd harmonic), anti-click envelope, and `DynamicsCompressorNode` limiter. | `src/audio/sonify.ts`, `src/audio/engine.ts` |
+| **🎂 Hear Your Birth Year** | Input any birth year: auditions your birth year against today's record warmth with a plain-language lifetime warming summary. | `src/ui/BirthYearModal.tsx` |
+| **🎓 Classroom / Guided Mode** | 5-step interactive educational lesson on anomalies, baselines, and historical inflection points with instant-feedback quizzes. | `src/ui/ClassroomModal.tsx` |
+| **🏛️ NASA EIC Portal** | Direct bridge connecting our sonification engine to official NASA Earth Information Center visual frames at `earth.gov`. | `src/ui/EICModal.tsx` |
+| **🎹 Decade Chords** | Auditions 10-year period averages as warm sustained chords with individual yearly notes arpeggiated across 2.5 seconds. | `src/audio/engine.ts` |
+| **📊 Warming Stripes Scrubber** | 146-band Ed Hawkins climate stripes under the timeline acting as a direct click-to-jump scrubber. | `src/ui/TimelineSlider.tsx` |
+| **📈 Vector Anomaly Chart** | Zero-dependency SVG temperature anomaly line chart with baseline zero-line, playhead indicator, and hover inspection. | `src/ui/TemperatureChart.tsx` |
+| **🎧 "What Am I Hearing?"** | Offline bilingual (**English / हिन्दी**) explainer computing historical rank (#1 to #146), pre-industrial deltas, and decade normals. | `src/ui/ExplainerModal.tsx` |
+| **⚖️ Comparative Mode** | Audition any two historical years back-to-back with live $\Delta ^\circ\text{C}$ and $\Delta\text{ Hz}$ delta calculations. | `src/ui/CompareModal.tsx` |
+| **💾 Media Exporter** | Synthesize and download the 146-year time-lapse as an uncompressed 16-bit WAV file (`OfflineAudioContext`) or chart as PNG. | `src/audio/exportWav.ts`, `src/ui/ExportModal.tsx` |
+| **🔗 Shareable State URLs** | Bookmarks and shares exact year, speed, and mode configurations via URL query parameters (`?year=...`). | `src/utils/urlState.ts` |
+| **▶ 100-Second Auto-Tour** | Scripted guided run with synchronized on-screen English subtitles for presentations and judge evaluations. | `src/ui/AutoTour.tsx` |
 
 ---
 
-## 3. Exact Sonification Formula
+## 3. Screenshots
 
-$$\text{Frequency (Hz)} = 220.0 + \left(\frac{\text{Anomaly} - (-0.5)}{1.3 - (-0.5)}\right) \times (880.0 - 220.0)$$
+| 3D Globe & Mission Control | "What Am I Hearing?" Bilingual Explainer |
+| :---: | :---: |
+| ![3D Globe](docs/screenshots/01-hero-globe.png) | ![Explainer](docs/screenshots/03-explainer-bilingual.png) |
+| **Mission Control Sidebar** | **Classroom Guided Lesson** |
+| ![Mission Control](docs/screenshots/02-mission-control.png) | ![Classroom](docs/screenshots/04-classroom-guided.png) |
 
-- **Anomaly Minimum:** $-0.50\ ^\circ\text{C} \longrightarrow 220.0\text{ Hz}$ (Musical note **A3**)
-- **Baseline Zero:** $0.00\ ^\circ\text{C} \longrightarrow 403.3\text{ Hz}$ (Musical note **G4**)
-- **Check Value:** $+0.90\ ^\circ\text{C} \longrightarrow 733.3\text{ Hz}$ (Musical note **F#5**)
-- **Anomaly Maximum:** $+1.30\ ^\circ\text{C} \longrightarrow 880.0\text{ Hz}$ (Musical note **A5**)
+---
+
+## 4. Exact Deterministic Sonification Rule
+
+$$\text{Frequency (Hz)} = 220.0 + \left(\frac{\text{clamp}(\text{Anomaly}, -0.5, 1.3) - (-0.5)}{1.3 - (-0.5)}\right) \times (880.0 - 220.0)$$
+
+- **−0.50 °C:** 220.0 Hz (Musical note **A3**)
+- **0.00 °C Baseline Normal:** 403.3 Hz (Musical note **G4**)
+- **+0.90 °C Verification Test:** 733.3 Hz (Musical note **F#5**)
+- **+1.30 °C Upper Bound:** 880.0 Hz (Musical note **A5**)
 - Clamping is strictly applied to any anomaly values outside the $[-0.5, +1.3]$ range.
 
 ---
 
-## 4. Real Data Pipeline
+## 5. Reproduce Our Data in 3 Commands
 
-All scientific measurements originate from the **NASA Goddard Institute for Space Studies (GISS)**:
-- **Source:** GISTEMP v4 Surface Temperature Analysis (Global Land-Ocean Temperature Index: `GLB.Ts+dSST.csv`)
-- **Direct NASA URL:** `https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv`
-- **Data Pipeline Script:** `scripts/fetch-data.mjs` downloads the live CSV, strips metadata headers, parses the annual meteorological mean (`J-D` column), validates 146 consecutive years (1880–2025) without gaps or non-finite values, and compiles `public/data/gistemp.json`.
-- The bundled JSON is shipped with the app so that Earth 616 operates 100% offline without live NASA network dependencies.
+To guarantee absolute scientific reproducibility, anyone can reproduce our bundled dataset directly from NASA servers:
 
-To re-fetch and validate data at any time:
-```bash
+```powershell
+# 1. Download and validate live NASA GISTEMP v4 dataset
 npm run fetch-data
+
+# 2. Run automated test suite (18/18 tests verifying formulas and parsing)
+npm run test
+
+# 3. Execute unified quality gate (validates dataset, tests, and builds static bundle)
+npm run verify
 ```
 
 ---
 
-## 5. Accessibility (WCAG 2.1 AA)
+## 6. Real NASA Data Pipeline
 
-- **Keyboard Navigable:** Full functionality via `ArrowLeft` / `ArrowRight` (±1 year), `PageUp` / `PageDown` (±10 years), `Home` (1880), `End` (2025), `Space` (Play single tone), and `P` (Toggle time-lapse).
+All scientific measurements originate from the **NASA Goddard Institute for Space Studies (GISS)**:
+- **Product:** Surface Temperature Analysis (GISTEMP v4), Global Land-Ocean Temperature Index (`GLB.Ts+dSST.csv`)
+- **Direct NASA URL:** `https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv`
+- **Data Pipeline:** `scripts/fetch-data.mjs` streams the CSV from NASA servers, extracts the annual mean (`J-D` column), validates 146 consecutive years (1880–2025) without gaps or missing numbers, and compiles `public/data/gistemp.json`.
+- The bundled JSON is shipped with the app so that Earth 616 operates 100% offline without live NASA network dependencies.
+
+---
+
+## 7. Universal Accessibility (WCAG 2.1 AA)
+
+- **Keyboard Navigation:** Full operation using `ArrowLeft` / `ArrowRight` (±1 year), `PageUp` / `PageDown` (±10 years), `Home` (1880), `End` (2025), `Space` (Play single tone), and `P` (Toggle time-lapse).
 - **Screen Reader Announcements:** High-priority `aria-live="polite"` region continuously announces:  
   *e.g., "Year 2015, anomaly plus 0.90 degrees Celsius, pitch 733 hertz."*
 - **Speech Synthesis:** Built-in Web Speech API (`speechSynthesis`) toggle for auditory readouts.
-- **High-Contrast Mode:** One-click toggle for high-contrast presentation.
-- **Reduced Motion Support:** Respects `prefers-reduced-motion` and includes an on-screen toggle to freeze globe auto-rotation and ripple effects.
+- **High-Contrast Mode:** High-contrast palette toggle for visibility.
+- **Reduced Motion Support:** Respects `prefers-reduced-motion` and includes an on-screen toggle to stop globe auto-rotation and ripple effects.
 - **Multimodal Feedback:** Information is never encoded solely by color; numerical labels, units, and frequencies accompany every visualization.
 
 ---
 
-## 6. Getting Started
+## 8. Limitations & Uncertainty Disclosure
 
-### Prerequisites
-- Node.js (v18 or newer)
-- npm (v8 or newer)
-
-### Installation & Development
-```bash
-# Clone the repository
-git clone https://github.com/your-username/nasa-earth-jukebox.git
-cd nasa-earth-jukebox
-
-# Install dependencies (includes WebAssembly Rollup patch)
-npm install
-
-# Download and validate latest NASA GISTEMP dataset
-npm run fetch-data
-
-# Run unit test suite (Vitest)
-npm run test
-
-# Launch local development server
-npm run dev
-```
-Open [http://localhost:5173](http://localhost:5173) in your browser.
-
-### Production Build
-```bash
-npm run build
-npm run preview
-```
-The compiled, zero-backend static build is saved to `dist/`, ready for immediate hosting on **Vercel**, **Netlify**, or **GitHub Pages**.
+- **Annual Global Mean:** Represents whole-planet thermodynamic energy balance, not daily local weather variations.
+- **Climatological Baseline:** Temperatures are expressed as anomalies relative to the 1951–1980 baseline normal.
+- **Uncertainty Bounds:** Because individual uncertainty columns are not provided in the simplified J-D summary table (`GLB.Ts+dSST.csv`), *uncertainty bounds are not plotted on the line chart* to avoid inventing numbers.
 
 ---
 
-## 7. Limitations & Scope
+## 9. Submission Documents & Deliverables
 
-- **Global Means:** The dataset reflects annual global surface temperature averages. It represents whole-planet thermodynamic energy shifts, not daily weather variations or localized microclimates.
-- **Climatological Baseline:** Temperatures are expressed as anomalies relative to the internationally standardized 1951–1980 baseline normal.
-
----
-
-## 8. Space Apps Submission Narrative & Citations
-
-- Full Space Apps Challenge submission text is available in [SUBMISSION.md](SUBMISSION.md).
-- Complete references, licenses, and formal NASA citations are cataloged in [REFERENCES.md](REFERENCES.md).
-- Demonstration video script is detailed in [DEMO_SCRIPT.md](DEMO_SCRIPT.md).
-- Project evolution and implementation audit is documented in [CHANGELOG.md](CHANGELOG.md).
+- 📄 **Portal Narrative:** [SUBMISSION.md](SUBMISSION.md)
+- 📋 **Submission Checklist:** [SUBMISSION_CHECKLIST.md](SUBMISSION_CHECKLIST.md)
+- 🔬 **References & Citations:** [REFERENCES.md](REFERENCES.md) & [REFERENCES_PORTAL.txt](REFERENCES_PORTAL.txt)
+- 🛡️ **Originality Disclosure:** [ORIGINAL_WORK.md](ORIGINAL_WORK.md)
+- 🤖 **AI Assistance Disclosure:** [AI_DISCLOSURE.md](AI_DISCLOSURE.md)
+- 🎬 **Video Demonstration Script:** [DEMO_SCRIPT.md](DEMO_SCRIPT.md) & [demo.srt](demo.srt)
+- 🚀 **Deployment Guide:** [DEPLOY.md](DEPLOY.md)
+- 📝 **Implementation Audit:** [docs/JUDGING_AUDIT.md](docs/JUDGING_AUDIT.md)
 
 ---
 
-## 9. License
+## 10. License
 
 This project is open-source under the [MIT License](LICENSE).  
 Copyright © 2026 Team Earth 616.

@@ -1,0 +1,55 @@
+1
+00:00:00,500 --> 00:00:05,800
+What if we could not only see, but hear how Earth is changing?
+
+2
+00:00:06,000 --> 00:00:11,500
+Welcome to Earth 616: The Earth Information Jukebox, built for the NASA International Space Apps Challenge 2026.
+
+3
+00:00:12,000 --> 00:00:17,200
+Unlike artistic interpretations or climate-inspired music, Earth 616 is built on strict scientific honesty.
+
+4
+00:00:17,500 --> 00:00:23,000
+Every pitch is synthesized in real time from authentic NASA GISTEMP records from 1880 to 2025.
+
+5
+00:00:23,300 --> 00:00:30,000
+Our rule is simple: higher temperature anomaly produces a higher pitch. In 1880, the tone is deep and Earth’s atmosphere glows cool blue.
+
+6
+00:00:30,500 --> 00:00:36,800
+Users can scrub 146 years of warming stripes or open "Hear Your Birth Year" to hear how much the planet warmed in their own lifetime.
+
+7
+00:00:37,000 --> 00:00:43,500
+Notice our real-time oscilloscope visualizer reacting live with every harmonic wave.
+
+8
+00:00:44,000 --> 00:00:49,500
+Now, let's play the accelerated chronological time-lapse. Decades pass in seconds as the pitch ascends relentlessly.
+
+9
+00:00:50,000 --> 00:00:58,000
+By 2024, with a record anomaly of plus 1.28 degrees Celsius, the tone reaches near the top of our scale, and Earth’s atmosphere transforms into a burning red glow.
+
+10
+00:00:58,500 --> 00:01:05,000
+Curious listeners can open "What Am I Hearing?" for an instant offline scientific breakdown with a full Hindi bilingual toggle.
+
+11
+00:01:05,500 --> 00:01:12,000
+Designed for universal accessibility, Earth 616 is fully navigable by keyboard with live screen-reader announcements.
+
+12
+00:01:12,500 --> 00:01:18,500
+All 146 consecutive years are verified with 18 automated unit tests.
+
+13
+00:01:19,000 --> 00:01:25,500
+Our roadmap extends this framework to NASA wind, precipitation, and wildfire datasets.
+
+14
+00:01:26,000 --> 00:01:31,500
+Earth 616: Turning NASA climate science into an experience you can see, touch, and hear. Thank you.

@@ -8,6 +8,7 @@ interface TransportControlsProps {
   onPrev: () => void;
   onNext: () => void;
   onPlayTone: () => void;
+  onPlayDecadeChord?: () => void;
   speed: SpeedOption;
   onSpeedChange: (speed: SpeedOption) => void;
   glide: boolean;
@@ -26,6 +27,7 @@ export default function TransportControls({
   onPrev,
   onNext,
   onPlayTone,
+  onPlayDecadeChord,
   speed,
   onSpeedChange,
   glide,
@@ -72,17 +74,41 @@ export default function TransportControls({
             background: 'rgba(0, 212, 255, 0.15)',
             borderColor: 'rgba(0, 212, 255, 0.4)',
             color: '#00D4FF',
-            padding: '6px 12px',
+            padding: '6px 10px',
             fontSize: 12,
             fontFamily: 'var(--font-mono)',
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
+            gap: 4,
           }}
         >
           <span>🎵</span>
           <span>Tone</span>
         </button>
+
+        {/* Play Decade Chord */}
+        {onPlayDecadeChord && (
+          <button
+            onClick={onPlayDecadeChord}
+            title="Play Decade Chord (arpeggiates 10-year period over sustained chord)"
+            aria-label="Play Decade Chord"
+            style={{
+              ...btnStyle,
+              background: 'rgba(249, 115, 22, 0.18)',
+              borderColor: 'rgba(249, 115, 22, 0.45)',
+              color: '#F97316',
+              padding: '6px 10px',
+              fontSize: 12,
+              fontFamily: 'var(--font-mono)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+            }}
+          >
+            <span>🎹</span>
+            <span>Decade</span>
+          </button>
+        )}
 
         {/* Play / Pause Time-lapse */}
         <button

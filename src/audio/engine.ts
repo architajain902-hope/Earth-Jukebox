@@ -233,6 +233,98 @@ export class AudioEngine {
     return targetFreq;
   }
 
+  /**
+   * Play a decade chord:
+   * Sustained warm chord based on decade average anomaly,
+   * with the 10 individual yearly records arpeggiated across 2.5s.
+   */
+  playDecadeChord(
+    decadeRecords: { year: number; anomaly: number }[],
+    onArpYear?: (year: number) => void
+  ): number {
+    if (!this.ctx || !this.analyser) {
+      this.init();
+    }
+    if (!this.ctx || !this.analyser || decadeRecords.length === 0) return 0;
+
+    this.resume();
+    this.stopCurrent(0.02);
+
+    const avgAnomaly =
+      decadeRecords.reduce((acc, r) => acc + r.anomaly, 0) / decadeRecords.length;
+    const baseFreq = anomalyToFrequency(avgAnomaly);
+    const now = this.ctx.currentTime;
+    const totalDuration = 2.8;
+
+    // Sustained pad envelope
+    const padEnv = this.ctx.createGain();
+    padEnv.gain.setValueAtTime(0.0001, now);
+    padEnv.gain.linearRampToValueAtTime(0.35, now + 0.3);
+    padEnv.gain.setValueAtTime(0.35, now + totalDuration - 0.5);
+    padEnv.gain.exponentialRampToValueAtTime(0.0001, now + totalDuration);
+
+    // Root tone
+    const oscRoot = this.ctx.createOscillator();
+    oscRoot.type = 'sine';
+    oscRoot.frequency.setValueAtTime(baseFreq, now);
+
+    // Sub octave for depth
+    const oscSub = this.ctx.createOscillator();
+    oscSub.type = 'sine';
+    oscSub.frequency.setValueAtTime(baseFreq * 0.5, now);
+    const subGain = this.ctx.createGain();
+    subGain.gain.value = 0.25;
+
+    // 2nd harmonic
+    const oscHarm = this.ctx.createOscillator();
+    oscHarm.type = 'sine';
+    oscHarm.frequency.setValueAtTime(baseFreq * 2, now);
+    const harmGain = this.ctx.createGain();
+    harmGain.gain.value = 0.15;
+
+    oscRoot.connect(padEnv);
+    oscSub.connect(subGain);
+    subGain.connect(padEnv);
+    oscHarm.connect(harmGain);
+    harmGain.connect(padEnv);
+    padEnv.connect(this.analyser);
+
+    oscRoot.start(now);
+    oscSub.start(now);
+    oscHarm.start(now);
+    oscRoot.stop(now + totalDuration + 0.05);
+    oscSub.stop(now + totalDuration + 0.05);
+    oscHarm.stop(now + totalDuration + 0.05);
+
+    // Arpeggiate the 10 years across the pad
+    const stepDur = (totalDuration - 0.4) / decadeRecords.length;
+    decadeRecords.forEach((rec, idx) => {
+      const arpTime = now + 0.1 + idx * stepDur;
+      const arpFreq = anomalyToFrequency(rec.anomaly);
+
+      const arpEnv = this.ctx!.createGain();
+      arpEnv.gain.setValueAtTime(0.0001, arpTime);
+      arpEnv.gain.exponentialRampToValueAtTime(0.3, arpTime + 0.02);
+      arpEnv.gain.exponentialRampToValueAtTime(0.0001, arpTime + stepDur * 0.95);
+
+      const arpOsc = this.ctx!.createOscillator();
+      arpOsc.type = 'triangle';
+      arpOsc.frequency.setValueAtTime(arpFreq, arpTime);
+
+      arpOsc.connect(arpEnv);
+      arpEnv.connect(this.analyser!);
+
+      arpOsc.start(arpTime);
+      arpOsc.stop(arpTime + stepDur);
+
+      setTimeout(() => {
+        onArpYear?.(rec.year);
+      }, (0.1 + idx * stepDur) * 1000);
+    });
+
+    return avgAnomaly;
+  }
+
   dispose(): void {
     this.stopCurrent(0);
     if (this.ctx) {

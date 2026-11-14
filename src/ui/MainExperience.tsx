@@ -5,6 +5,7 @@ import type { GistempDataset } from '../data/types';
 import { audioEngine } from '../audio/engine';
 import { anomalyToFrequency, frequencyToNoteName } from '../audio/sonify';
 import { getRecordForYear } from '../data/loadData';
+import { setUrlState, copyShareableLink, type AppUrlState } from '../utils/urlState';
 import EarthGlobe from '../globe/EarthGlobe';
 import YearDisplay from './YearDisplay';
 import TimelineSlider from './TimelineSlider';
@@ -17,9 +18,16 @@ import ExplainerModal from './ExplainerModal';
 import CompareModal from './CompareModal';
 import AboutModal from './AboutModal';
 import AutoTour from './AutoTour';
+import BirthYearModal from './BirthYearModal';
+import ClassroomModal from './ClassroomModal';
+import EICModal from './EICModal';
+import FutureEarthModal from './FutureEarthModal';
+import DataMethodModal from './DataMethodModal';
+import ExportModal from './ExportModal';
 
 interface MainExperienceProps {
   dataset: GistempDataset;
+  initialParams?: AppUrlState;
 }
 
 const SPEED_MS: Record<SpeedOption, number> = {
@@ -28,16 +36,16 @@ const SPEED_MS: Record<SpeedOption, number> = {
   fast: 100,
 };
 
-export default function MainExperience({ dataset }: MainExperienceProps) {
+export default function MainExperience({ dataset, initialParams }: MainExperienceProps) {
   const { data } = dataset;
   const years = data.map((d) => d.year);
   const minYear = years[0] ?? 1880;
   const maxYear = years[years.length - 1] ?? 2025;
 
-  // Selected year state (default to 2024 or latest)
-  const [selectedYear, setSelectedYear] = useState<number>(2024);
+  // Selected year state (default from URL or 2024)
+  const [selectedYear, setSelectedYear] = useState<number>(initialParams?.year ?? 2024);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [speed, setSpeed] = useState<SpeedOption>('normal');
+  const [speed, setSpeed] = useState<SpeedOption>(initialParams?.speed ?? 'normal');
   const [glide, setGlide] = useState<boolean>(false);
   const [volume, setVolume] = useState<number>(0.65);
   const [muted, setMuted] = useState<boolean>(false);
@@ -46,11 +54,20 @@ export default function MainExperience({ dataset }: MainExperienceProps) {
   // Pulse animation on the 3D globe
   const [pulseTrigger, setPulseTrigger] = useState<number>(0);
 
-  // Modals & Tour
+  // Modals & Panels
   const [showExplainer, setShowExplainer] = useState<boolean>(false);
   const [showCompare, setShowCompare] = useState<boolean>(false);
   const [showAbout, setShowAbout] = useState<boolean>(false);
+  const [showBirthYear, setShowBirthYear] = useState<boolean>(initialParams?.mode === 'birthyear');
+  const [showClassroom, setShowClassroom] = useState<boolean>(initialParams?.mode === 'classroom');
+  const [showEIC, setShowEIC] = useState<boolean>(false);
+  const [showFutureEarth, setShowFutureEarth] = useState<boolean>(false);
+  const [showDataMethod, setShowDataMethod] = useState<boolean>(false);
+  const [showExport, setShowExport] = useState<boolean>(false);
   const [isAutoTourActive, setIsAutoTourActive] = useState<boolean>(false);
+
+  // Link copy toast
+  const [linkCopiedToast, setLinkCopiedToast] = useState<boolean>(false);
 
   // Accessibility settings
   const [speechEnabled, setSpeechEnabled] = useState<boolean>(false);
@@ -66,6 +83,19 @@ export default function MainExperience({ dataset }: MainExperienceProps) {
   const currentAnomaly = currentRecord.anomaly;
   const currentFreq = anomalyToFrequency(currentAnomaly);
   const currentNote = frequencyToNoteName(currentFreq);
+
+  // Synchronize URL parameters
+  useEffect(() => {
+    let mode: 'jukebox' | 'classroom' | 'birthyear' = 'jukebox';
+    if (showClassroom) mode = 'classroom';
+    else if (showBirthYear) mode = 'birthyear';
+
+    setUrlState({
+      year: selectedYear,
+      speed,
+      mode,
+    });
+  }, [selectedYear, speed, showClassroom, showBirthYear]);
 
   // Sync volume / mute with audio engine
   useEffect(() => {
@@ -95,6 +125,20 @@ export default function MainExperience({ dataset }: MainExperienceProps) {
     speakCurrent(selectedYear, currentAnomaly, freq);
   }, [currentAnomaly, selectedYear, speakCurrent]);
 
+  // Play Decade Chord
+  const handlePlayDecadeChord = useCallback(() => {
+    const decadeStart = Math.floor(selectedYear / 10) * 10;
+    const decadeEnd = decadeStart + 9;
+    const decadeRecords = data.filter((d) => d.year >= decadeStart && d.year <= decadeEnd);
+
+    if (decadeRecords.length > 0) {
+      setPulseTrigger(Date.now());
+      audioEngine.playDecadeChord(decadeRecords, (arpYear) => {
+        setSelectedYear(arpYear);
+      });
+    }
+  }, [data, selectedYear]);
+
   // Trigger sound when jumping years manually
   const handleYearChange = useCallback((year: number) => {
     setSelectedYear(year);
@@ -108,6 +152,15 @@ export default function MainExperience({ dataset }: MainExperienceProps) {
       }
     }
   }, [data, isPlaying, glide, speakCurrent]);
+
+  // Handle Share link copy
+  const handleCopyLink = async () => {
+    const success = await copyShareableLink();
+    if (success) {
+      setLinkCopiedToast(true);
+      setTimeout(() => setLinkCopiedToast(false), 2500);
+    }
+  };
 
   // Timelapse playback loop
   useEffect(() => {
@@ -236,23 +289,24 @@ export default function MainExperience({ dataset }: MainExperienceProps) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '10px 18px',
-          background: 'rgba(11, 29, 58, 0.85)',
+          padding: '8px 16px',
+          background: 'rgba(11, 29, 58, 0.9)',
           borderBottom: '1px solid rgba(0, 212, 255, 0.2)',
           backdropFilter: 'blur(12px)',
           zIndex: 40,
           flexShrink: 0,
+          gap: 10,
         }}
       >
-        {/* Title & Badge */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        {/* Title, Badge & EIC Link */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: 22 }}>🌍</span>
             <span
               style={{
                 fontFamily: 'var(--font-sans)',
                 fontWeight: 700,
-                fontSize: 16,
+                fontSize: 15,
                 letterSpacing: 0.5,
               }}
             >
@@ -260,29 +314,49 @@ export default function MainExperience({ dataset }: MainExperienceProps) {
             </span>
           </div>
 
-          <span
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 11,
-              color: '#94A3B8',
-              display: 'none',
-              // hide on very small phones
-            }}
-            className="hide-mobile"
-          >
-            The Earth Information Jukebox
-          </span>
-
           <DataBadge dataset={dataset} />
+
+          {/* NASA EIC Link-up button */}
+          <button
+            onClick={() => setShowEIC(true)}
+            style={{
+              ...navBtnStyle,
+              background: 'rgba(0, 212, 255, 0.15)',
+              borderColor: 'rgba(0, 212, 255, 0.4)',
+              color: '#00D4FF',
+              fontWeight: 600,
+            }}
+            title="See it in NASA's Earth Information Center (EIC)"
+          >
+            🏛️ NASA EIC
+          </button>
         </div>
 
-        {/* Action Controls & Accessibility Toggles */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* Feature Action Buttons */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          {/* Hear Your Birth Year */}
+          <button
+            onClick={() => setShowBirthYear(true)}
+            style={navBtnStyle}
+            title="Hear Your Birth Year (Personalized comparison)"
+          >
+            🎂 Birth Year
+          </button>
+
+          {/* Classroom Guided Mode */}
+          <button
+            onClick={() => setShowClassroom(true)}
+            style={navBtnStyle}
+            title="Classroom / Guided Mode (5-step interactive lesson)"
+          >
+            🎓 Classroom
+          </button>
+
           {/* What am I hearing? button */}
           <button
             onClick={() => setShowExplainer(true)}
             style={navBtnStyle}
-            title="What am I hearing? (Scientific Explainer)"
+            title="What am I hearing? (Bilingual scientific explainer)"
           >
             🎧 What am I hearing?
           </button>
@@ -296,7 +370,47 @@ export default function MainExperience({ dataset }: MainExperienceProps) {
             ⚖️ Compare
           </button>
 
-          {/* Auto-tour button */}
+          {/* Data & Method */}
+          <button
+            onClick={() => setShowDataMethod(true)}
+            style={navBtnStyle}
+            title="Data & Method (Formulas, live calculation, limitations)"
+          >
+            🔬 Method
+          </button>
+
+          {/* Export Audio / PNG */}
+          <button
+            onClick={() => setShowExport(true)}
+            style={navBtnStyle}
+            title="Export time-lapse as WAV audio or chart as PNG"
+          >
+            💾 Export
+          </button>
+
+          {/* Future Earth Teaser */}
+          <button
+            onClick={() => setShowFutureEarth(true)}
+            style={navBtnStyle}
+            title="Future Earth Roadmap (Wind, precipitation, wildfire sonification)"
+          >
+            🚀 Future
+          </button>
+
+          {/* Shareable Link Button */}
+          <button
+            onClick={handleCopyLink}
+            style={{
+              ...navBtnStyle,
+              borderColor: linkCopiedToast ? '#22C55E' : 'rgba(0, 212, 255, 0.3)',
+              color: linkCopiedToast ? '#22C55E' : '#E0F2FE',
+            }}
+            title="Copy shareable link with current year and settings"
+          >
+            {linkCopiedToast ? '✓ Copied!' : '🔗 Share'}
+          </button>
+
+          {/* 100-Second Auto-Tour */}
           <button
             onClick={() => setIsAutoTourActive(true)}
             style={{
@@ -304,25 +418,24 @@ export default function MainExperience({ dataset }: MainExperienceProps) {
               background: 'rgba(252, 61, 33, 0.25)',
               borderColor: '#FC3D21',
               color: '#FFFFFF',
-              fontWeight: 600,
+              fontWeight: 700,
             }}
-            title="Start scripted 90-second audio-visual guided tour"
+            title="Start 100-second automated video presentation tour"
           >
-            🚀 Auto-Tour
+            ▶ Auto-Tour (100s)
           </button>
 
           {/* About / Credits */}
           <button
             onClick={() => setShowAbout(true)}
             style={navBtnStyle}
-            title="About the project, team, and citations"
+            title="About the project, challenge alignment, and team"
           >
             ℹ️ About
           </button>
 
-          {/* Accessibility Settings Menu */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 4 }}>
-            {/* Spoken Audio Toggle */}
+          {/* Accessibility Toggles */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginLeft: 2 }}>
             <button
               onClick={() => setSpeechEnabled(!speechEnabled)}
               title={speechEnabled ? 'Spoken narration enabled' : 'Enable spoken narration (Web Speech API)'}
@@ -336,7 +449,6 @@ export default function MainExperience({ dataset }: MainExperienceProps) {
               🗣️
             </button>
 
-            {/* Reduce Motion Toggle */}
             <button
               onClick={() => setReduceMotion(!reduceMotion)}
               title={reduceMotion ? 'Reduced motion active' : 'Reduce motion'}
@@ -350,7 +462,6 @@ export default function MainExperience({ dataset }: MainExperienceProps) {
               🚸
             </button>
 
-            {/* High Contrast Toggle */}
             <button
               onClick={() => setHighContrast(!highContrast)}
               title={highContrast ? 'High contrast active' : 'Toggle high contrast mode'}
@@ -437,13 +548,13 @@ export default function MainExperience({ dataset }: MainExperienceProps) {
         {/* Right Sidebar Control Deck */}
         <aside
           style={{
-            width: 340,
+            width: 350,
             maxHeight: '100%',
             overflowY: 'auto',
-            padding: '16px 14px',
+            padding: '14px 12px',
             display: 'flex',
             flexDirection: 'column',
-            gap: 12,
+            gap: 10,
             background: 'rgba(11, 29, 58, 0.75)',
             borderLeft: '1px solid rgba(0, 212, 255, 0.15)',
             backdropFilter: 'blur(16px)',
@@ -457,6 +568,7 @@ export default function MainExperience({ dataset }: MainExperienceProps) {
             onPrev={() => handleYearChange(Math.max(minYear, selectedYear - 1))}
             onNext={() => handleYearChange(Math.min(maxYear, selectedYear + 1))}
             onPlayTone={handlePlayTone}
+            onPlayDecadeChord={handlePlayDecadeChord}
             speed={speed}
             onSpeedChange={setSpeed}
             glide={glide}
@@ -507,6 +619,45 @@ export default function MainExperience({ dataset }: MainExperienceProps) {
         />
       )}
 
+      {showBirthYear && (
+        <BirthYearModal
+          data={data}
+          onSelectYear={handleYearChange}
+          onClose={() => setShowBirthYear(false)}
+        />
+      )}
+
+      {showClassroom && (
+        <ClassroomModal
+          data={data}
+          onSetYear={handleYearChange}
+          onClose={() => setShowClassroom(false)}
+        />
+      )}
+
+      {showEIC && (
+        <EICModal onClose={() => setShowEIC(false)} />
+      )}
+
+      {showFutureEarth && (
+        <FutureEarthModal onClose={() => setShowFutureEarth(false)} />
+      )}
+
+      {showDataMethod && (
+        <DataMethodModal
+          dataset={dataset}
+          selectedYear={selectedYear}
+          onClose={() => setShowDataMethod(false)}
+        />
+      )}
+
+      {showExport && (
+        <ExportModal
+          data={data}
+          onClose={() => setShowExport(false)}
+        />
+      )}
+
       {showAbout && (
         <AboutModal onClose={() => setShowAbout(false)} />
       )}
@@ -528,18 +679,19 @@ const navBtnStyle: React.CSSProperties = {
   border: '1px solid rgba(0, 212, 255, 0.3)',
   borderRadius: 6,
   color: '#E0F2FE',
-  fontSize: 12,
+  fontSize: 11.5,
   fontFamily: 'var(--font-mono)',
-  padding: '5px 10px',
+  padding: '4px 8px',
   cursor: 'pointer',
   transition: 'all 0.15s ease',
+  whiteSpace: 'nowrap',
 };
 
 const iconToggleStyle: React.CSSProperties = {
   background: 'transparent',
   border: '1px solid rgba(255, 255, 255, 0.15)',
   borderRadius: 6,
-  padding: '4px 7px',
-  fontSize: 13,
+  padding: '3px 6px',
+  fontSize: 12,
   cursor: 'pointer',
 };

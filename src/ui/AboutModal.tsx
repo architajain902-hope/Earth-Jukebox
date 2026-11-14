@@ -26,7 +26,7 @@ export default function AboutModal({ onClose }: AboutModalProps) {
         className="glass"
         style={{
           width: '100%',
-          maxWidth: 600,
+          maxWidth: 640,
           padding: 28,
           maxHeight: '90vh',
           overflowY: 'auto',
@@ -56,24 +56,53 @@ export default function AboutModal({ onClose }: AboutModalProps) {
           </button>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, fontSize: 13.5, lineHeight: 1.6, color: '#CBD5E1' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, fontSize: 13, lineHeight: 1.6, color: '#CBD5E1' }}>
+          {/* How this answers the challenge card */}
+          <div
+            style={{
+              background: 'rgba(11, 61, 145, 0.4)',
+              border: '1px solid rgba(0, 212, 255, 0.35)',
+              borderRadius: 8,
+              padding: 14,
+            }}
+          >
+            <h3 style={{ color: '#00D4FF', fontSize: 12.5, textTransform: 'uppercase', letterSpacing: 1, margin: 0, marginBottom: 6 }}>
+              🎯 How This Answers the Challenge
+            </h3>
+            <p style={{ margin: 0, marginBottom: 8, fontSize: 12.5, color: '#E0F2FE' }}>
+              <strong>Challenge:</strong> The Earth Information Jukebox (NASA Space Apps Challenge 2026).
+            </p>
+            <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 4, fontSize: 12, color: '#CBD5E1' }}>
+              <li>
+                <strong>Pairs Visual Frames with Dynamic Sound:</strong> Synchronizes NASA Earth Information Center (EIC) temperature anomaly visual frames with a real-time Web Audio synthesizer.
+              </li>
+              <li>
+                <strong>Translates Sight into Sound:</strong> Converts 146 years of planetary thermal data into exact musical frequencies (220 Hz to 880 Hz), enabling users to hear Earth's warming.
+              </li>
+              <li>
+                <strong>Accessibility First:</strong> Designed from the ground up for blind and low-vision users via full keyboard navigation, `aria-live` screen-reader pipelines, and speech synthesis.
+              </li>
+              <li>
+                <strong>Zero Pre-recorded Media:</strong> 100% synthesized in real time directly from authentic NASA GISTEMP v4 numbers.
+              </li>
+            </ul>
+          </div>
+
           <div>
-            <h3 style={{ color: '#00D4FF', fontSize: 14, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>
+            <h3 style={{ color: '#00D4FF', fontSize: 13, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>
               Mission Statement & Scientific Honesty
             </h3>
             <p>
-              Built for the <strong>NASA International Space Apps Challenge 2026</strong> under the challenge <em>"The Earth Information Jukebox"</em>.
-              Our core principle is <strong>strict scientific honesty</strong>: every audible tone and visible hue is synthesized mathematically directly from verified NASA satellite and surface observation records.
-              We never fabricate, extrapolate, or randomize climate data.
+              Our core principle is <strong>strict scientific honesty</strong>: every audible tone and visible hue is synthesized mathematically directly from verified NASA satellite and surface observation records. We never fabricate, extrapolate, or randomize climate data.
             </p>
           </div>
 
           <div>
-            <h3 style={{ color: '#00D4FF', fontSize: 14, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>
-              NASA Data Source
+            <h3 style={{ color: '#00D4FF', fontSize: 13, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>
+              NASA Data Source & Citations
             </h3>
             <p>
-              NASA Goddard Institute for Space Studies (GISS) Surface Temperature Analysis (<strong>GISTEMP v4</strong>), Land-Ocean Temperature Index (GLB.Ts+dSST.csv), 1880 to 2025.
+              NASA Goddard Institute for Space Studies (GISS) Surface Temperature Analysis (<strong>GISTEMP v4</strong>), Land-Ocean Temperature Index (`GLB.Ts+dSST.csv`), 1880 to 2025.
               <br />
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#94A3B8' }}>
                 Baseline: 1951–1980 climatological normal. Citation: Lenssen et al. (2019) J. Geophys. Res. Atmos., 124(12), 6307–6326.
@@ -82,41 +111,31 @@ export default function AboutModal({ onClose }: AboutModalProps) {
           </div>
 
           <div>
-            <h3 style={{ color: '#00D4FF', fontSize: 14, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>
-              Exact Sonification Formula
+            <h3 style={{ color: '#00D4FF', fontSize: 13, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>
+              Exact Deterministic Sonification Formula
             </h3>
             <p>
               Linear frequency mapping with limiter compression:
               <br />
               <code style={{ background: 'rgba(0,0,0,0.4)', padding: '2px 6px', borderRadius: 4, fontFamily: 'var(--font-mono)', color: '#38BDF8' }}>
-                freq = 220 + ((anomaly - (-0.5)) / (1.3 - (-0.5))) * (880 - 220) Hz
+                freq = 220.0 + ((clamp(anomaly, −0.5, +1.3) − (−0.5)) / 1.8) × 660.0 Hz
               </code>
               <br />
               −0.50 °C maps to 220.0 Hz (A3), +0.90 °C produces 733.3 Hz, and +1.30 °C maps to 880.0 Hz (A5).
-              Tones are shaped with a 60ms attack, smooth exponential decay, and a subtle second harmonic for warmth.
             </p>
           </div>
 
           <div>
-            <h3 style={{ color: '#00D4FF', fontSize: 14, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>
-              Scientific Scope & Limitations
+            <h3 style={{ color: '#00D4FF', fontSize: 13, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>
+              Team & AI Assistance Disclosure
             </h3>
             <p>
-              The data represents <strong>annual global mean surface temperature anomalies</strong>. It measures long-term global energy imbalance, not localized daily weather variations or single extreme weather events.
+              <strong>Team Earth 616</strong> (NASA Space Apps Challenge 2026, Bhopal Event). This web application was built with AI coding assistance (Antigravity by Google DeepMind). All scientific values, formulas, and data pipelines were verified against official NASA GISS sources.
             </p>
           </div>
 
           <div>
-            <h3 style={{ color: '#00D4FF', fontSize: 14, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>
-              Team & AI Disclosure
-            </h3>
-            <p>
-              <strong>Team Earth 616</strong>. This web application was built with the assistance of Antigravity AI coding tools. All scientific values, formulas, and data pipelines were verified against official NASA GISS sources.
-            </p>
-          </div>
-
-          <div>
-            <h3 style={{ color: '#00D4FF', fontSize: 14, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>
+            <h3 style={{ color: '#00D4FF', fontSize: 13, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>
               Open Source License
             </h3>
             <p>
@@ -125,7 +144,7 @@ export default function AboutModal({ onClose }: AboutModalProps) {
           </div>
         </div>
 
-        <div style={{ marginTop: 24, display: 'flex', justifyContent: 'flex-end' }}>
+        <div style={{ marginTop: 22, display: 'flex', justifyContent: 'flex-end' }}>
           <button
             onClick={onClose}
             style={{

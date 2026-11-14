@@ -98,16 +98,57 @@ export default function AboutModal({ onClose }: AboutModalProps) {
           </div>
 
           <div>
-            <h3 style={{ color: '#00D4FF', fontSize: 13, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>
-              NASA Data Source & Citations
+            <h3 style={{ color: '#00D4FF', fontSize: 13, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>
+              Data & Media Sources
             </h3>
-            <p>
-              NASA Goddard Institute for Space Studies (GISS) Surface Temperature Analysis (<strong>GISTEMP v4</strong>), Land-Ocean Temperature Index (`GLB.Ts+dSST.csv`), 1880 to 2025.
-              <br />
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#94A3B8' }}>
-                Baseline: 1951–1980 climatological normal. Citation: Lenssen et al. (2019) J. Geophys. Res. Atmos., 124(12), 6307–6326.
-              </span>
+            <p style={{ margin: '0 0 8px 0' }}>
+              Exported soundscapes are our own derived work from NASA media and data. We followed each page's explicit credit request (see the NASA Reproduction Guidelines linked on each SVS page):
             </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 11.5, background: 'rgba(4, 10, 24, 0.5)', padding: 10, borderRadius: 6, border: '1px solid rgba(0, 212, 255, 0.2)' }}>
+              <div>
+                <strong>1. NASA GISTEMP v4 Surface Temperature: </strong>
+                <a href="https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv" target="_blank" rel="noopener noreferrer" style={{ color: '#38BDF8' }}>
+                  GLB.Ts+dSST.csv ↗
+                </a>
+                <br />
+                <span style={{ color: '#94A3B8', fontSize: 10.5 }}>Baseline: 1951–1980 climatological normal. Citation: Lenssen et al. (2019) J. Geophys. Res. Atmos.</span>
+              </div>
+
+              <div>
+                <strong>2. Change in Night Lights between 2012 and 2023 - EIC Version: </strong>
+                <a href="https://svs.gsfc.nasa.gov/5313/" target="_blank" rel="noopener noreferrer" style={{ color: '#38BDF8' }}>
+                  SVS #5313 ↗
+                </a>
+                <br />
+                <span style={{ color: '#94A3B8', fontSize: 10.5 }}>Credit: NASA's Scientific Visualization Studio. Visualizer: Kel Elkins (USRA).</span>
+              </div>
+
+              <div>
+                <strong>3. Global Sea Surface Currents and Temperature: </strong>
+                <a href="https://svs.gsfc.nasa.gov/3912/" target="_blank" rel="noopener noreferrer" style={{ color: '#38BDF8' }}>
+                  SVS #3912 ↗
+                </a>
+                <br />
+                <span style={{ color: '#94A3B8', fontSize: 10.5 }}>Credit: NASA/Goddard Space Flight Center Scientific Visualization Studio. Visualizations by: Greg Shirah.</span>
+              </div>
+
+              <div>
+                <strong>4. Perpetual Ocean 2: Western Boundary Currents: </strong>
+                <a href="https://svs.gsfc.nasa.gov/5425/" target="_blank" rel="noopener noreferrer" style={{ color: '#38BDF8' }}>
+                  SVS #5425 ↗
+                </a>
+                <br />
+                <span style={{ color: '#94A3B8', fontSize: 10.5 }}>Credit: NASA's Scientific Visualization Studio. Visualizers: Greg Shirah, Horace Mitchell.</span>
+              </div>
+
+              <div>
+                <strong>5. NASA Space Apps Challenge 2026: </strong>
+                <a href="https://www.spaceappschallenge.org/2026/challenges/the-earth-information-jukebox/" target="_blank" rel="noopener noreferrer" style={{ color: '#38BDF8' }}>
+                  The Earth Information Jukebox ↗
+                </a>
+                {' '}(<a href="https://www.spaceappschallenge.org/2026/challenges/the-earth-information-jukebox/?tab=resources" target="_blank" rel="noopener noreferrer" style={{ color: '#38BDF8' }}>Resources Tab ↗</a>)
+              </div>
+            </div>
           </div>
 
           <div>

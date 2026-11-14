@@ -2,26 +2,59 @@ NASA SPACE APPS CHALLENGE 2026 - REFERENCES & CITATIONS
 Project: Earth 616: The Earth Information Jukebox
 Team: Earth 616 (Bhopal Local Event)
 
-1. SCIENTIFIC DATASETS:
-- NASA GISS Surface Temperature Analysis (GISTEMP v4): Global Land-Ocean Temperature Index (GLB.Ts+dSST.csv), 1880–2025.
-  URL: https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv
-  Citation: GISTEMP Team, 2024: GISS Surface Temperature Analysis (GISTEMP), version 4. NASA Goddard Institute for Space Studies. Dataset accessed November 2024 at https://data.giss.nasa.gov/gistemp/.
-  Secondary Citation: Lenssen, N., G. Schmidt, J. Hansen, M. Menne, A. Perkins, R. Ruedy, and D. Shindell, 2019: Improvements in the GISTEMP uncertainty model. J. Geophys. Res. Atmos., 124, no. 12, 6307–6326, doi:10.1029/2018JD029522.
-  License: Public Domain (U.S. Government Work).
+We followed each NASA page's explicit credit request (see the NASA Reproduction Guidelines linked on each SVS page: https://www.nasa.gov/nasa-brand-center/images-and-media/). Exported soundscapes are our own derived work from NASA media and data.
 
-2. NASA VISUALIZATIONS & EARTH INFORMATION CENTER:
-- NASA Earth Information Center (EIC): Visual frames and climate indicators.
-  URL: https://earth.gov and https://earth.gov/explore
-- NASA Scientific Visualization Studio (SVS): GISTEMP Global Temperature Anomalies (1880–2024), SVS Entry #5190.
-  URL: https://svs.gsfc.nasa.gov/5190/
-- NASA Visible Earth / Blue Marble: Global planetary day surface, ocean specular, normal, and cloud maps.
-  URL: https://visibleearth.nasa.gov/ (Reto Stöckli, NASA Earth Observatory).
-  License: Public Domain / MIT (Three.js asset repository).
-- NASA Black Marble: Global nocturnal city lights composite (Suomi NPP VIIRS Day/Night Band).
-  URL: https://earthobservatory.nasa.gov/features/NightLights (NASA Earth Applied Sciences / GSFC; Román, M. O., et al., 2018).
-  License: Public Domain (U.S. Government Work).
+============================================================
+1. NASA SCIENTIFIC DATASETS & VISUALIZATIONS
+============================================================
 
-3. OPEN-SOURCE LIBRARIES:
+Title: NASA GISS Surface Temperature Analysis (GISTEMP v4)
+URL: https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv
+Credit: NASA Goddard Institute for Space Studies
+Visualizers: GISTEMP Team (Lenssen et al., 2019)
+Release Date: Updated monthly (1880–2025)
+Datasets: Global Land-Ocean Temperature Index (GLB.Ts+dSST.csv)
+Where used: Powers the entire core sonification engine, line chart, warming stripes scrubber, and statistical ranking explainer.
+
+Title: Change in Night Lights between 2012 and 2023 - EIC Version
+URL: https://svs.gsfc.nasa.gov/5313/
+Credit: NASA's Scientific Visualization Studio
+Visualizers: Kel Elkins (USRA)
+Scientists: Zhuosen Wang (University of Maryland), Miguel Roman (Leidos), Ranjay Shrestha (SSAI), Srija Chakraborty (USRA), Virginia Kalb (NASA)
+Release Date: 14 June 2024
+Datasets: Black Marble (Black Marble: Next Generation) [Suomi NPP: VIIRS], "NASA Earth Observatory images by Joshua Stevens, using Suomi NPP VIIRS data from Miguel Roman, NASA GSFC."
+Where used: Jukebox Tab Frame Sonifier (night lights frame analysis, nocturnal urbanization audio translation, and 3D globe night lights).
+
+Title: Global Sea Surface Currents and Temperature
+URL: https://svs.gsfc.nasa.gov/3912/
+Credit: NASA/Goddard Space Flight Center Scientific Visualization Studio
+Visualizers: Greg Shirah (NASA/GSFC); Animators: Greg Shirah, Horace Mitchell (NASA/GSFC), Eric Sokolowsky (Global Science and Technology, Inc.); Producer: Michael Starobin (HTSI)
+Scientists: Hong Zhang (UCLA), Dimitris Menemenlis (NASA/JPL, Caltech)
+Release Date: 16 March 2012 (page updated 18 February 2025)
+Datasets: GTOPO30 Topography and Bathymetry (USGS), ECCO2 (NASA/JPL)
+Where used: Jukebox Tab Frame Sonifier (ocean thermal currents and sea surface temperature acoustic spectrum mapping).
+
+Title: Perpetual Ocean 2: Western Boundary Currents
+URL: https://svs.gsfc.nasa.gov/5425/
+Credit: NASA's Scientific Visualization Studio
+Visualizers: Greg Shirah (NASA/GSFC), Horace Mitchell (NASA/GSFC); Technical support: Laurence Schuler, Ian Jones (ADNET Systems, Inc.); Producer: Kathleen Gaeta (Advocates in Manpower Management, Inc.)
+Scientists: Atousa Saberi (NASA/GSFC), Josh Willis (JPL)
+Release Date: 27 February 2025 (page updated 20 May 2025)
+Datasets: BMNG Blue Marble imagery (courtesy of Reto Stockli, NASA/GSFC), ECCO2 (NASA/JPL), ETOPO-30 (NOAA)
+Where used: Jukebox Tab Frame Sonifier (Gulf Stream and western boundary current streamline analysis and fluid sonification).
+
+Title: The Earth Information Jukebox - NASA Space Apps Challenge 2026
+URL: https://www.spaceappschallenge.org/2026/challenges/the-earth-information-jukebox/
+Resources Tab URL: https://www.spaceappschallenge.org/2026/challenges/the-earth-information-jukebox/?tab=resources
+Credit: NASA Space Apps Challenge 2026 / Earth Information Center
+Visualizers: NASA Earth Information Center / SVS
+Release Date: 2026
+Datasets: NASA Earth Information Center Content Database by SVS
+Where used: Primary challenge statement, design criteria, and EIC visualization resource catalog.
+
+============================================================
+2. OPEN-SOURCE LIBRARIES
+============================================================
 - React 18.3.1 (MIT License) - UI component hierarchy
 - Three.js 0.169.0 (MIT License) - WebGL 3D graphics & shaders
 - @react-three/fiber 8.17.10 & @react-three/drei 9.117.3 (MIT License) - 3D scene integration
@@ -29,7 +62,9 @@ Team: Earth 616 (Bhopal Local Event)
 - Vite 5.4.11 & Vitest 2.1.5 (MIT License) - Bundling & unit testing
 - TypeScript 5.6.3 (Apache-2.0 License) - Type safety
 
-4. TYPOGRAPHY:
+============================================================
+3. TYPOGRAPHY
+============================================================
 - Space Grotesk (Florian Karsten) - SIL Open Font License 1.1
 - Space Mono (Colophon Foundry) - SIL Open Font License 1.1
 - JetBrains Mono (JetBrains) - SIL Open Font License 1.1

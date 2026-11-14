@@ -3,16 +3,25 @@ import type { GistempDataset } from '../data/types';
 import { analyzeFrame, type FrameAnalysisResult } from '../vision/frameAnalyzer';
 import { frameSonifier } from '../vision/frameSonifier';
 import { anomalyToFrequency } from '../audio/sonify';
+import SourcesModal from './SourcesModal';
 
 interface FrameManifestItem {
   id: string;
   title: string;
-  agency: string;
-  date: string;
-  sourceUrl: string;
-  description: string;
+  sourceId: string;
+  file: string;
   thumbnail: string;
+  sourceTitle: string;
+  sourceUrl: string;
+  credit: string;
+  visualizers: string;
+  scientists: string;
+  releaseDate: string;
+  datasetCredits: string;
+  description: string;
   altText: string;
+  agency?: string;
+  notes?: string;
   category: string;
   defaultScale: string;
 }
@@ -31,13 +40,14 @@ export default function JukeboxTab({
   getCanvasElement,
 }: JukeboxTabProps) {
   const [frames, setFrames] = useState<FrameManifestItem[]>([]);
-  const [selectedFrameId, setSelectedFrameId] = useState<string>('blue-marble');
+  const [selectedFrameId, setSelectedFrameId] = useState<string>('night-lights');
   const [analysis, setAnalysis] = useState<FrameAnalysisResult | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [activeColumn, setActiveColumn] = useState<number>(0);
   const [activeFreq, setActiveFreq] = useState<number>(440);
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [customImageSrc, setCustomImageSrc] = useState<string | null>(null);
+  const [showSourcesModal, setShowSourcesModal] = useState<boolean>(false);
 
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
   const imageElementRef = useRef<HTMLImageElement | null>(null);
@@ -53,11 +63,25 @@ export default function JukeboxTab({
       .then((res) => res.json())
       .then((data: FrameManifestItem[]) => {
         setFrames(data);
+        if (data.length > 0 && !data.some((f) => f.id === selectedFrameId)) {
+          setSelectedFrameId(data[0].id);
+        }
       })
       .catch((err) => {
         console.error('Failed to load frames manifest:', err);
       });
   }, []);
+
+  const activeItem = frames.find((f) => f.id === selectedFrameId);
+
+  // Warn in console if frame has unknown source
+  useEffect(() => {
+    if (activeItem && activeItem.sourceId === 'unknown') {
+      console.warn(
+        `[Frame Source Warning] Frame "${activeItem.id}" has no verified SVS source (sourceId: "unknown"). Marked as source TODO.`
+      );
+    }
+  }, [activeItem]);
 
   // Process and analyze active frame
   const processFrame = useCallback(
@@ -183,8 +207,6 @@ export default function JukeboxTab({
     reader.readAsDataURL(file);
   };
 
-  const activeItem = frames.find((f) => f.id === selectedFrameId);
-
   return (
     <div
       style={{
@@ -227,23 +249,47 @@ export default function JukeboxTab({
           </p>
         </div>
 
-        {onClose && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <button
-            onClick={onClose}
+            onClick={() => setShowSourcesModal(true)}
             style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
+              background: 'rgba(0, 212, 255, 0.15)',
+              border: '1px solid #00D4FF',
               borderRadius: 6,
-              color: '#FFFFFF',
+              color: '#00D4FF',
               padding: '6px 12px',
               cursor: 'pointer',
               fontFamily: 'var(--font-mono)',
-              fontSize: 12,
+              fontSize: 11.5,
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
             }}
+            title="View verified NASA SVS sources, visualizers, datasets, and credits"
           >
-            ✕ Back to 3D Globe
+            <span>📜</span>
+            <span>Sources & Credits</span>
           </button>
-        )}
+
+          {onClose && (
+            <button
+              onClick={onClose}
+              style={{
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: 6,
+                color: '#FFFFFF',
+                padding: '6px 12px',
+                cursor: 'pointer',
+                fontFamily: 'var(--font-mono)',
+                fontSize: 12,
+              }}
+            >
+              ✕ Back to 3D Globe
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Frame Selection Gallery */}
@@ -284,11 +330,28 @@ export default function JukeboxTab({
                 transition: 'all 0.15s ease',
               }}
             >
-              <span style={{ fontSize: 11, fontWeight: 700, color: isSelected ? '#00D4FF' : '#E0F2FE' }}>
-                {item.title}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: isSelected ? '#00D4FF' : '#E0F2FE' }}>
+                  {item.title}
+                </span>
+                {import.meta.env.DEV && item.sourceId === 'unknown' && (
+                  <span
+                    style={{
+                      background: '#DC2626',
+                      color: '#FFF',
+                      fontSize: 8.5,
+                      fontWeight: 700,
+                      padding: '1px 4px',
+                      borderRadius: 3,
+                      fontFamily: 'var(--font-mono)',
+                    }}
+                  >
+                    TODO
+                  </span>
+                )}
+              </div>
               <span style={{ fontSize: 9.5, color: '#94A3B8', marginTop: 2 }}>
-                {item.agency}
+                {item.credit || item.agency}
               </span>
             </button>
           );
@@ -380,6 +443,68 @@ export default function JukeboxTab({
               />
             )}
           </div>
+
+          {/* SVS Source Citation & Credit Line */}
+          {activeItem && (
+            <div
+              style={{
+                padding: '10px 12px',
+                borderRadius: 8,
+                background: 'rgba(4, 10, 24, 0.75)',
+                border: '1px solid rgba(0, 212, 255, 0.25)',
+                fontSize: 11,
+                lineHeight: 1.5,
+                color: '#CBD5E1',
+              }}
+              role="contentinfo"
+              aria-label="Image frame citation"
+            >
+              <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
+                <span style={{ color: '#94A3B8', fontWeight: 600 }}>Source:</span>
+                <a
+                  href={activeItem.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: '#38BDF8',
+                    textDecoration: 'underline',
+                    fontWeight: 600,
+                  }}
+                  title={`Open official NASA page for ${activeItem.sourceTitle || activeItem.title}`}
+                >
+                  {activeItem.sourceTitle || activeItem.title} ↗
+                </a>
+                {import.meta.env.DEV && activeItem.sourceId === 'unknown' && (
+                  <span
+                    style={{
+                      background: '#DC2626',
+                      color: '#FFFFFF',
+                      fontSize: 9,
+                      fontWeight: 700,
+                      padding: '1px 6px',
+                      borderRadius: 4,
+                      fontFamily: 'var(--font-mono)',
+                      letterSpacing: 0.5,
+                    }}
+                    title="Dev Mode Warning: this frame has no verified SVS source entry"
+                  >
+                    source TODO
+                  </span>
+                )}
+              </div>
+              <div style={{ marginTop: 2, fontSize: 10.5, color: '#94A3B8' }}>
+                <span><strong>Credit:</strong> {activeItem.credit}. </span>
+                {activeItem.visualizers && (
+                  <span><strong>Visualizer:</strong> {activeItem.visualizers}.</span>
+                )}
+              </div>
+              {activeItem.notes && (
+                <div style={{ marginTop: 4, fontSize: 10, color: '#FCD34D', background: 'rgba(251, 191, 36, 0.08)', padding: '4px 6px', borderRadius: 4 }}>
+                  <strong>Notes:</strong> {activeItem.notes}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Transport Bar */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -533,6 +658,11 @@ export default function JukeboxTab({
           </div>
         </div>
       </div>
+
+      {/* Sources & Credits Modal */}
+      {showSourcesModal && (
+        <SourcesModal onClose={() => setShowSourcesModal(false)} />
+      )}
     </div>
   );
 }

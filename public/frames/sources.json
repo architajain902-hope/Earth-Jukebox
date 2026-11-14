@@ -1,0 +1,51 @@
+{
+  "svs-5313": {
+    "id": "svs-5313",
+    "title": "Change in Night Lights between 2012 and 2023 - EIC Version",
+    "sourceUrl": "https://svs.gsfc.nasa.gov/5313/",
+    "credit": "NASA's Scientific Visualization Studio",
+    "visualizers": "Kel Elkins (USRA)",
+    "scientists": "Zhuosen Wang (University of Maryland), Miguel Roman (Leidos), Ranjay Shrestha (SSAI), Srija Chakraborty (USRA), Virginia Kalb (NASA)",
+    "releaseDate": "14 June 2024",
+    "datasetCredits": "Black Marble (Black Marble: Next Generation) [Suomi NPP: VIIRS], \"NASA Earth Observatory images by Joshua Stevens, using Suomi NPP VIIRS data from Miguel Roman, NASA GSFC.\"",
+    "description": "flat map of night lights; annual averages 2012-2023, then change (PURPLE = increase, ORANGE = decrease), then zoomed views of India, Ukraine, Western Europe and the Eastern Mediterranean. Wide aspect ratio version made for the NASA Earth Information Center.",
+    "notes": "In the \"change\" part, PURPLE = increase, ORANGE = decrease; first part = annual averages 2012-2023; later part has zoomed views of India, Ukraine, Western Europe and the Eastern Mediterranean."
+  },
+  "svs-3912": {
+    "id": "svs-3912",
+    "title": "Global Sea Surface Currents and Temperature",
+    "sourceUrl": "https://svs.gsfc.nasa.gov/3912/",
+    "credit": "NASA/Goddard Space Flight Center Scientific Visualization Studio",
+    "visualizers": "Greg Shirah (NASA/GSFC); Animators: Greg Shirah, Horace Mitchell (NASA/GSFC), Eric Sokolowsky (Global Science and Technology, Inc.); Producer: Michael Starobin (HTSI)",
+    "scientists": "Hong Zhang (UCLA), Dimitris Menemenlis (NASA/JPL, Caltech)",
+    "releaseDate": "16 March 2012 (page updated 18 February 2025)",
+    "datasetCredits": "GTOPO30 Topography and Bathymetry (USGS), ECCO2 (NASA/JPL)",
+    "description": "sea surface currents coloured by sea surface temperature, from ECCO2 model output (surface flows only).",
+    "notes": "Temperature scale: -3°C (deep blue) through 12°C (sky blue) to 22°C+ (white). Surface currents show fluid flow circulation across global ocean basins."
+  },
+  "svs-5425": {
+    "id": "svs-5425",
+    "title": "Perpetual Ocean 2: Western Boundary Currents",
+    "sourceUrl": "https://svs.gsfc.nasa.gov/5425/",
+    "credit": "NASA's Scientific Visualization Studio",
+    "visualizers": "Greg Shirah (NASA/GSFC), Horace Mitchell (NASA/GSFC); Technical support: Laurence Schuler, Ian Jones (ADNET Systems, Inc.); Producer: Kathleen Gaeta (Advocates in Manpower Management, Inc.)",
+    "scientists": "Atousa Saberi (NASA/GSFC), Josh Willis (JPL); Producer: Kathleen Gaeta (Advocates in Manpower Management, Inc.)",
+    "releaseDate": "27 February 2025 (page updated 20 May 2025)",
+    "datasetCredits": "BMNG Blue Marble imagery (courtesy of Reto Stockli, NASA/GSFC), ECCO2 (NASA/JPL), ETOPO-30 (NOAA)",
+    "description": "rotating globe of ocean currents, zoom to the Kuroshio Current, the Agulhas Current and the Gulf Stream, using the ECCO-2 ocean model.",
+    "notes": "White and cyan swirling current streamlines against oceanic depths; highlighting high-energy western boundary currents."
+  },
+  "space-apps-challenge": {
+    "id": "space-apps-challenge",
+    "title": "The Earth Information Jukebox - NASA Space Apps Challenge 2026",
+    "sourceUrl": "https://www.spaceappschallenge.org/2026/challenges/the-earth-information-jukebox/",
+    "resourcesUrl": "https://www.spaceappschallenge.org/2026/challenges/the-earth-information-jukebox/?tab=resources",
+    "credit": "NASA Space Apps Challenge 2026",
+    "visualizers": "NASA Earth Information Center / SVS",
+    "scientists": "NASA Earth Applied Sciences",
+    "releaseDate": "2026",
+    "datasetCredits": "NASA Earth Information Center Content Database by SVS",
+    "description": "Challenge to pair NASA Earth Information Center visualizations with dynamic real-time sonification.",
+    "notes": "Resources tab: https://www.spaceappschallenge.org/2026/challenges/the-earth-information-jukebox/?tab=resources"
+  }
+}

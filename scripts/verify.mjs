@@ -17,7 +17,7 @@ console.log(' Earth 616: Space Apps 2026 Verification Suite');
 console.log('====================================================\n');
 
 // 1. Data Validation Check
-console.log('▶ [1/3] Validating NASA GISTEMP v4 Dataset...');
+console.log('▶ [1/4] Validating NASA GISTEMP v4 Dataset...');
 try {
   const jsonPath = join(ROOT, 'public', 'data', 'gistemp.json');
   const raw = readFileSync(jsonPath, 'utf8');
@@ -51,8 +51,19 @@ try {
   process.exit(1);
 }
 
-// 2. Unit Testing Check
-console.log('\n▶ [2/3] Executing Vitest Unit Test Suite...');
+// 2. Source & Attribution Check
+console.log('\n▶ [2/4] Verifying NASA SVS Media Sources & Attribution Integrity...');
+try {
+  const sourceOut = execSync('node scripts/check-sources.mjs', { cwd: ROOT, encoding: 'utf8', stdio: 'pipe' });
+  const lines = sourceOut.trim().split('\n').filter(l => l.includes('✓')).join('\n  ');
+  console.log(`  ${lines}`);
+} catch (err) {
+  console.error('  ✗ Source verification failed:', err.stdout || err.message);
+  process.exit(1);
+}
+
+// 3. Unit Testing Check
+console.log('\n▶ [3/4] Executing Vitest Unit Test Suite...');
 try {
   const testOut = execSync('npm run test', { cwd: ROOT, encoding: 'utf8', stdio: 'pipe' });
   console.log(testOut.trim().split('\n').filter(l => l.includes('✓') || l.includes('Test Files') || l.includes('Tests')).join('\n  '));
@@ -62,8 +73,8 @@ try {
   process.exit(1);
 }
 
-// 3. TypeScript & Production Build Check
-console.log('\n▶ [3/3] Compiling TypeScript & Production Build...');
+// 4. TypeScript & Production Build Check
+console.log('\n▶ [4/4] Compiling TypeScript & Production Build...');
 try {
   const buildOut = execSync('npm run build', { cwd: ROOT, encoding: 'utf8', stdio: 'pipe' });
   const buildSummary = buildOut.trim().split('\n').filter(l => l.includes('built in') || l.includes('dist/')).join('\n  ');

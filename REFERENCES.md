@@ -46,25 +46,49 @@
 
 ---
 
-## 3. NASA Earth Information Center (EIC) Visual Frames
+## 3. NASA Earth Information Center (EIC) & SVS Visual Frames
 
-### NASA Blue Marble Composite
-- **Title:** The Blue Marble Next Generation
-- **Source Agency:** NASA Earth Observatory / Visible Earth
-- **URL:** https://visibleearth.nasa.gov/images/57723/the-blue-marble
-- **Credit:** Reto Stöckli, NASA Earth Observatory
+We followed each page's explicit credit request; see the NASA Reproduction Guidelines linked on each SVS page (https://www.nasa.gov/nasa-brand-center/images-and-media/). Exported soundscapes are our own derived work from NASA media and data.
 
-### Climate Warming Stripes
-- **Title:** Global Warming Stripes (1880–2025)
-- **Source Agency:** NASA GISTEMP v4 / Prof. Ed Hawkins, University of Reading
-- **URL:** https://data.giss.nasa.gov/gistemp/
-- **Credit:** Ed Hawkins / National Centre for Atmospheric Science
+### Change in Night Lights between 2012 and 2023 - EIC Version
+- **Title:** Change in Night Lights between 2012 and 2023 - EIC Version
+- **URL:** https://svs.gsfc.nasa.gov/5313/
+- **Credit:** NASA's Scientific Visualization Studio
+- **Visualizer:** Kel Elkins (USRA)
+- **Scientists:** Zhuosen Wang (University of Maryland), Miguel Roman (Leidos), Ranjay Shrestha (SSAI), Srija Chakraborty (USRA), Virginia Kalb (NASA)
+- **Released:** 14 June 2024
+- **Datasets:** Black Marble (Black Marble: Next Generation) [Suomi NPP: VIIRS], "NASA Earth Observatory images by Joshua Stevens, using Suomi NPP VIIRS data from Miguel Roman, NASA GSFC."
+- **Description:** Flat map of night lights; annual averages 2012-2023, then change (PURPLE = increase, ORANGE = decrease), then zoomed views of India, Ukraine, Western Europe and the Eastern Mediterranean. Wide aspect ratio version made for the NASA Earth Information Center.
+- **Where Used:** Jukebox Tab Frame Sonifier (night lights frame analysis, nocturnal urbanization audio translation, and 3D globe night lights).
 
-### Suomi NPP VIIRS Global Night Lights
-- **Title:** Earth at Night: Black Marble
-- **Source Agency:** NASA Earth Applied Sciences / NOAA VIIRS
-- **URL:** https://earthobservatory.nasa.gov/features/NightLights
-- **Credit:** NASA Earth Observatory images by Joshua Stevens, using Suomi NPP VIIRS data from Miguel Román, NASA Goddard
+### Global Sea Surface Currents and Temperature
+- **Title:** Global Sea Surface Currents and Temperature
+- **URL:** https://svs.gsfc.nasa.gov/3912/
+- **Credit:** NASA/Goddard Space Flight Center Scientific Visualization Studio
+- **Visualizations by:** Greg Shirah (NASA/GSFC); Animators: Greg Shirah, Horace Mitchell (NASA/GSFC), Eric Sokolowsky (Global Science and Technology, Inc.); Producer: Michael Starobin (HTSI)
+- **Scientists:** Hong Zhang (UCLA), Dimitris Menemenlis (NASA/JPL, Caltech)
+- **Released:** 16 March 2012 (page updated 18 February 2025)
+- **Datasets:** GTOPO30 Topography and Bathymetry (USGS), ECCO2 (NASA/JPL)
+- **Description:** Sea surface currents coloured by sea surface temperature, from ECCO2 model output (surface flows only).
+- **Where Used:** Jukebox Tab Frame Sonifier (ocean thermal currents and sea surface temperature acoustic spectrum mapping).
+
+### Perpetual Ocean 2: Western Boundary Currents
+- **Title:** Perpetual Ocean 2: Western Boundary Currents
+- **URL:** https://svs.gsfc.nasa.gov/5425/
+- **Credit:** NASA's Scientific Visualization Studio
+- **Visualizers:** Greg Shirah (NASA/GSFC), Horace Mitchell (NASA/GSFC); Technical support: Laurence Schuler, Ian Jones (ADNET Systems, Inc.); Producer: Kathleen Gaeta (Advocates in Manpower Management, Inc.)
+- **Scientists:** Atousa Saberi (NASA/GSFC), Josh Willis (JPL)
+- **Released:** 27 February 2025 (page updated 20 May 2025)
+- **Datasets:** BMNG Blue Marble imagery (courtesy of Reto Stockli, NASA/GSFC), ECCO2 (NASA/JPL), ETOPO-30 (NOAA)
+- **Description:** Rotating globe of ocean currents, zoom to the Kuroshio Current, the Agulhas Current and the Gulf Stream, using the ECCO-2 ocean model.
+- **Where Used:** Jukebox Tab Frame Sonifier (Gulf Stream and western boundary current streamline analysis and fluid sonification).
+
+### The Earth Information Jukebox - NASA Space Apps Challenge 2026
+- **Title:** The Earth Information Jukebox - NASA Space Apps Challenge 2026
+- **URL:** https://www.spaceappschallenge.org/2026/challenges/the-earth-information-jukebox/
+- **Resources Tab:** https://www.spaceappschallenge.org/2026/challenges/the-earth-information-jukebox/?tab=resources
+- **Credit:** NASA Space Apps Challenge 2026 / Earth Information Center
+- **Where Used:** Primary challenge statement, design criteria, and EIC visualization resource catalog.
 
 ---
 

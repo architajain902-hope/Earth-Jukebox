@@ -81,7 +81,7 @@ To guarantee absolute scientific reproducibility, anyone can reproduce our bundl
 # 1. Download and validate live NASA GISTEMP v4 dataset
 npm run fetch-data
 
-# 2. Run automated test suite (26/26 tests verifying formulas, color math, monotonicity, and parsing)
+# 2. Run automated test suite (27/27 tests verifying formulas, color math, monotonicity, and sources)
 npm run test
 
 # 3. Execute unified quality gate (validates dataset, tests, and builds static bundle)
@@ -134,7 +134,21 @@ All scientific measurements originate from the **NASA Goddard Institute for Spac
 
 ---
 
-## 10. License
+## 10. Data & Media Sources
+
+We followed each page's explicit credit request; see the [NASA Reproduction Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) linked on each SVS page. Exported soundscapes are our own derived work from NASA media and data.
+
+| Resource / Product | SVS / Data URL | Official Credit | Usage in Earth 616 |
+| :--- | :--- | :--- | :--- |
+| **NASA GISTEMP v4** | [GLB.Ts+dSST.csv](https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv) | NASA Goddard Institute for Space Studies | Ground truth tonal root pitch ($220–880\text{ Hz}$), temperature chart, warming stripes scrubber. |
+| **Change in Night Lights (2012–2023)** | [SVS #5313](https://svs.gsfc.nasa.gov/5313/) | NASA's Scientific Visualization Studio (Visualizer: Kel Elkins) | Nocturnal urbanization frame sonification and 3D globe night-side lights. |
+| **Global Sea Surface Currents & Temp** | [SVS #3912](https://svs.gsfc.nasa.gov/3912/) | NASA/GSFC Scientific Visualization Studio (Visualizer: Greg Shirah) | Ocean thermal flow and sea surface temperature acoustic spectrum mapping. |
+| **Perpetual Ocean 2: Western Boundary Currents** | [SVS #5425](https://svs.gsfc.nasa.gov/5425/) | NASA's Scientific Visualization Studio (Visualizers: Greg Shirah, Horace Mitchell) | Ocean fluid flow streamlines, eddies, and Gulf Stream sonification. |
+| **The Earth Information Jukebox** | [Space Apps 2026 Challenge](https://www.spaceappschallenge.org/2026/challenges/the-earth-information-jukebox/) | NASA Space Apps Challenge / EIC ([Resources Tab](https://www.spaceappschallenge.org/2026/challenges/the-earth-information-jukebox/?tab=resources)) | Challenge statement, prompt requirements, and resource catalog. |
+
+---
+
+## 11. License
 
 This project is open-source under the [MIT License](LICENSE).  
 Copyright © 2026 Team Earth 616.

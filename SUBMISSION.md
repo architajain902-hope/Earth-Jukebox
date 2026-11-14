@@ -92,23 +92,43 @@ Roadmap for expanding into multi-sensory Earth observation:
 
 ### 4. Space Agency Data Usage
 
+We followed each page's explicit credit request; see the NASA Reproduction Guidelines linked on each SVS page (https://www.nasa.gov/nasa-brand-center/images-and-media/). Exported soundscapes are our own derived work from NASA media and data.
+
 #### 1. NASA GISS Surface Temperature Analysis (GISTEMP v4)
-- **Product:** Global Land-Ocean Temperature Index (GLB.Ts+dSST.csv)
+- **Product & URL:** Global Land-Ocean Temperature Index (`GLB.Ts+dSST.csv`): https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv
 - **Time Coverage:** 1880 to 2025 (146 consecutive years analyzed)
 - **Baseline Period:** 1951–1980 Global Mean Normal
-- **How Used:** Powers the entire sonification engine, line chart, warming stripes scrubber, and statistical explainer.
+- **How Used:** Powers the core sonification engine, SVG temperature anomaly line chart, warming stripes scrubber, and statistical ranking explainer.
 - **Citation:** GISTEMP Team, 2024: *GISS Surface Temperature Analysis (GISTEMP), version 4.* NASA Goddard Institute for Space Studies. Lenssen, N. et al., 2019: *Improvements in the GISTEMP uncertainty model.* J. Geophys. Res. Atmos., 124(12), 6307–6326.
 
-#### 2. NASA Visible Earth / Blue Marble Imagery
-- **Product:** High-resolution day surface, cloud composites, specular ocean maps, and normal bump maps.
+#### 2. Change in Night Lights between 2012 and 2023 - EIC Version
+- **Product & URL:** NASA SVS Entry #5313: https://svs.gsfc.nasa.gov/5313/
+- **Credit:** NASA's Scientific Visualization Studio
+- **Visualizer:** Kel Elkins (USRA)
+- **Scientists:** Zhuosen Wang (University of Maryland), Miguel Roman (Leidos), Ranjay Shrestha (SSAI), Srija Chakraborty (USRA), Virginia Kalb (NASA)
+- **Released:** 14 June 2024
+- **Datasets:** Black Marble (Black Marble: Next Generation) [Suomi NPP: VIIRS], "NASA Earth Observatory images by Joshua Stevens, using Suomi NPP VIIRS data from Miguel Roman, NASA GSFC."
+- **How Used:** Analyzed in the EIC Frame Jukebox for nocturnal electrification dynamics, where city light density dictates arpeggio pulse tempo, purple areas trigger rising notes, and orange areas trigger softening chords.
+
+#### 3. Global Sea Surface Currents and Temperature
+- **Product & URL:** NASA SVS Entry #3912: https://svs.gsfc.nasa.gov/3912/
+- **Credit:** NASA/Goddard Space Flight Center Scientific Visualization Studio
+- **Visualizers:** Greg Shirah (NASA/GSFC); Animators: Greg Shirah, Horace Mitchell (NASA/GSFC), Eric Sokolowsky (Global Science and Technology, Inc.); Producer: Michael Starobin (HTSI)
+- **Scientists:** Hong Zhang (UCLA), Dimitris Menemenlis (NASA/JPL, Caltech)
+- **Released:** 16 March 2012 (page updated 18 February 2025)
+- **Datasets:** GTOPO30 Topography and Bathymetry (USGS), ECCO2 (NASA/JPL)
+- **How Used:** Analyzed in the EIC Frame Jukebox for sea surface temperature fluid thermal flows, translating thermal gradients (-3°C to 22°C) into harmonic frequency spectrums.
+
+#### 4. Perpetual Ocean 2: Western Boundary Currents
+- **Product & URL:** NASA SVS Entry #5425: https://svs.gsfc.nasa.gov/5425/
+- **Credit:** NASA's Scientific Visualization Studio
+- **Visualizers:** Greg Shirah (NASA/GSFC), Horace Mitchell (NASA/GSFC); Technical support: Laurence Schuler, Ian Jones (ADNET Systems, Inc.); Producer: Kathleen Gaeta (Advocates in Manpower Management, Inc.)
+- **Scientists:** Atousa Saberi (NASA/GSFC), Josh Willis (JPL)
+- **Released:** 27 February 2025 (page updated 20 May 2025)
+- **Datasets:** BMNG Blue Marble imagery (courtesy of Reto Stockli, NASA/GSFC), ECCO2 (NASA/JPL), ETOPO-30 (NOAA)
+- **How Used:** Analyzed in the EIC Frame Jukebox to capture streamline eddies, western boundary currents, and energetic fluid flow in the Gulf Stream.
+
+#### 5. NASA Visible Earth / Blue Marble Imagery
+- **Product & URL:** High-resolution day surface, cloud composites, specular ocean maps, and normal bump maps: https://visibleearth.nasa.gov/images/57723/the-blue-marble
 - **How Used:** Mapped onto our interactive 3D WebGL globe to represent Earth's physical land-ocean topography.
 - **Citation:** NASA Earth Observatory Visible Earth team; Reto Stöckli.
-
-#### 3. NASA Earth Information Center (EIC) Visual Frames
-- **Product:** Earth Information Center climate dashboard (`earth.gov`) and NASA Scientific Visualization Studio (SVS Entry #5190).
-- **How Used:** Serves as the visual reference paired directly with our real-time sonification algorithms.
-
-#### 4. NASA Black Marble Night Lights Imagery
-- **Product:** Suomi NPP VIIRS Day/Night Band Global Nocturnal City Lights Composite.
-- **How Used:** Rendered on the night hemisphere of our 3D Earth globe and analyzed as a nocturnal electrification frame in the EIC Frame Jukebox.
-- **Citation:** NASA Earth Applied Sciences / Goddard Space Flight Center; Román, M. O., et al., 2018.

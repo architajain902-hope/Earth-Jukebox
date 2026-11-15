@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* =========================================================
    SONIX: The Earth Information Jukebox
    Global Styles, Dual Themes (Deep Space / Daylight), & System Design

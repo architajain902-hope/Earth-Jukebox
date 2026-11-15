@@ -18,6 +18,7 @@ interface MoreDrawerProps {
   onOpenAutoTour: () => void;
   onOpenSources: () => void;
   onOpenAbout: () => void;
+  onOpenPeakChart?: () => void;
 }
 
 export default function MoreDrawer({
@@ -37,6 +38,7 @@ export default function MoreDrawer({
   onOpenAutoTour,
   onOpenSources,
   onOpenAbout,
+  onOpenPeakChart,
 }: MoreDrawerProps) {
   if (!isOpen) return null;
 
@@ -136,6 +138,14 @@ export default function MoreDrawer({
                   desc="Planned wind, precipitation & wildfire sonification"
                   onClick={() => { onClose(); onOpenFutureEarth(); }}
                 />
+                {onOpenPeakChart && (
+                  <DrawerButton
+                    icon="📈"
+                    title="Peak Trends (Peak Chart)"
+                    desc="Interactive cubic spline chart with live glow field"
+                    onClick={() => { onClose(); onOpenPeakChart(); }}
+                  />
+                )}
               </div>
             </div>
 

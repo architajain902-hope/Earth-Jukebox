@@ -27,6 +27,7 @@ import AutoTour from './AutoTour';
 import AccessibilityDropdown from './AccessibilityDropdown';
 import SoundMixerModal from './SoundMixerModal';
 import CoachMark from './CoachMark';
+import PeakChartModal from './PeakChartModal';
 
 import JukeboxTab from './JukeboxTab';
 import LearnTab from './LearnTab';
@@ -107,6 +108,7 @@ export default function MainExperience({
   const [showDataMethod, setShowDataMethod] = useState<boolean>(false);
   const [showExport, setShowExport] = useState<boolean>(false);
   const [showSources, setShowSources] = useState<boolean>(false);
+  const [showPeakChart, setShowPeakChart] = useState<boolean>(false);
   const [isAutoTourActive, setIsAutoTourActive] = useState<boolean>(false);
 
   // Toast
@@ -1124,6 +1126,14 @@ export default function MainExperience({
         />
       )}
 
+      {showPeakChart && (
+        <PeakChartModal
+          dataset={dataset}
+          selectedYear={selectedYear}
+          onClose={() => setShowPeakChart(false)}
+        />
+      )}
+
       <MoreDrawer
         isOpen={showMoreDrawer}
         onClose={() => setShowMoreDrawer(false)}
@@ -1138,6 +1148,7 @@ export default function MainExperience({
         onOpenExport={() => setShowExport(true)}
         onOpenSources={() => setShowSources(true)}
         onOpenAbout={() => setShowAbout(true)}
+        onOpenPeakChart={() => setShowPeakChart(true)}
         onCopyLink={handleCopyLink}
         onToggleRecording={handleToggleRecording}
         isRecording={isRecording}

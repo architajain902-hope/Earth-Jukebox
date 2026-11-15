@@ -20,7 +20,7 @@ export default function YearDisplay({
   soundMode = 'musical',
   onToggleSoundMode,
 }: YearDisplayProps) {
-  // Anomaly color mapping based on 4-tier climate scale
+  // 4-tier climate anomaly color
   const anomalyColor =
     anomaly < -0.15
       ? 'var(--color-cool, #3AA0FF)'
@@ -36,43 +36,44 @@ export default function YearDisplay({
     <div
       className="glass"
       style={{
-        padding: '16px 18px',
-        minWidth: 240,
-        maxWidth: 280,
-        pointerEvents: 'auto',
-        borderRadius: 14,
-        background: 'rgba(7, 18, 38, 0.78)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        border: `1px solid rgba(255, 255, 255, 0.12)`,
-        boxShadow: `0 12px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1)`,
-        transition: 'border-color 0.4s ease, box-shadow 0.4s ease',
+        padding: '20px 22px',
+        width: '100%',
+        boxSizing: 'border-box',
+        borderRadius: 16,
+        background: 'var(--surface-glass, rgba(7, 18, 38, 0.85))',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        border: '1px solid var(--surface-border, rgba(0, 212, 255, 0.25))',
+        boxShadow: '0 16px 40px rgba(0, 0, 0, 0.55)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 12,
       }}
       role="region"
       aria-label="Now Playing Earth Data Card"
     >
-      {/* Top Header: Now Playing badge + Sound Mode Pill */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {/* Animated Equalizer or Vinyl Icon */}
+      {/* Top Header: Equalizer & Sentence case label */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* Animated Equalizer */}
           <div
             style={{
               display: 'flex',
               alignItems: 'flex-end',
-              gap: 2,
-              height: 12,
-              width: 14,
+              gap: 3,
+              height: 14,
+              width: 16,
             }}
-            title={isPlaying ? 'Audio playing' : 'Audio idle'}
+            title={isPlaying ? 'Audio active' : 'Audio standby'}
           >
-            {[0.6, 1.0, 0.4, 0.8].map((h, i) => (
+            {[0.5, 1.0, 0.35, 0.85].map((h, i) => (
               <span
                 key={i}
                 style={{
-                  width: 2.5,
+                  width: 3,
                   height: isPlaying ? '100%' : `${h * 100}%`,
                   background: anomalyColor,
-                  borderRadius: 1,
+                  borderRadius: 1.5,
                   animation: isPlaying ? `eqBar 0.7s ease-in-out infinite alternate ${i * 0.15}s` : 'none',
                   transition: 'height 0.2s ease',
                 }}
@@ -81,89 +82,116 @@ export default function YearDisplay({
           </div>
           <span
             style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 9.5,
-              fontWeight: 600,
-              letterSpacing: 1,
-              textTransform: 'uppercase',
-              color: '#94A3B8',
+              fontFamily: 'var(--font-heading)',
+              fontSize: 15,
+              fontWeight: 700,
+              color: 'var(--text-primary, #FFFFFF)',
+              letterSpacing: 0.2,
             }}
           >
-            Now Playing
+            Now playing
           </span>
         </div>
 
-        {/* Sound mode toggle pill */}
+        {/* Sound mode indicator / toggle */}
         {onToggleSoundMode ? (
           <button
             onClick={onToggleSoundMode}
-            title={`Current mode: ${soundMode === 'musical' ? 'Harmonic Scale (Musically Pleasing)' : 'Scientific Linear (Exact Pitch)'}. Click to switch.`}
+            title="Click to toggle between Exact linear formula and Musical scale mode"
             style={{
               background: soundMode === 'musical' ? 'rgba(0, 212, 255, 0.18)' : 'rgba(255, 176, 32, 0.18)',
               border: `1px solid ${soundMode === 'musical' ? 'rgba(0, 212, 255, 0.4)' : 'rgba(255, 176, 32, 0.4)'}`,
               color: soundMode === 'musical' ? '#38BDF8' : '#FBBF24',
-              borderRadius: 12,
-              padding: '2px 7px',
-              fontSize: 9,
-              fontFamily: 'var(--font-mono)',
-              cursor: 'pointer',
+              borderRadius: 8,
+              padding: '4px 10px',
+              fontSize: 12.5,
               fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: 0.5,
+              cursor: 'pointer',
             }}
           >
-            {soundMode === 'musical' ? 'Harmonic' : 'Exact Hz'}
+            {soundMode === 'musical' ? 'Musical mode' : 'Exact mode'}
           </button>
         ) : (
           <span
             style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 9,
-              color: '#64748B',
-              textTransform: 'uppercase',
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'var(--text-secondary, #CBD5E1)',
             }}
           >
-            NASA GISTEMP
+            {soundMode === 'musical' ? 'Musical mode' : 'Exact mode'}
           </span>
         )}
       </div>
 
-      {/* Main Year Display */}
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
-        <div style={{ overflow: 'hidden', height: 44, display: 'flex', alignItems: 'center' }}>
-          <AnimatePresence mode="popLayout">
-            <motion.div
-              key={year}
-              initial={{ y: 24, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -24, opacity: 0 }}
-              transition={{ duration: 0.16, ease: 'easeOut' }}
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: 40,
-                fontWeight: 800,
-                color: '#FFFFFF',
-                letterSpacing: -1,
-                lineHeight: 1,
-              }}
-            >
-              {year}
-            </motion.div>
-          </AnimatePresence>
-        </div>
+      {/* Main Year Display: 72px big as specified in Stage 2 */}
+      <div style={{ overflow: 'hidden', minHeight: 76, display: 'flex', alignItems: 'center' }}>
+        <AnimatePresence mode="popLayout">
+          <motion.div
+            key={year}
+            initial={{ y: 32, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -32, opacity: 0 }}
+            transition={{ duration: 0.16, ease: 'easeOut' }}
+            style={{
+              fontFamily: 'var(--font-heading)',
+              fontSize: 72,
+              fontWeight: 800,
+              color: 'var(--text-primary, #FFFFFF)',
+              letterSpacing: -2,
+              lineHeight: 1,
+            }}
+          >
+            {year}
+          </motion.div>
+        </AnimatePresence>
+      </div>
 
-        {/* Musical Note & Pitch Pill */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+      {/* Temperature Anomaly: 32px big, with no-break hyphen to avoid awkward wrap */}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'nowrap' }}>
+        <span
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 32,
+            fontWeight: 800,
+            color: anomalyColor,
+            textShadow: `0 0 20px ${anomalyColor}40`,
+            lineHeight: 1,
+          }}
+        >
+          {sign}{anomaly.toFixed(2)} °C
+        </span>
+        <span
+          style={{
+            fontSize: 14,
+            fontWeight: 500,
+            color: 'var(--text-secondary, #CBD5E1)',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          anomaly vs 1951&#8209;1980
+        </span>
+      </div>
+
+      {/* Synthesized Pitch Pill */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '10px 14px',
+          background: 'rgba(0, 212, 255, 0.12)',
+          border: '1px solid rgba(0, 212, 255, 0.28)',
+          borderRadius: 10,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
           <span
             style={{
               fontFamily: 'var(--font-mono)',
-              fontSize: 13,
-              fontWeight: 700,
+              fontSize: 18,
+              fontWeight: 800,
               color: '#FFFFFF',
-              background: 'rgba(0, 212, 255, 0.18)',
-              border: '1px solid rgba(0, 212, 255, 0.35)',
-              borderRadius: 6,
-              padding: '2px 7px',
             }}
           >
             {noteName}
@@ -171,48 +199,42 @@ export default function YearDisplay({
           <span
             style={{
               fontFamily: 'var(--font-mono)',
-              fontSize: 10,
+              fontSize: 16,
+              fontWeight: 700,
               color: '#38BDF8',
             }}
           >
             {Math.round(frequency)} Hz
           </span>
         </div>
-      </div>
-
-      {/* Temperature Anomaly */}
-      <div style={{ marginTop: 6, display: 'flex', alignItems: 'baseline', gap: 6 }}>
         <span
           style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 21,
-            fontWeight: 800,
-            color: anomalyColor,
-            textShadow: `0 0 16px ${anomalyColor}40`,
+            fontSize: 13,
+            fontWeight: 600,
+            color: 'var(--text-secondary, #CBD5E1)',
           }}
         >
-          {sign}{anomaly.toFixed(2)} °C
+          {soundMode === 'musical' ? 'Harmonic scale' : 'Scientific linear'}
         </span>
-        <span style={{ fontSize: 11, color: '#94A3B8' }}>anomaly vs 1951-80</span>
       </div>
 
       {/* Baseline reference footer */}
       <div
         style={{
-          marginTop: 10,
-          borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-          paddingTop: 6,
+          marginTop: 4,
+          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+          paddingTop: 8,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          fontFamily: 'var(--font-mono)',
-          fontSize: 9,
-          color: '#64748B',
-          letterSpacing: 0.5,
+          fontSize: 13.5,
+          color: 'var(--text-secondary, #CBD5E1)',
         }}
       >
-        <span>1880–2025 OBSERVED</span>
-        <span>A3 (220Hz) → A5 (880Hz)</span>
+        <span>Observed data, 1880 to 2025</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13 }}>
+          220 Hz → 880 Hz
+        </span>
       </div>
     </div>
   );

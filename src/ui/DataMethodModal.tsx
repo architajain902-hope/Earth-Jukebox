@@ -4,16 +4,19 @@ import { validateDataset } from '../data/validate';
 import { anomalyToFrequency, frequencyToNoteName } from '../audio/sonify';
 
 interface DataMethodModalProps {
+  visible?: boolean;
   dataset: GistempDataset;
   selectedYear: number;
   onClose: () => void;
 }
 
 export default function DataMethodModal({
+  visible = true,
   dataset,
   selectedYear,
   onClose,
 }: DataMethodModalProps) {
+  if (!visible || !dataset) return null;
   const { data } = dataset;
   const validation = validateDataset(dataset);
   const currentRec = data.find((d) => d.year === selectedYear) ?? data[data.length - 1];

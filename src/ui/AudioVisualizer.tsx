@@ -3,9 +3,19 @@ import { audioEngine } from '../audio/engine';
 
 interface AudioVisualizerProps {
   isPlaying: boolean;
+  noteName?: string;
+  frequency?: number;
+  soundMode?: 'scientific' | 'musical';
+  musicalScale?: string;
 }
 
-export default function AudioVisualizer({ isPlaying }: AudioVisualizerProps) {
+export default function AudioVisualizer({
+  isPlaying,
+  noteName = 'G4',
+  frequency = 403,
+  soundMode = 'scientific',
+  musicalScale = 'dorian',
+}: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animFrameRef = useRef<number | null>(null);
 
@@ -27,8 +37,8 @@ export default function AudioVisualizer({ isPlaying }: AudioVisualizerProps) {
 
       ctx.clearRect(0, 0, width, height);
 
-      // Subtle background grid
-      ctx.strokeStyle = 'rgba(0, 212, 255, 0.05)';
+      // Subtle horizontal center line & audio grid
+      ctx.strokeStyle = 'rgba(0, 212, 255, 0.08)';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(0, midY);
@@ -53,11 +63,11 @@ export default function AudioVisualizer({ isPlaying }: AudioVisualizerProps) {
         }
 
         if (!isSilent) {
-          // Draw real-time oscilloscope wave
-          ctx.lineWidth = 2.2;
+          // Draw real-time dynamic glowing waveform
+          ctx.lineWidth = 2.6;
           ctx.strokeStyle = '#00D4FF';
-          ctx.shadowColor = 'rgba(0, 212, 255, 0.6)';
-          ctx.shadowBlur = 8;
+          ctx.shadowColor = 'rgba(0, 212, 255, 0.85)';
+          ctx.shadowBlur = 12;
           ctx.beginPath();
 
           const sliceWidth = width / timeData.length;
@@ -82,23 +92,22 @@ export default function AudioVisualizer({ isPlaying }: AudioVisualizerProps) {
         }
       }
 
-      // Idle breathing wave (ambient undulating sine wave)
+      // Idle animated undulating harmonic wave (taller & expressive)
       idlePhase += 0.04;
-      ctx.lineWidth = 1.6;
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
-      ctx.shadowColor = 'rgba(56, 189, 248, 0.3)';
-      ctx.shadowBlur = 6;
+      ctx.lineWidth = 2.0;
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.55)';
+      ctx.shadowColor = 'rgba(0, 212, 255, 0.45)';
+      ctx.shadowBlur = 8;
       ctx.beginPath();
 
-      const numPoints = 64;
+      const numPoints = 80;
       for (let i = 0; i <= numPoints; i++) {
         const x = (i / numPoints) * width;
-        // Dual sine wave breathing effect
-        const envelope = Math.sin((i / numPoints) * Math.PI); // Taper at edges
+        const envelope = Math.sin((i / numPoints) * Math.PI); // Smooth edge taper
         const y =
           midY +
-          Math.sin(idlePhase + (i / numPoints) * 6.28 * 2) * 6 * envelope +
-          Math.sin(idlePhase * 0.5 + (i / numPoints) * 6.28) * 3 * envelope;
+          Math.sin(idlePhase + (i / numPoints) * 6.28 * 2.5) * 16 * envelope +
+          Math.sin(idlePhase * 0.6 + (i / numPoints) * 6.28 * 1.2) * 8 * envelope;
 
         if (i === 0) {
           ctx.moveTo(x, y);
@@ -124,61 +133,105 @@ export default function AudioVisualizer({ isPlaying }: AudioVisualizerProps) {
     <div
       className="glass"
       style={{
-        padding: '10px 12px',
+        padding: '18px 20px',
         display: 'flex',
         flexDirection: 'column',
-        gap: 6,
-        borderRadius: 10,
-        position: 'relative',
+        gap: 12,
+        borderRadius: 16,
+        background: 'var(--surface-glass, rgba(7, 18, 38, 0.85))',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        border: '1px solid var(--surface-border, rgba(0, 212, 255, 0.25))',
+        boxShadow: '0 16px 40px rgba(0, 0, 0, 0.55)',
+        width: '100%',
+        boxSizing: 'border-box',
       }}
       role="region"
-      aria-label="Real-time Audio Oscilloscope Visualizer"
+      aria-label="Live sound wave visualizer"
     >
+      {/* Title & Mode Status Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span
             style={{
-              width: 6,
-              height: 6,
+              width: 8,
+              height: 8,
               borderRadius: '50%',
-              background: isPlaying ? '#22C55E' : '#64748B',
-              boxShadow: isPlaying ? '0 0 8px #22C55E' : 'none',
+              background: isPlaying ? '#22C55E' : '#38BDF8',
+              boxShadow: isPlaying ? '0 0 10px #22C55E' : '0 0 6px #38BDF8',
             }}
           />
-          <span
+          <h3
             style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 10,
-              color: '#94A3B8',
-              textTransform: 'uppercase',
-              letterSpacing: 0.8,
+              fontFamily: 'var(--font-heading)',
+              fontSize: 16,
+              fontWeight: 700,
+              color: 'var(--text-primary, #FFFFFF)',
+              margin: 0,
             }}
           >
-            Oscilloscope {isPlaying ? '(Live Signal)' : '(Standby)'}
-          </span>
+            Live sound wave
+          </h3>
         </div>
         <span
           style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 9,
-            color: '#64748B',
+            fontSize: 12.5,
+            fontWeight: 600,
+            color: 'var(--text-secondary, #CBD5E1)',
           }}
         >
-          Web Audio Synth
+          {soundMode === 'musical' ? `Musical (${musicalScale})` : 'Exact mode'}
         </span>
       </div>
 
-      <div style={{ position: 'relative', width: '100%', height: 48 }}>
+      {/* Large Numbers: Note & Hz display */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'baseline',
+          justifyContent: 'space-between',
+          padding: '8px 12px',
+          background: 'rgba(0, 212, 255, 0.08)',
+          borderRadius: 8,
+          border: '1px solid rgba(0, 212, 255, 0.2)',
+        }}
+      >
+        <span
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 26,
+            fontWeight: 800,
+            color: '#FFFFFF',
+            letterSpacing: 0.5,
+          }}
+        >
+          {noteName}
+        </span>
+        <span
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 22,
+            fontWeight: 700,
+            color: '#00D4FF',
+          }}
+        >
+          {Math.round(frequency)} Hz
+        </span>
+      </div>
+
+      {/* Taller Canvas (128px high) as specified in Stage 6 */}
+      <div style={{ position: 'relative', width: '100%', height: 128 }}>
         <canvas
           ref={canvasRef}
           width={320}
-          height={48}
+          height={128}
           style={{
             width: '100%',
             height: '100%',
             display: 'block',
-            borderRadius: 6,
-            background: 'rgba(4, 10, 24, 0.45)',
+            borderRadius: 8,
+            background: 'rgba(2, 6, 17, 0.75)',
+            border: '1px solid rgba(0, 212, 255, 0.15)',
           }}
         />
 
@@ -186,28 +239,33 @@ export default function AudioVisualizer({ isPlaying }: AudioVisualizerProps) {
           <div
             style={{
               position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              bottom: 8,
+              left: 0,
+              right: 0,
+              textAlign: 'center',
               pointerEvents: 'none',
             }}
           >
             <span
               style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 9.5,
-                color: 'rgba(148, 163, 184, 0.75)',
-                background: 'rgba(7, 18, 38, 0.65)',
-                padding: '2px 8px',
-                borderRadius: 4,
-                letterSpacing: 0.5,
+                fontSize: 12.5,
+                fontWeight: 500,
+                color: 'var(--text-secondary, #CBD5E1)',
+                background: 'rgba(5, 11, 26, 0.85)',
+                padding: '3px 10px',
+                borderRadius: 6,
+                border: '1px solid rgba(255,255,255,0.1)',
               }}
             >
-              Press ▶ Play or select a year to hear Earth
+              Press Play to see the sound
             </span>
           </div>
         )}
+      </div>
+
+      {/* Helper text */}
+      <div style={{ fontSize: 13, color: 'var(--text-secondary, #CBD5E1)', lineHeight: 1.4 }}>
+        Real-time audio synthesis from NASA GISTEMP records.
       </div>
     </div>
   );

@@ -42,49 +42,49 @@
 }
 
 /* ---------------------------------------------------------
-   Dark Theme ("Deep Space" - Default)
+   Dark Theme ("Deep Space" - Default) - High Contrast (AA/AAA)
 --------------------------------------------------------- */
 :root, [data-theme="dark"] {
   --bg-gradient: radial-gradient(circle at 50% 30%, #0B1D3A 0%, #050B1A 70%, #020611 100%);
   --bg-solid: #050B1A;
-  --surface-glass: rgba(11, 29, 58, 0.72);
-  --surface-glass-active: rgba(11, 45, 90, 0.85);
-  --surface-border: rgba(0, 212, 255, 0.22);
-  --surface-border-subtle: rgba(255, 255, 255, 0.12);
+  --surface-glass: rgba(11, 29, 58, 0.85);
+  --surface-glass-active: rgba(11, 45, 90, 0.95);
+  --surface-border: rgba(0, 212, 255, 0.28);
+  --surface-border-subtle: rgba(255, 255, 255, 0.16);
   --text-primary: #FFFFFF;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
-  --card-backdrop: blur(16px);
-  --header-bg: rgba(5, 11, 26, 0.85);
-  --panel-bg: rgba(5, 11, 26, 0.85);
-  --chart-grid: rgba(255, 255, 255, 0.08);
-  --chart-grid-text: #64748B;
-  --chart-zero-line: rgba(255, 255, 255, 0.35);
-  --scroll-track: rgba(4, 10, 20, 0.6);
-  --scroll-thumb: rgba(0, 212, 255, 0.3);
+  --text-secondary: #CBD5E1; /* Lifted for WCAG AA/AAA */
+  --text-muted: #94A3B8;     /* Lifted for WCAG AA */
+  --card-backdrop: blur(20px);
+  --header-bg: rgba(5, 11, 26, 0.92);
+  --panel-bg: rgba(5, 11, 26, 0.92);
+  --chart-grid: rgba(255, 255, 255, 0.12);
+  --chart-grid-text: #94A3B8;
+  --chart-zero-line: rgba(255, 255, 255, 0.45);
+  --scroll-track: rgba(4, 10, 20, 0.7);
+  --scroll-thumb: rgba(0, 212, 255, 0.4);
 }
 
 /* ---------------------------------------------------------
-   Light Theme ("Daylight" - WCAG 2.1 AA Contrast)
+   Light Theme ("Daylight" - WCAG 2.1 AA/AAA Contrast)
 --------------------------------------------------------- */
 [data-theme="light"] {
   --bg-gradient: radial-gradient(circle at 50% 30%, #FFFFFF 0%, #F1F5F9 65%, #E2E8F0 100%);
   --bg-solid: #F8FAFC;
-  --surface-glass: rgba(255, 255, 255, 0.92);
+  --surface-glass: rgba(255, 255, 255, 0.94);
   --surface-glass-active: rgba(241, 245, 249, 0.98);
-  --surface-border: rgba(11, 61, 145, 0.3);
-  --surface-border-subtle: rgba(11, 61, 145, 0.16);
+  --surface-border: rgba(11, 61, 145, 0.35);
+  --surface-border-subtle: rgba(11, 61, 145, 0.2);
   --text-primary: #0A192F;
-  --text-secondary: #1E293B;
-  --text-muted: #334155;
-  --card-backdrop: blur(16px);
-  --header-bg: rgba(255, 255, 255, 0.94);
-  --panel-bg: rgba(255, 255, 255, 0.95);
-  --chart-grid: rgba(15, 23, 42, 0.12);
+  --text-secondary: #1E293B; /* High contrast dark */
+  --text-muted: #334155;     /* High contrast medium dark */
+  --card-backdrop: blur(20px);
+  --header-bg: rgba(255, 255, 255, 0.96);
+  --panel-bg: rgba(255, 255, 255, 0.96);
+  --chart-grid: rgba(15, 23, 42, 0.16);
   --chart-grid-text: #334155;
-  --chart-zero-line: rgba(11, 61, 145, 0.6);
-  --scroll-track: rgba(226, 232, 240, 0.8);
-  --scroll-thumb: rgba(11, 61, 145, 0.45);
+  --chart-zero-line: rgba(11, 61, 145, 0.75);
+  --scroll-track: rgba(226, 232, 240, 0.85);
+  --scroll-thumb: rgba(11, 61, 145, 0.5);
 }
 
 html, body {
@@ -95,6 +95,7 @@ html, body {
   background-image: var(--bg-gradient);
   color: var(--text-primary);
   font-family: var(--font-body);
+  font-size: 16px; /* 16px minimum base font as specified */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -176,48 +177,139 @@ button {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
-/* Subtle breathing animation for idle waveform */
-@keyframes breathe {
-  0%, 100% { opacity: 0.45; transform: scaleY(0.9); }
-  50% { opacity: 0.85; transform: scaleY(1.1); }
+/* =========================================================
+   3-Row Main Page Grid (100dvh, Zero Overlaps)
+   ========================================================= */
+.app-viewport-grid {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: 100dvh;
+  width: 100vw;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-.breathe-anim {
-  animation: breathe 3s ease-in-out infinite;
+.earth-stage-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr 320px;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 18px;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Loading wireframe spin */
-@keyframes globe-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.earth-stage-left,
+.earth-stage-right {
+  min-width: 0;
+  width: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  z-index: 10;
 }
 
-.globe-spinner {
-  animation: globe-spin 8s linear infinite;
+.earth-stage-center {
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.earth-canvas-wrapper {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+
+.earth-center-overlay {
+  position: relative;
+  z-index: 15;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  padding: 12px 16px;
+  box-sizing: border-box;
+}
+
+.earth-center-overlay > * {
+  pointer-events: auto;
+}
+
+/* Slim Player Dock (Row 3, Max 200px) */
+.player-dock {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 8px 20px 8px 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 200px;
+  z-index: 50;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 /* Responsive Grid / Layout Breakpoints */
+@media (max-width: 1099px) {
+  .earth-stage-grid {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    gap: 14px;
+    padding: 10px 14px;
+  }
+  .earth-stage-center {
+    height: 44vh;
+    min-height: 260px;
+    width: 100%;
+    flex-shrink: 0;
+  }
+  .earth-stage-left,
+  .earth-stage-right {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+  .player-dock {
+    max-height: none;
+    position: sticky;
+    bottom: 0;
+    border-radius: 0;
+  }
+}
+
 @media (max-width: 480px) {
-  .app-control-deck {
-    padding: 10px 12px !important;
-    gap: 8px !important;
-  }
-  .app-hud-overlay {
-    top: 56px !important;
-    left: 8px !important;
-    right: 8px !important;
-  }
   .hide-on-mobile {
     display: none !important;
   }
 }
 
 @media (max-width: 768px) {
-  .app-header {
-    padding: 8px 12px !important;
-  }
   .hide-on-tablet {
     display: none !important;
+  }
+  button, .touch-target {
+    min-height: 44px;
   }
 }
 

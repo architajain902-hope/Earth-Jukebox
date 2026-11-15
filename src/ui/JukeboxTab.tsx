@@ -53,8 +53,8 @@ export default function JukeboxTab({
   const imageElementRef = useRef<HTMLImageElement | null>(null);
 
   const currentRecord =
-    dataset.data.find((d) => d.year === selectedYear) ?? dataset.data[dataset.data.length - 1];
-  const currentAnomaly = currentRecord.anomaly;
+    dataset?.data?.find((d) => d.year === selectedYear) ?? dataset?.data?.[dataset?.data?.length - 1];
+  const currentAnomaly = currentRecord?.anomaly ?? 0;
   const rootHz = anomalyToFrequency(currentAnomaly);
 
   // Load frames manifest

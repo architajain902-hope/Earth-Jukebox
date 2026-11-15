@@ -1,6 +1,6 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import type { AnomalyRecord } from '../data/types';
-import { getRecordForYear } from '../data/loadData';
+import { computeTimelineMilestones } from '../data/milestones';
 
 interface TimelineSliderProps {
   years: number[];
@@ -47,18 +47,6 @@ function getStripeColor(anomaly: number): string {
   }
 }
 
-const MILESTONES = [
-  { year: 1880, label: '1880 Start' },
-  { year: 1910, label: '1910 Coolest' },
-  { year: 1940, label: '1940 Peak' },
-  { year: 1976, label: '1976 Last Cool' },
-  { year: 1998, label: '1998 Super El Niño' },
-  { year: 2016, label: '2016 +1.0°C' },
-  { year: 2023, label: '2023 Record' },
-  { year: 2024, label: '2024 +1.45°C' },
-  { year: 2025, label: '2025 Current' },
-];
-
 export default function TimelineSlider({
   years,
   selectedYear,
@@ -68,6 +56,9 @@ export default function TimelineSlider({
   const minYear = years[0] ?? 1880;
   const maxYear = years[years.length - 1] ?? 2025;
   const stripRef = useRef<HTMLDivElement>(null);
+
+  // Compute 100% mathematically verified milestones from data
+  const milestones = useMemo(() => computeTimelineMilestones(data), [data]);
 
   const handleStripClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!stripRef.current) return;
@@ -101,36 +92,33 @@ export default function TimelineSlider({
 
   return (
     <div
-      className="glass"
       style={{
-        padding: '12px 14px',
         display: 'flex',
         flexDirection: 'column',
-        gap: 8,
-        borderRadius: 10,
+        gap: 6,
+        width: '100%',
       }}
       role="region"
       aria-label="Timeline and Warming Stripes Scrubber"
     >
-      {/* Header */}
+      {/* Header: Sentence case, 14px minimum */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span
           style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 10,
-            color: '#94A3B8',
-            textTransform: 'uppercase',
-            letterSpacing: 0.8,
+            fontSize: 14,
+            fontWeight: 600,
+            color: 'var(--text-secondary, #CBD5E1)',
+            letterSpacing: 0.2,
           }}
         >
-          Timeline Scrubber (1880–2025)
+          Observed data, 1880 to 2025
         </span>
         <span
           style={{
             fontFamily: 'var(--font-mono)',
-            fontSize: 12,
+            fontSize: 16,
             fontWeight: 700,
-            color: '#38BDF8',
+            color: '#00D4FF',
           }}
         >
           {selectedYear}
@@ -152,7 +140,7 @@ export default function TimelineSlider({
         aria-valuenow={selectedYear}
         style={{
           width: '100%',
-          accentColor: '#FC3D21',
+          accentColor: '#00D4FF',
           cursor: 'pointer',
           height: 6,
           margin: '2px 0',
@@ -166,11 +154,11 @@ export default function TimelineSlider({
         title="Warming stripes scrubber. Click anywhere to jump to that year."
         style={{
           display: 'flex',
-          height: 24,
+          height: 22,
           borderRadius: 6,
           overflow: 'hidden',
           cursor: 'pointer',
-          border: '1px solid rgba(255, 255, 255, 0.15)',
+          border: '1px solid rgba(255, 255, 255, 0.18)',
           boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.4)',
           position: 'relative',
         }}
@@ -204,7 +192,7 @@ export default function TimelineSlider({
                     position: 'absolute',
                     inset: 0,
                     border: '2px solid #FFFFFF',
-                    boxShadow: '0 0 6px rgba(255, 255, 255, 0.9)',
+                    boxShadow: '0 0 8px rgba(255, 255, 255, 0.95)',
                     zIndex: 2,
                   }}
                 />
@@ -214,7 +202,7 @@ export default function TimelineSlider({
         })}
       </div>
 
-      {/* Milestones row (Horizontally scrollable snap row beneath stripes) */}
+      {/* Computed True Milestones (Horizontally scrollable snap row) */}
       <div
         className="snap-scroll-x"
         style={{
@@ -226,54 +214,45 @@ export default function TimelineSlider({
           scrollbarWidth: 'none',
         }}
         role="group"
-        aria-label="Key Historical Climate Milestones"
+        aria-label="Key Verified Historical Climate Milestones"
       >
-        {MILESTONES.map((m) => {
+        {milestones.map((m) => {
           const isCurrent = m.year === selectedYear;
-          const rec = getRecordForYear(data, m.year);
-          const anomText = rec ? `${rec.anomaly >= 0 ? '+' : ''}${rec.anomaly.toFixed(2)}°C` : '';
           return (
             <button
               key={m.year}
               onClick={() => onChange(m.year)}
-              title={`${m.label}: ${anomText}`}
+              title={`${m.label} (${m.formattedAnomaly})`}
               style={{
                 flexShrink: 0,
-                padding: '3px 8px',
-                borderRadius: 4,
-                fontSize: 10,
-                fontFamily: 'var(--font-mono)',
+                padding: '4px 10px',
+                borderRadius: 6,
+                fontSize: 12.5,
+                fontWeight: 600,
                 cursor: 'pointer',
-                background: isCurrent ? 'rgba(252, 61, 33, 0.35)' : 'rgba(11, 29, 58, 0.6)',
-                border: isCurrent ? '1px solid #FC3D21' : '1px solid rgba(255, 255, 255, 0.12)',
-                color: isCurrent ? '#FFFFFF' : '#CBD5E1',
+                background: isCurrent ? 'rgba(0, 212, 255, 0.25)' : 'rgba(11, 29, 58, 0.65)',
+                border: isCurrent ? '1px solid #00D4FF' : '1px solid rgba(255, 255, 255, 0.14)',
+                color: isCurrent ? '#FFFFFF' : 'var(--text-secondary, #CBD5E1)',
                 whiteSpace: 'nowrap',
                 transition: 'all 0.15s ease',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
               }}
             >
-              {m.label}
+              <span>{m.label}</span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 11,
+                  color: m.anomaly >= 0 ? '#F97316' : '#38BDF8',
+                }}
+              >
+                ({m.formattedAnomaly})
+              </span>
             </button>
           );
         })}
-      </div>
-
-      {/* Sonification Mapping Rule in UI */}
-      <div
-        style={{
-          marginTop: 2,
-          padding: '6px 8px',
-          background: 'rgba(11, 29, 58, 0.5)',
-          borderRadius: 6,
-          border: '1px solid rgba(0, 212, 255, 0.1)',
-          fontFamily: 'var(--font-mono)',
-          fontSize: 9.5,
-          color: '#94A3B8',
-          lineHeight: 1.4,
-        }}
-      >
-        <span style={{ color: '#00D4FF' }}>Rule:</span> Higher temp = Higher pitch (linear mapping).
-        <br />
-        −0.5 °C → 220 Hz (A3) &nbsp;|&nbsp; +1.3 °C → 880 Hz (A5)
       </div>
     </div>
   );

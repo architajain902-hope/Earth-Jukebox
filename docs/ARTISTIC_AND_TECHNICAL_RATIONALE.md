@@ -1,6 +1,6 @@
 # Artistic and Technical Rationale
 
-**Project:** Earth 616: The Earth Information Jukebox  
+**Project:** SONIX: The Earth Information Jukebox  
 **Challenge:** The Earth Information Jukebox (NASA International Space Apps Challenge 2026)  
 **Track:** Science & Creative Technology  
 **Version:** 2.0.0 Production Release  
@@ -15,7 +15,7 @@ Traditional climate communications rely almost exclusively on two-dimensional vi
 1. **The Visually Impaired Community:** Millions of blind and low-vision individuals are entirely locked out of visual climate data and NASA satellite imagery.
 2. **The General Public:** Cognitive fatigue from static numbers often obscures the visceral reality of accelerating warming. Sound bypasses intellectual abstraction; the human auditory cortex processes temporal shifts, frequency changes, and harmonic tension with immediate emotional clarity.
 
-**Earth 616: The Earth Information Jukebox** bridges this divide. It pairs **NASA Earth Information Center (EIC)** visual frames with **real-time dynamic sonification**, translating scientific data and satellite imagery into an auditory experience where Earth’s changes can be heard as well as seen.
+**SONIX: The Earth Information Jukebox** bridges this divide. It pairs **NASA Earth Information Center (EIC)** visual frames with **real-time dynamic sonification**, translating scientific data and satellite imagery into an auditory experience where Earth’s changes can be heard as well as seen.
 
 ---
 
@@ -25,11 +25,11 @@ Traditional climate communications rely almost exclusively on two-dimensional vi
 
 A fundamental hazard in creative sonification is the temptation to produce "music inspired by climate"—arbitrary chord progressions or aesthetic soundscapes where data is merely metaphorical. Conversely, direct raw sonification (e.g. mapping every raw RGB pixel value directly to random sine wave frequencies) produces chaotic, unlistenable white noise that repels the listener.
 
-To resolve this tension, **Earth 616** introduces a **strict separation of concerns**:
+To resolve this tension, **SONIX** introduces a **strict separation of concerns**:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                        EARTH 616 ARCHITECTURE                          │
+│                        SONIX ARCHITECTURE                              │
 ├────────────────────────────────────────────────────────────────────────┤
 │                                                                        │
 │   [LAYER 1: GROUND TRUTH]              [LAYER 2: HARMONIC ATMOSPHERE]  │
@@ -110,4 +110,4 @@ Accessibility is not an afterthought; it is woven into every layer:
 
 ## 6. Conclusion
 
-Earth 616 transforms NASA's vast repository of satellite observations and global temperature models from silent visual frames into a living, audible planetary instrument. By honoring scientific ground truth while applying sophisticated computer vision and audio design, Earth 616 empowers students, researchers, judges, and citizens worldwide to hear the pulse of our changing planet.
+SONIX transforms NASA's vast repository of satellite observations and global temperature models from silent visual frames into a living, audible planetary instrument. By honoring scientific ground truth while applying sophisticated computer vision and audio design, SONIX empowers students, researchers, judges, and citizens worldwide to hear the pulse of our changing planet.

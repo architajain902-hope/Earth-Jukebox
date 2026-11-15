@@ -34,7 +34,7 @@ export default function FutureEarthModal({ onClose }: FutureEarthModalProps) {
       title: 'Ocean Heat Content (OHC) & Sea Level Anomalies',
       source: 'NASA/JPL Integrated Multi-Mission Ocean Altimeter Topography',
       soundConcept:
-        'Deep sub-bass acoustic pressure drone (40 Hz to 110 Hz): Reflects heat absorbed by upper 2,000 meters of oceans, grounding the Earth 616 acoustic orchestration.',
+        'Deep sub-bass acoustic pressure drone (40 Hz to 110 Hz): Reflects heat absorbed by upper 2,000 meters of oceans, grounding the SONIX acoustic orchestration.',
       status: 'Planned Future Work (Not Yet Implemented)',
       icon: '🌊',
     },
@@ -97,7 +97,7 @@ export default function FutureEarthModal({ onClose }: FutureEarthModalProps) {
         </div>
 
         <p style={{ fontSize: 13, color: '#CBD5E1', marginBottom: 16, lineHeight: 1.5 }}>
-          Earth 616 establishes the temperature sonification foundation. Our long-term vision is a full planetary symphony pairing visual frames from the NASA Earth Information Center across four key Earth system dynamics:
+          SONIX establishes the temperature sonification foundation. Our long-term vision is a full planetary symphony pairing visual frames from the NASA Earth Information Center across four key Earth system dynamics:
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

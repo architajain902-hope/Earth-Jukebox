@@ -176,7 +176,7 @@ export default function ExplainerModal({
             <p>
               <strong style={{ color: '#00D4FF' }}>Why does this tone sound like this?</strong>
               <br />
-              Earth 616 uses a direct scientific mapping: higher planetary temperature anomaly produces a strictly higher musical pitch.
+              SONIX uses a direct scientific mapping: higher planetary temperature anomaly produces a strictly higher musical pitch.
               At −0.5 °C the pitch is a deep 220 Hz (musical note A3). As global temperatures rise up to +1.3 °C, the pitch rises linearly to 880 Hz (A5).
             </p>
 
@@ -237,7 +237,7 @@ export default function ExplainerModal({
             <p>
               <strong style={{ color: '#00D4FF' }}>यह ध्वनि ऐसी क्यों सुनाई देती है?</strong>
               <br />
-              अर्थ 616 प्रत्यक्ष वैज्ञानिक नियमों पर आधारित है: तापमान जितना अधिक होता है, ध्वनि की पिच (आवृत्ति) उतनी ही ऊंची हो जाती है।
+              SONIX प्रत्यक्ष वैज्ञानिक नियमों पर आधारित है: तापमान जितना अधिक होता है, ध्वनि की पिच (आवृत्ति) उतनी ही ऊंची हो जाती है।
               −0.5 °C पर यह 220 हर्ट्ज़ (संगीत स्वर A3) होती है, और +1.3 °C पर बढ़कर 880 हर्ट्ज़ (A5) तक पहुँचती है।
             </p>
 

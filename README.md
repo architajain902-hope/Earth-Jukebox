@@ -1,15 +1,16 @@
-# 🌍 Earth 616: The Earth Information Jukebox
+# 🌍 SONIX: The Earth Information Jukebox
 
 > **NASA International Space Apps Challenge 2026**  
 > *Challenge:* The Earth Information Jukebox  
 > *Event:* Bhopal, India (Local Event)  
-> *Team:* **Earth 616**  
+> *Team:* **Team SONIX**  
 > *Live Demo:* **[https://earth-jukebox.vercel.app](https://earth-jukebox.vercel.app)** *(or your deployment URL)*  
 > *Demo Video:* **[Watch the 100-Second Demonstration Video](#)** *(Public / Unlisted link)*
 
 ---
 
-![Earth 616 Cover](docs/cover.png)
+![SONIX Cover](docs/cover.png)  
+<sub>*Logo: AI-generated*</sub>
 
 ---
 
@@ -17,9 +18,9 @@
 
 Earth observation visualizations created by NASA are visually stunning, but they can feel abstract on 2D charts and remain inaccessible to visually impaired audiences.
 
-**Earth 616: The Earth Information Jukebox** pairs **NASA Earth Information Center (EIC) visual frames** with **dynamic real-time sonification**. Every year's authentic NASA surface temperature anomaly from 1880 to 2025 is mapped to an exact, deterministic musical pitch: **higher temperature = higher pitch**.
+**SONIX: The Earth Information Jukebox** pairs **NASA Earth Information Center (EIC) visual frames** with **dynamic real-time sonification**. Every year's authentic NASA surface temperature anomaly from 1880 to 2025 is mapped to an exact, deterministic musical pitch: **higher temperature = higher pitch**.
 
-Unlike subjective "climate music", Earth 616 upholds **strict scientific honesty**:
+Unlike subjective "climate music", SONIX upholds **strict scientific honesty**:
 - Zero randomized notes or artistic approximations.
 - 100% synthesized in real time via the browser's native **Web Audio API** (zero audio files).
 - All numbers, ranks, and baselines are computed dynamically from real NASA GISTEMP v4 data.
@@ -53,11 +54,13 @@ Unlike subjective "climate music", Earth 616 upholds **strict scientific honesty
 
 ## 3. Screenshots
 
-| 3D Globe & Mission Control | "What Am I Hearing?" Bilingual Explainer |
+| 3D Earth Globe & SONIX Deck | NASA Frames Tab & SVS Sonifier |
 | :---: | :---: |
-| ![3D Globe](docs/screenshots/01-hero-globe.png) | ![Explainer](docs/screenshots/03-explainer-bilingual.png) |
-| **Mission Control Sidebar** | **Classroom Guided Lesson** |
-| ![Mission Control](docs/screenshots/02-mission-control.png) | ![Classroom](docs/screenshots/04-classroom-guided.png) |
+| ![3D Earth Globe](docs/screenshots/01-earth-tab.png) | ![NASA Frames Tab](docs/screenshots/02-nasa-frames-tab.png) |
+| **Learn Tab & Modules** | **Daylight Light Theme (WCAG AAA)** |
+| ![Learn Tab](docs/screenshots/03-learn-tab.png) | ![Light Theme](docs/screenshots/06-light-theme.png) |
+| **Mission Control & Feature Index** | **Mobile View (360px Responsive)** |
+| ![More Drawer](docs/screenshots/04-more-drawer.png) | ![Mobile 360px](docs/screenshots/07-mobile-360px.png) |
 
 ---
 
@@ -96,7 +99,7 @@ All scientific measurements originate from the **NASA Goddard Institute for Spac
 - **Product:** Surface Temperature Analysis (GISTEMP v4), Global Land-Ocean Temperature Index (`GLB.Ts+dSST.csv`)
 - **Direct NASA URL:** `https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv`
 - **Data Pipeline:** `scripts/fetch-data.mjs` streams the CSV from NASA servers, extracts the annual mean (`J-D` column), validates 146 consecutive years (1880–2025) without gaps or missing numbers, and compiles `public/data/gistemp.json`.
-- The bundled JSON is shipped with the app so that Earth 616 operates 100% offline without live NASA network dependencies.
+- The bundled JSON is shipped with the app so that SONIX operates 100% offline without live NASA network dependencies.
 
 ---
 
@@ -138,7 +141,7 @@ All scientific measurements originate from the **NASA Goddard Institute for Spac
 
 We followed each page's explicit credit request; see the [NASA Reproduction Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) linked on each SVS page. Exported soundscapes are our own derived work from NASA media and data.
 
-| Resource / Product | SVS / Data URL | Official Credit | Usage in Earth 616 |
+| Resource / Product | SVS / Data URL | Official Credit | Usage in SONIX |
 | :--- | :--- | :--- | :--- |
 | **NASA GISTEMP v4** | [GLB.Ts+dSST.csv](https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv) | NASA Goddard Institute for Space Studies | Ground truth tonal root pitch ($220–880\text{ Hz}$), temperature chart, warming stripes scrubber. |
 | **Change in Night Lights (2012–2023)** | [SVS #5313](https://svs.gsfc.nasa.gov/5313/) | NASA's Scientific Visualization Studio (Visualizer: Kel Elkins) | Nocturnal urbanization frame sonification and 3D globe night-side lights. |
@@ -151,4 +154,4 @@ We followed each page's explicit credit request; see the [NASA Reproduction Guid
 ## 11. License
 
 This project is open-source under the [MIT License](LICENSE).  
-Copyright © 2026 Team Earth 616.
+Copyright © 2026 Team SONIX.

@@ -68,7 +68,7 @@ export class DemoScreenRecorder {
         // Auto trigger download
         const a = document.createElement('a');
         a.href = url;
-        a.download = `earth-616-demo-recording-${Date.now()}.webm`;
+        a.download = `sonix-demo-recording-${Date.now()}.webm`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

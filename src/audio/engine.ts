@@ -1,6 +1,6 @@
 /**
  * engine.ts
- * Web Audio API synthesizer for "Earth 616: The Earth Information Jukebox".
+ * Web Audio API synthesizer for "SONIX: The Earth Information Jukebox".
  * 100% mathematically synthesized in real time from authentic NASA data.
  * Zero pre-recorded audio files. Zero randomized notes.
  *

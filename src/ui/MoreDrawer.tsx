@@ -87,7 +87,7 @@ export default function MoreDrawer({
                 Mission Control Menu
               </h2>
               <div style={{ fontSize: 11, color: '#94A3B8', fontFamily: 'var(--font-mono)' }}>
-                Earth 616 Feature Index
+                SONIX Feature Index
               </div>
             </div>
             <button
@@ -207,7 +207,7 @@ export default function MoreDrawer({
                 />
                 <DrawerButton
                   icon="ℹ️"
-                  title="About Earth 616"
+                  title="About SONIX"
                   desc="Team, challenge statement, judging alignment"
                   onClick={() => { onClose(); onOpenAbout(); }}
                 />

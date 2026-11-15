@@ -51,19 +51,24 @@ export default function App() {
             style={fullscreenCenter}
           >
             <div style={{ textAlign: 'center' }}>
-              <div
+              <img
+                src="/branding/sonix-logo.png"
+                alt="SONIX logo"
                 style={{
-                  fontSize: 54,
+                  width: 72,
+                  height: 72,
+                  borderRadius: 16,
                   marginBottom: 16,
-                  display: 'inline-block',
+                  boxShadow: '0 0 24px rgba(0, 212, 255, 0.4)',
                   animation: 'pulse 1.8s infinite ease-in-out',
                 }}
-              >
-                🌍
-              </div>
-              <h2 style={{ fontSize: 22, fontWeight: 700, color: '#FFFFFF', marginBottom: 8 }}>
-                Earth 616
+              />
+              <h2 style={{ fontSize: 24, fontWeight: 800, color: '#FFFFFF', marginBottom: 6, letterSpacing: 1 }}>
+                SONIX
               </h2>
+              <div style={{ fontSize: 13, color: '#94A3B8', marginBottom: 12 }}>
+                The Earth Information Jukebox
+              </div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#00D4FF' }}>
                 Verifying NASA GISTEMP v4 Dataset...
               </div>
@@ -170,7 +175,23 @@ function StartOverlay({
         }}
       />
 
-      <div style={{ fontSize: 68, marginBottom: 12 }}>🌍</div>
+      <div style={{ marginBottom: 16 }}>
+        <img
+          src="/branding/sonix-logo.png"
+          alt="SONIX logo"
+          style={{
+            width: 104,
+            height: 104,
+            borderRadius: 22,
+            boxShadow: '0 0 36px rgba(0, 212, 255, 0.45)',
+            border: '2px solid rgba(0, 212, 255, 0.35)',
+            display: 'inline-block',
+          }}
+        />
+        <div style={{ fontSize: 10, color: '#64748B', marginTop: 4, fontFamily: 'var(--font-mono)' }}>
+          Logo: AI-generated
+        </div>
+      </div>
 
       <div
         style={{
@@ -195,7 +216,7 @@ function StartOverlay({
           color: '#FFFFFF',
         }}
       >
-        Earth 616: The Earth Information Jukebox
+        SONIX: The Earth Information Jukebox
       </h1>
 
       {/* Story-First Hook */}

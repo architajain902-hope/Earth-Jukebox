@@ -23,7 +23,7 @@ const CITATION = 'GISTEMP Team, 2024: GISS Surface Temperature Analysis (GISTEMP
 
 function fetchText(url) {
   return new Promise((resolve, reject) => {
-    https.get(url, { headers: { 'User-Agent': 'Earth616-Jukebox/1.0' } }, (res) => {
+    https.get(url, { headers: { 'User-Agent': 'SONIX-Jukebox/1.0' } }, (res) => {
       if (res.statusCode === 301 || res.statusCode === 302) {
         return fetchText(res.headers.location).then(resolve).catch(reject);
       }

@@ -163,11 +163,11 @@ export default function LearnTab({
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
             <span style={{ fontSize: 24 }}>🏛️</span>
             <h3 style={{ fontSize: 16, fontWeight: 700, color: '#FFFFFF', margin: 0 }}>
-              How Earth 616 Answers "The Earth Information Jukebox" Challenge
+              How SONIX Answers "The Earth Information Jukebox" Challenge
             </h3>
           </div>
           <p style={{ fontSize: 13.5, color: '#CBD5E1', lineHeight: 1.6, margin: 0 }}>
-            Earth observation visualizations created by NASA are visually stunning, but they can feel abstract on 2D charts and remain inaccessible to visually impaired audiences. Earth 616 translates visual satellite anomaly maps into synchronized Web Audio synthesis—pairing sight with sound so that planetary change can be heard as well as seen, with zero pre-recorded audio or subjective distortion.
+            Earth observation visualizations created by NASA are visually stunning, but they can feel abstract on 2D charts and remain inaccessible to visually impaired audiences. SONIX translates visual satellite anomaly maps into synchronized Web Audio synthesis—pairing sight with sound so that planetary change can be heard as well as seen, with zero pre-recorded audio or subjective distortion.
           </p>
         </div>
       </div>

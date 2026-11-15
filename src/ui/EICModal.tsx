@@ -80,16 +80,16 @@ export default function EICModal({ onClose }: EICModalProps) {
           </p>
         </div>
 
-        {/* How Earth 616 pairs with EIC frames */}
+        {/* How SONIX pairs with EIC frames */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, fontSize: 13, color: '#CBD5E1', lineHeight: 1.6 }}>
           <div>
             <h3 style={{ color: '#FFFFFF', fontSize: 14, marginBottom: 4 }}>
-              How Earth 616 Translates EIC Visualizations into Sound
+              How SONIX Translates EIC Visualizations into Sound
             </h3>
             <p>
               At NASA's physical and online Earth Information Center (at NASA HQ in Washington, D.C. and at <strong>earth.gov</strong>), visitors view large-format animated displays of Earth's surface temperature anomalies from the NASA Goddard Institute for Space Studies (GISS).
               <br />
-              Earth 616 directly pairs these visual frames with mathematically synthesized frequencies:
+              SONIX directly pairs these visual frames with mathematically synthesized frequencies:
             </p>
             <ul style={{ paddingLeft: 20, marginTop: 6, display: 'flex', flexDirection: 'column', gap: 4 }}>
               <li>

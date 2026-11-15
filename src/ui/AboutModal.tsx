@@ -20,7 +20,7 @@ export default function AboutModal({ onClose }: AboutModalProps) {
       }}
       role="dialog"
       aria-modal="true"
-      aria-label="About Earth 616 Jukebox"
+      aria-label="About SONIX: The Earth Information Jukebox"
       onClick={onClose}
     >
       <div
@@ -38,14 +38,27 @@ export default function AboutModal({ onClose }: AboutModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 26 }}>🌍</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <img
+              src="/branding/sonix-logo.png"
+              alt="SONIX logo"
+              style={{
+                width: 52,
+                height: 52,
+                borderRadius: 12,
+                border: '1px solid rgba(0, 212, 255, 0.4)',
+                objectFit: 'cover',
+              }}
+            />
             <div>
               <h2 style={{ fontSize: 19, fontWeight: 700, color: '#FFFFFF', margin: 0 }}>
-                Earth 616: The Earth Information Jukebox
+                SONIX: The Earth Information Jukebox
               </h2>
               <div style={{ fontSize: 11, color: '#00D4FF', fontFamily: 'var(--font-mono)' }}>
-                NASA International Space Apps Challenge 2026
+                Team SONIX • NASA International Space Apps Challenge 2026
+              </div>
+              <div style={{ fontSize: 9.5, color: '#64748B', fontFamily: 'var(--font-mono)', marginTop: 2 }}>
+                Logo: AI-generated
               </div>
             </div>
           </div>
@@ -93,7 +106,7 @@ export default function AboutModal({ onClose }: AboutModalProps) {
             }}
           >
             <h3 style={{ color: '#00D4FF', fontSize: 12.5, textTransform: 'uppercase', letterSpacing: 1, margin: 0, marginBottom: 8 }}>
-              🎯 How Earth 616 Answers the Challenge
+              🎯 How SONIX Answers the Challenge
             </h3>
             <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12.5, color: '#E0F2FE' }}>
               <li>

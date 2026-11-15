@@ -133,4 +133,4 @@ We followed each page's explicit credit request; see the NASA Reproduction Guide
 ---
 
 ## 6. AI Assistance Disclosure
-In compliance with NASA International Space Apps Challenge regulations, the Earth 616 team discloses that AI programming assistance (Antigravity by Google DeepMind) was utilized during the development of this prototype. All underlying NASA datasets are 100% authentic, verified, and unmanipulated; all sonification algorithms adhere strictly to linear mathematical mappings.
+In compliance with NASA International Space Apps Challenge regulations, Team SONIX discloses that AI programming assistance (Antigravity by Google DeepMind) and AI image generation tools were utilized during the development of this prototype. All underlying NASA datasets are 100% authentic, verified, and unmanipulated; all sonification algorithms adhere strictly to linear mathematical mappings.

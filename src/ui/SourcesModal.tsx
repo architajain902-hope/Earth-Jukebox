@@ -115,7 +115,7 @@ export default function SourcesModal({ onClose }: SourcesModalProps) {
         </div>
 
         <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 0, marginBottom: 16, lineHeight: 1.5 }}>
-          All NASA Earth Information Center (EIC) visual frames and Scientific Visualization Studio (SVS) media used in Earth 616 are verified directly from NASA servers. We followed each page's explicit credit request (see the NASA Reproduction Guidelines linked on each SVS page). Exported soundscapes are our own derived work from NASA media and data.
+          All NASA Earth Information Center (EIC) visual frames and Scientific Visualization Studio (SVS) media used in SONIX are verified directly from NASA servers. We followed each page's explicit credit request (see the NASA Reproduction Guidelines linked on each SVS page). Exported soundscapes are our own derived work from NASA media and data.
         </p>
 
         {loading ? (

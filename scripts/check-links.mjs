@@ -38,7 +38,7 @@ function checkUrl(url) {
 
       const req = client.request(parsed, {
         method: 'HEAD',
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Earth616/1.0' },
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) SONIX/1.0' },
         timeout: 8000
       }, (res) => {
         // Status 200, 301, 302, 403 (some servers block HEAD/bots)
@@ -70,7 +70,7 @@ function checkUrl(url) {
 
 async function main() {
   console.log('====================================================');
-  console.log(' Earth 616: Documentation URL Link Integrity Check');
+  console.log(' SONIX: Documentation URL Link Integrity Check');
   console.log('====================================================\n');
 
   const allUrls = new Set();

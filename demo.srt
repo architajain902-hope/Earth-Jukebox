@@ -4,11 +4,11 @@ What if we could not only see, but hear how Earth is changing?
 
 2
 00:00:06,000 --> 00:00:11,500
-Welcome to Earth 616: The Earth Information Jukebox, built for the NASA International Space Apps Challenge 2026.
+Welcome to SONIX: The Earth Information Jukebox, built for the NASA International Space Apps Challenge 2026.
 
 3
 00:00:12,000 --> 00:00:17,200
-Unlike artistic interpretations or climate-inspired music, Earth 616 is built on strict scientific honesty.
+Unlike artistic interpretations or climate-inspired music, SONIX is built on strict scientific honesty.
 
 4
 00:00:17,500 --> 00:00:23,000
@@ -40,7 +40,7 @@ Curious listeners can open "What Am I Hearing?" for an instant offline scientifi
 
 11
 00:01:05,500 --> 00:01:12,000
-Designed for universal accessibility, Earth 616 is fully navigable by keyboard with live screen-reader announcements.
+Designed for universal accessibility, SONIX is fully navigable by keyboard with live screen-reader announcements.
 
 12
 00:01:12,500 --> 00:01:18,500
@@ -52,4 +52,4 @@ Our roadmap extends this framework to NASA wind, precipitation, and wildfire dat
 
 14
 00:01:26,000 --> 00:01:31,500
-Earth 616: Turning NASA climate science into an experience you can see, touch, and hear. Thank you.
+SONIX: Turning NASA climate science into an experience you can see, touch, and hear. Thank you.

@@ -20,7 +20,7 @@ export default function ExportModal({ data, onClose }: ExportModalProps) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `nasa-earth-jukebox-1880-2025-timelapse.wav`;
+      a.download = `sonix-earth-jukebox-1880-2025-timelapse.wav`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -58,7 +58,7 @@ export default function ExportModal({ data, onClose }: ExportModalProps) {
       // Title header
       ctx.fillStyle = '#FFFFFF';
       ctx.font = 'bold 28px sans-serif';
-      ctx.fillText('Earth 616: Global Surface Temperature Anomaly (1880–2025)', 40, 50);
+      ctx.fillText('SONIX: The Earth Information Jukebox (1880–2025)', 40, 50);
 
       ctx.fillStyle = '#94A3B8';
       ctx.font = '16px monospace';
@@ -75,7 +75,7 @@ export default function ExportModal({ data, onClose }: ExportModalProps) {
         const pngUrl = canvas.toDataURL('image/png');
         const a = document.createElement('a');
         a.href = pngUrl;
-        a.download = 'nasa-gistemp-temperature-anomaly-chart.png';
+        a.download = 'sonix-earth-jukebox-temperature-anomaly-chart.png';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -235,7 +235,7 @@ export default function ExportModal({ data, onClose }: ExportModalProps) {
             lineHeight: 1.4,
           }}
         >
-          <em>Attribution Note:</em> All exported audio and charts are derived works synthesized by Team Earth 616 from authentic NASA GISTEMP v4 records. Permitted for open educational and research reuse under the MIT License.
+          <em>Attribution Note:</em> All exported audio and charts are derived works synthesized by Team SONIX from authentic NASA GISTEMP v4 records. Permitted for open educational and research reuse under the MIT License.
         </div>
 
         <div style={{ marginTop: 18, display: 'flex', justifyContent: 'flex-end' }}>

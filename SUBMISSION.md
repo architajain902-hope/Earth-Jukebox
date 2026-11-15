@@ -1,7 +1,7 @@
 # NASA International Space Apps Challenge 2026: Project Submission
 
-## Project Name: Earth 616: The Earth Information Jukebox
-**Team Name:** Earth 616  
+## Project Name: SONIX: The Earth Information Jukebox
+**Team Name:** Team SONIX  
 **Local Event:** Bhopal, India  
 **Challenge:** The Earth Information Jukebox  
 
@@ -9,14 +9,14 @@
 
 ### 1. Challenge Selection
 **Challenge:** The Earth Information Jukebox  
-**Why this challenge:** NASA's Earth Information Center creates world-class visual frames of our changing climate. Earth 616 directly answers this challenge by translating these visual anomalies into dynamic, real-time synthesized sound, making planetary climate change accessible, auditory, and intuitive for everyone.
+**Why this challenge:** NASA's Earth Information Center creates world-class visual frames of our changing climate. SONIX directly answers this challenge by translating these visual anomalies into dynamic, real-time synthesized sound, making planetary climate change accessible, auditory, and intuitive for everyone.
 
 ---
 
 ### 2. High-Level Summary
 *Word count: 96 words (Limit: at most 120 words)*
 
-Earth 616: The Earth Information Jukebox translates 146 years (1880–2025) of NASA global surface temperature anomalies into an interactive 3D audio-visual instrument. Pairing NASA Earth Information Center visual frames with real-time Web Audio synthesis, every pitch is mathematically calculated from real data: higher temperature anomaly produces higher pitch. Users can scrub history, play automated time-lapses, audition decade chords, compare birth years, and explore offline bilingual English/Hindi explainers. Built with strict scientific honesty and zero pre-recorded audio, Earth 616 delivers an accessible, universal way to hear and see our warming planet.
+SONIX: The Earth Information Jukebox translates 146 years (1880–2025) of NASA global surface temperature anomalies into an interactive 3D audio-visual instrument. Pairing NASA Earth Information Center visual frames with real-time Web Audio synthesis, every pitch is mathematically calculated from real data: higher temperature anomaly produces higher pitch. Users can scrub history, play automated time-lapses, audition decade chords, compare birth years, and explore offline bilingual English/Hindi explainers. Built with strict scientific honesty and zero pre-recorded audio, SONIX delivers an accessible, universal way to hear and see our warming planet.
 
 ---
 
@@ -26,7 +26,7 @@ Earth 616: The Earth Information Jukebox translates 146 years (1880–2025) of N
 Earth observation visualizations produced by NASA—such as global temperature anomaly heatmaps—are visually stunning, but they remain abstract to the general public and inaccessible to blind and low-vision individuals. Furthermore, artistic "climate music" projects frequently compromise scientific rigor by improvising arbitrary melodies that have no mathematical relationship to real data.
 
 #### Our Approach & Core Philosophy
-Earth 616 is founded on **strict scientific honesty**:
+SONIX is founded on **strict scientific honesty**:
 1. Sound is generated directly from physical data values; we never fake, invent, or randomize climate measurements.
 2. Sound is synthesized 100% in real time inside the browser using the Web Audio API without relying on pre-recorded audio files.
 3. Every numerical value displayed or quoted in the application is computed dynamically from verified NASA records at runtime.

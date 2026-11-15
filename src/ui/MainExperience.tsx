@@ -377,14 +377,27 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
         }}
       >
         {/* 1. Brand Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 24, cursor: 'pointer' }} onClick={() => setActiveTab('earth')}>🌍</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => setActiveTab('earth')}>
+          <img
+            src="/branding/sonix-logo.png"
+            alt="SONIX logo"
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              border: '1px solid rgba(0, 212, 255, 0.4)',
+              objectFit: 'cover',
+            }}
+          />
           <div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary, #FFFFFF)', letterSpacing: -0.3, lineHeight: 1 }}>
-              Earth 616
+            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary, #FFFFFF)', letterSpacing: 0.5, lineHeight: 1.1 }}>
+              SONIX
             </div>
-            <div style={{ fontSize: 10, color: '#00D4FF', fontFamily: 'var(--font-mono)', letterSpacing: 0.5 }}>
-              NASA Space Apps 2026
+            <div
+              className="hide-on-mobile"
+              style={{ fontSize: 10, color: '#00D4FF', fontFamily: 'var(--font-mono)', letterSpacing: 0.3 }}
+            >
+              The Earth Information Jukebox
             </div>
           </div>
         </div>
@@ -851,7 +864,7 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
               }}
             >
               <span>
-                v1.1.0 • Built: {typeof __BUILD_TIME__ !== 'undefined' ? __BUILD_TIME__.slice(0, 10) : '2026-11-15'} • NASA GISTEMP v4
+                SONIX • v1.1.0 • Built: {typeof __BUILD_TIME__ !== 'undefined' ? __BUILD_TIME__.slice(0, 10) : '2026-11-15'} • NASA GISTEMP v4
               </span>
               <span>
                 Independent student project using NASA data and imagery. Not endorsed by NASA.

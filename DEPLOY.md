@@ -1,6 +1,6 @@
-# DEPLOYMENT GUIDE: EARTH 616 JUKEBOX
+# DEPLOYMENT GUIDE: SONIX JUKEBOX
 
-Earth 616 is a zero-backend, client-side static web application built with Vite, React, TypeScript, and Three.js. It can be deployed in under 2 minutes to **Vercel**, **Netlify**, or **GitHub Pages**.
+SONIX is a zero-backend, client-side static web application built with Vite, React, TypeScript, and Three.js. It can be deployed in under 2 minutes to **Vercel**, **Netlify**, or **GitHub Pages**.
 
 ---
 

@@ -1,5 +1,5 @@
 # JUDGING AUDIT & GAP ANALYSIS
-**Project:** Earth 616: The Earth Information Jukebox  
+**Project:** SONIX: The Earth Information Jukebox  
 **Event:** NASA International Space Apps Challenge 2026 (Bhopal Local Event -> Global Nominee)  
 **Challenge:** The Earth Information Jukebox  
 **Date:** November 14, 2026
@@ -22,7 +22,7 @@
 
 Based on the working summary of **The Earth Information Jukebox (NASA Space Apps 2026)**:
 
-| Requirement from Challenge Statement | Status in Earth 616 | Verification Details & Improvements Planned |
+| Requirement from Challenge Statement | Status in SONIX | Verification Details & Improvements Planned |
 | :--- | :---: | :--- |
 | **Pairs NASA Earth Information Center (EIC) visualizations / visual frames with dynamic sonification** | **Partial** | *Current:* Uses NASA GISTEMP v4 and Blue Marble textures on a 3D WebGL globe.<br>*Fix:* Add a dedicated **EIC Portal modal** referencing `earth.gov` visual frames and explaining how our real-time sonification algorithm translates these visual anomaly maps into sound. |
 | **Generated in real time (synthesized, not pre-recorded music)** | **Done** | 100% real-time Web Audio API synthesis via pure sine + 2nd harmonic oscillator graph and `DynamicsCompressorNode`. Zero external audio files. |

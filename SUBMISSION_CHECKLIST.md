@@ -1,6 +1,6 @@
 # NASA INTERNATIONAL SPACE APPS CHALLENGE 2026: SUBMISSION CHECKLIST
 
-**Project:** Earth 616: The Earth Information Jukebox  
+**Project:** SONIX: The Earth Information Jukebox  
 **Local Event:** Bhopal, India  
 **Challenge:** The Earth Information Jukebox  
 **Submission Deadline:** Sunday 15 Nov, 11:59 PM IST  
@@ -12,7 +12,7 @@
 Use this checklist to ensure 100% compliance before final submission on the Space Apps portal.
 
 ### 1. Team & Project Profile
-- [ ] **Team Name:** Earth 616
+- [ ] **Team Name:** Team SONIX
 - [ ] **Challenge Selected:** The Earth Information Jukebox
 - [ ] **Team Roster:** All team members (up to 6) accepted and registered in the project roster.
 - [ ] **Location / Event:** Bhopal, India local event selected.

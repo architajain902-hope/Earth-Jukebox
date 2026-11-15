@@ -1,4 +1,4 @@
-# Earth 616: The Earth Information Jukebox
+# SONIX: The Earth Information Jukebox
 ## Official Demonstration Video Script (Under 2:00)
 
 *Target Video Duration: 1 minute 52 seconds (8-second safety margin below 2:00)*  
@@ -9,10 +9,10 @@
 
 ### [0:00 - 0:12] Hook & Vision
 **Visual:**  
-Camera flies in through a deep space starfield toward a photorealistic, rotating 3D Earth. The title card appears: *"Earth 616: The Earth Information Jukebox"*.
+Camera flies in through a deep space starfield toward a photorealistic, rotating 3D Earth. The title card appears: *"SONIX: The Earth Information Jukebox"*.
 
 **Spoken Narration (Speaker):**  
-"What if we could not only see, but hear how Earth is changing? Welcome to Earth 616: The Earth Information Jukebox, built for the NASA International Space Apps Challenge 2026."
+"What if we could not only see, but hear how Earth is changing? Welcome to SONIX: The Earth Information Jukebox, built for the NASA International Space Apps Challenge 2026."
 
 ---
 
@@ -21,7 +21,7 @@ Camera flies in through a deep space starfield toward a photorealistic, rotating
 Camera settles on the rotating globe. The year counter displays **1880** with anomaly **−0.18 °C**. A deep, warm synthesized sine tone sounds at **337 Hz** (note E4). An atmospheric Fresnel glow shimmers cool blue around the planet, and a gentle cyan acoustic pulse ripples outward.
 
 **Spoken Narration (Speaker):**  
-"Unlike artistic interpretations or climate-inspired music, Earth 616 is built on strict scientific honesty. Every pitch is synthesized in real time from authentic NASA GISTEMP records from 1880 to 2025. Our rule is simple: higher temperature anomaly produces a higher pitch. In 1880, the tone is deep and Earth’s atmosphere glows cool blue."
+"Unlike artistic interpretations or climate-inspired music, SONIX is built on strict scientific honesty. Every pitch is synthesized in real time from authentic NASA GISTEMP records from 1880 to 2025. Our rule is simple: higher temperature anomaly produces a higher pitch. In 1880, the tone is deep and Earth’s atmosphere glows cool blue."
 
 ---
 
@@ -52,7 +52,7 @@ The 3D Earth's atmospheric glow dynamically transitions from cyan to blazing amb
 The user opens the *"What Am I Hearing?"* explainer, revealing the #1 historical rank, pre-industrial baseline deltas, and switches language to **Hindi (हिन्दी)**. The camera highlights keyboard focus rings, `aria-live` screen-reader captions, and the Web Speech narration toggle.
 
 **Spoken Narration (Speaker):**  
-"Curious listeners can open 'What Am I Hearing?' for an instant offline scientific breakdown with a full Hindi bilingual toggle. Designed for universal accessibility, Earth 616 is fully navigable by keyboard with live screen-reader announcements."
+"Curious listeners can open 'What Am I Hearing?' for an instant offline scientific breakdown with a full Hindi bilingual toggle. Designed for universal accessibility, SONIX is fully navigable by keyboard with live screen-reader announcements."
 
 ---
 
@@ -61,13 +61,13 @@ The user opens the *"What Am I Hearing?"* explainer, revealing the #1 historical
 The *"Data & Method"* panel opens, displaying live mathematical formula calculations and 100% data validation. The *"Future Earth"* roadmap card showcases planned wind vector, precipitation, and wildfire sonification.
 
 **Spoken Narration (Speaker):**  
-"All 146 consecutive years are verified with 18 automated unit tests. Our roadmap extends this framework to NASA wind, precipitation, and wildfire datasets."
+"All 146 consecutive years are verified with automated unit tests. Our roadmap extends this framework to NASA wind, precipitation, and wildfire datasets."
 
 ---
 
 ### [1:46 - 1:52] Closing
 **Visual:**  
-Earth rotates gracefully into space. The final screen shows: *"Team Earth 616 · NASA Space Apps Challenge 2026 · Open Source under MIT · Live Demo Link"*.
+Earth rotates gracefully into space. The final screen shows: *"Team SONIX · NASA Space Apps Challenge 2026 · Open Source under MIT · Live Demo Link"*.
 
 **Spoken Narration (Speaker):**  
-"Earth 616: Turning NASA climate science into an experience you can see, touch, and hear. Thank you."
+"SONIX: Turning NASA climate science into an experience you can see, touch, and hear. Thank you."

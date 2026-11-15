@@ -41,7 +41,7 @@ export default function AutoTour({
     // [0:00 - 0:12] Hook
     schedule(1000, () => {
       setCurrentCaption(
-        'Welcome to Earth 616: The Earth Information Jukebox. 146 years of real NASA climate measurements.'
+        'Welcome to SONIX: The Earth Information Jukebox. 146 years of real NASA climate measurements.'
       );
       onSetYear(1880);
     });
@@ -144,7 +144,7 @@ export default function AutoTour({
     // [1:45 - 2:00] Closing (Ends at 100s)
     schedule(95000, () => {
       setCurrentCaption(
-        'Earth 616: The Earth Information Jukebox · Team Earth 616 · NASA International Space Apps Challenge 2026.'
+        'SONIX: The Earth Information Jukebox · Team SONIX · NASA International Space Apps Challenge 2026.'
       );
     });
 

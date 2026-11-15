@@ -1,6 +1,6 @@
 # QA & VERIFICATION REPORT
 
-**Project:** Earth 616: The Earth Information Jukebox  
+**Project:** SONIX: The Earth Information Jukebox  
 **NASA Space Apps Challenge 2026** (Challenge: The Earth Information Jukebox)  
 **Date:** 2026-11-15  
 **Version:** v1.1.0  
@@ -48,7 +48,7 @@ All requested screenshots have been generated via automated browser execution:
 
 ```text
 ====================================================
- Earth 616: Space Apps 2026 Verification Suite
+ SONIX: Space Apps 2026 Verification Suite
 ====================================================
 
 ▶ [1/4] Validating NASA GISTEMP v4 Dataset...

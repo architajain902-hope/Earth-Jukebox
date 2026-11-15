@@ -65,7 +65,7 @@ export default function ClassroomModal({
       year: 1880,
       explanation:
         'In 1880, modern thermometer coverage became dense enough for global analysis. The anomaly was negative (−0.18 °C). In our sonification engine, cooler temperatures produce deeper pitches. Listen to the 1880 tone: it is low on the musical scale (around 337 Hz, note E4).',
-      question: 'In Earth 616, what happens to musical pitch as global anomaly decreases below zero?',
+      question: 'In SONIX, what happens to musical pitch as global anomaly decreases below zero?',
       options: [
         'The sound gets louder',
         'The musical pitch becomes lower in frequency (Hz)',
@@ -95,7 +95,7 @@ export default function ClassroomModal({
       year: latestRecord.year,
       explanation:
         `Recent years have shattered global heat records, with anomalies exceeding +1.20 °C above the baseline. In our jukebox, this pushes the audio frequency toward 880 Hz (musical note A5). The pitch is dramatically higher than 1880, translating the physical accumulation of planetary thermal energy directly into sound.`,
-      question: 'Why does Earth 616 use real mathematical mapping instead of randomized music?',
+      question: 'Why does SONIX use real mathematical mapping instead of randomized music?',
       options: [
         'Because randomized music is illegal in web browsers',
         'Scientific honesty: so every pitch change directly represents real NASA physical measurements',

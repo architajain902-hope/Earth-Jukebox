@@ -1,6 +1,6 @@
 # ORIGINAL WORK DISCLOSURE
 
-In accordance with the rules of the **NASA International Space Apps Challenge 2026**, this document clearly delineates original work created by **Team Earth 616** versus third-party data, libraries, and assets utilized.
+In accordance with the rules of the **NASA International Space Apps Challenge 2026**, this document clearly delineates original work created by **Team SONIX** versus third-party data, libraries, and assets utilized.
 
 ---
 
@@ -19,4 +19,4 @@ In accordance with the rules of the **NASA International Space Apps Challenge 20
 ---
 
 ## 2. Integrity Statement
-Team Earth 616 certifies that all software algorithms, mathematical sonification pipelines, visual shader implementations, and educational curricula presented in this repository were created by our team for the 2026 NASA Space Apps Challenge. All space agency data and open-source dependencies have been properly credited in [REFERENCES.md](REFERENCES.md).
+Team SONIX certifies that all software algorithms, mathematical sonification pipelines, visual shader implementations, and educational curricula presented in this repository were created by our team for the 2026 NASA Space Apps Challenge. All space agency data and open-source dependencies have been properly credited in [REFERENCES.md](REFERENCES.md).

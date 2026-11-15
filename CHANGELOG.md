@@ -1,4 +1,4 @@
-# CHANGELOG: Earth 616 Implementation Audit
+# CHANGELOG: SONIX Implementation Audit
 
 All key technical decisions, bug fixes, and milestones completed during the 36-hour NASA International Space Apps Challenge.
 

@@ -13,7 +13,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 
 console.log('====================================================');
-console.log(' Earth 616: Space Apps 2026 Verification Suite');
+console.log(' SONIX: Space Apps 2026 Verification Suite');
 console.log('====================================================\n');
 
 // 1. Data Validation Check

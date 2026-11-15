@@ -158,8 +158,8 @@ export default function TimelineSlider({
           borderRadius: 6,
           overflow: 'hidden',
           cursor: 'pointer',
-          border: '1px solid rgba(255, 255, 255, 0.18)',
-          boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.4)',
+          border: '1px solid rgba(0, 212, 255, 0.4)',
+          boxShadow: '0 0 12px rgba(0, 212, 255, 0.18), inset 0 1px 3px rgba(0, 0, 0, 0.5)',
           position: 'relative',
         }}
         role="slider"

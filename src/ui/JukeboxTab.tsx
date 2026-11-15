@@ -188,13 +188,14 @@ export default function JukeboxTab({
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         {/* Top Header */}
         <div
+          className="scroll-reveal"
           style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-start',
             flexWrap: 'wrap',
             gap: 16,
-            marginBottom: 20,
+            marginBottom: 24,
           }}
         >
           <div>
@@ -274,7 +275,7 @@ export default function JukeboxTab({
         </div>
 
         {/* Filmstrip of Verified NASA SVS Frames */}
-        <div style={{ marginBottom: 28 }}>
+        <div className="scroll-reveal-delay-1" style={{ marginBottom: 28 }}>
           <div
             style={{
               display: 'flex',
@@ -345,7 +346,7 @@ export default function JukeboxTab({
               display: 'flex',
               gap: 16,
               overflowX: 'auto',
-              paddingBottom: 10,
+              paddingBottom: 12,
               scrollSnapType: 'x mandatory',
               scrollbarWidth: 'thin',
             }}
@@ -358,17 +359,20 @@ export default function JukeboxTab({
                   onClick={() => setSelectedFrameId(item.id)}
                   aria-pressed={isSelected}
                   aria-label={`${item.title} (${item.sourceId})`}
+                  className={isSelected ? '' : 'neon-border-interactive'}
                   style={{
                     flex: '0 0 260px',
                     scrollSnapAlign: 'start',
                     padding: 10,
                     borderRadius: 12,
-                    border: isSelected ? '2px solid #00D4FF' : '1px solid rgba(255,255,255,0.15)',
-                    background: isSelected ? 'rgba(0, 212, 255, 0.18)' : 'rgba(11, 29, 58, 0.55)',
+                    border: isSelected ? '2px solid #00D4FF' : '1px solid rgba(0, 212, 255, 0.22)',
+                    background: isSelected ? 'rgba(0, 212, 255, 0.2)' : 'rgba(11, 29, 58, 0.55)',
                     cursor: 'pointer',
                     textAlign: 'left',
-                    transition: 'all 0.15s ease',
-                    boxShadow: isSelected ? '0 0 16px rgba(0, 212, 255, 0.25)' : 'none',
+                    transition: 'all 0.2s ease',
+                    boxShadow: isSelected
+                      ? '0 0 24px rgba(0, 212, 255, 0.5), inset 0 0 10px rgba(0, 212, 255, 0.2)'
+                      : '0 4px 14px rgba(0, 0, 0, 0.3)',
                   }}
                 >
                   <div
@@ -430,15 +434,14 @@ export default function JukeboxTab({
             gap: 24,
             marginBottom: 24,
           }}
-          className="nasa-frames-main-grid"
+          className="nasa-frames-main-grid scroll-reveal-delay-2"
         >
           {/* Visual Display with Scanline Playhead (16:9 Aspect Ratio) */}
           <div
-            className="glass"
+            className="glass neon-border"
             style={{
               padding: 20,
               borderRadius: 16,
-              border: '1px solid rgba(0, 212, 255, 0.3)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -540,11 +543,10 @@ export default function JukeboxTab({
 
           {/* Computer Vision Metrics & Analysis Breakdown */}
           <div
-            className="glass"
+            className="glass neon-border"
             style={{
               padding: 20,
               borderRadius: 16,
-              border: '1px solid rgba(0, 212, 255, 0.25)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -656,11 +658,10 @@ export default function JukeboxTab({
         {/* Compact Verified NASA Credit Line Under Every Frame (14px min text) */}
         {activeItem && (
           <div
-            className="glass"
+            className="glass neon-border scroll-reveal-delay-3"
             style={{
               padding: '18px 24px',
               borderRadius: 12,
-              border: '1px solid rgba(0, 212, 255, 0.25)',
               background: 'rgba(11, 29, 58, 0.65)',
             }}
           >

@@ -39,6 +39,7 @@ export default function LearnTab({
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         {/* Top Header */}
         <div
+          className="scroll-reveal"
           style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -106,11 +107,10 @@ export default function LearnTab({
         >
           {/* Card 1: 5-step classroom lesson */}
           <div
-            className="glass"
+            className="glass neon-border-interactive scroll-reveal-delay-1"
             style={{
               padding: 28,
               borderRadius: 16,
-              border: '1px solid rgba(0, 212, 255, 0.25)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -168,11 +168,10 @@ export default function LearnTab({
 
           {/* Card 2: What am I hearing? (<selectedYear>) */}
           <div
-            className="glass"
+            className="glass neon-border-interactive scroll-reveal-delay-2"
             style={{
               padding: 28,
               borderRadius: 16,
-              border: '1px solid rgba(0, 212, 255, 0.25)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -213,11 +212,10 @@ export default function LearnTab({
 
           {/* Card 3: How we made this */}
           <div
-            className="glass"
+            className="glass neon-border-interactive scroll-reveal-delay-3"
             style={{
               padding: 28,
               borderRadius: 16,
-              border: '1px solid rgba(0, 212, 255, 0.25)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -259,11 +257,10 @@ export default function LearnTab({
 
         {/* Challenge Alignment Highlight Card */}
         <div
-          className="glass"
+          className="glass neon-border scroll-reveal-delay-3"
           style={{
             padding: 28,
             borderRadius: 16,
-            border: '1px solid rgba(0, 212, 255, 0.3)',
             background: 'linear-gradient(135deg, rgba(11,61,145,0.25) 0%, rgba(5,11,26,0.65) 100%)',
           }}
         >

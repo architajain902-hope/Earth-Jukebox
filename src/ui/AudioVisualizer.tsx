@@ -141,8 +141,8 @@ export default function AudioVisualizer({
         background: 'var(--surface-glass, rgba(7, 18, 38, 0.85))',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        border: '1px solid var(--surface-border, rgba(0, 212, 255, 0.25))',
-        boxShadow: '0 16px 40px rgba(0, 0, 0, 0.55)',
+        border: '1px solid rgba(0, 212, 255, 0.38)',
+        boxShadow: '0 16px 40px rgba(0, 0, 0, 0.55), 0 0 20px rgba(0, 212, 255, 0.16), inset 0 0 14px rgba(0, 212, 255, 0.05)',
         width: '100%',
         boxSizing: 'border-box',
       }}

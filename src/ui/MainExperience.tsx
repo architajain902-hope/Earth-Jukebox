@@ -360,31 +360,35 @@ export default function MainExperience({
           ROW 1: SLIM TOP BAR (Max 5 Visible Items)
           ========================================================= */}
       <header
-        className="glass app-header"
+        className="glass app-header neon-border"
         style={{
-          height: 54,
+          height: 56,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0 18px',
-          margin: '8px 12px 0 12px',
+          padding: '0 20px',
+          margin: '8px 14px 0 14px',
           borderRadius: 14,
           zIndex: 100,
+          border: '1px solid rgba(0, 212, 255, 0.35)',
+          boxShadow: '0 4px 24px rgba(0, 0, 0, 0.45), 0 0 18px rgba(0, 212, 255, 0.16)',
         }}
       >
         {/* 1. Brand Logo & Title */}
         <div
           style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
           onClick={() => setActiveTab('earth')}
+          title="Return to 3D Earth Globe"
         >
           <img
             src="/branding/sonix-logo.png"
             alt="SONIX logo"
             style={{
-              width: 32,
-              height: 32,
+              width: 34,
+              height: 34,
               borderRadius: 8,
-              border: '1px solid rgba(0, 212, 255, 0.4)',
+              border: '1px solid rgba(0, 212, 255, 0.5)',
+              boxShadow: '0 0 12px rgba(0, 212, 255, 0.25)',
               objectFit: 'cover',
             }}
           />
@@ -401,64 +405,39 @@ export default function MainExperience({
           </div>
         </div>
 
-        {/* 2. Primary Tabs: Earth | NASA Frames | Learn */}
+        {/* 2. Primary Tabs: Earth | NASA Frames | Learn with Separate Spacing & Neon Detailing */}
         <nav
+          className="neon-tabs-nav"
           style={{
             display: 'flex',
-            background: 'rgba(2, 6, 17, 0.65)',
-            borderRadius: 10,
-            padding: 3,
-            border: '1px solid rgba(0, 212, 255, 0.2)',
+            alignItems: 'center',
+            gap: 12, // Distinct separated tab spacing
           }}
           aria-label="Main Navigation Tabs"
         >
           <button
             onClick={() => setActiveTab('earth')}
-            style={{
-              padding: '6px 14px',
-              borderRadius: 8,
-              border: 'none',
-              fontSize: 13,
-              fontWeight: 700,
-              cursor: 'pointer',
-              background: activeTab === 'earth' ? 'linear-gradient(135deg, #0B3D91 0%, #00D4FF 100%)' : 'transparent',
-              color: activeTab === 'earth' ? '#FFFFFF' : 'var(--text-secondary, #CBD5E1)',
-              transition: 'all 0.15s ease',
-            }}
+            className={`neon-tab-item ${activeTab === 'earth' ? 'active' : ''}`}
+            aria-pressed={activeTab === 'earth'}
           >
-            🌐 Earth
+            {activeTab === 'earth' && <span className="neon-pulse-dot" />}
+            <span>🌐 Earth</span>
           </button>
           <button
             onClick={() => setActiveTab('frames')}
-            style={{
-              padding: '6px 14px',
-              borderRadius: 8,
-              border: 'none',
-              fontSize: 13,
-              fontWeight: 700,
-              cursor: 'pointer',
-              background: activeTab === 'frames' ? 'linear-gradient(135deg, #0B3D91 0%, #00D4FF 100%)' : 'transparent',
-              color: activeTab === 'frames' ? '#FFFFFF' : 'var(--text-secondary, #CBD5E1)',
-              transition: 'all 0.15s ease',
-            }}
+            className={`neon-tab-item ${activeTab === 'frames' ? 'active' : ''}`}
+            aria-pressed={activeTab === 'frames'}
           >
-            🎞️ NASA Frames
+            {activeTab === 'frames' && <span className="neon-pulse-dot" />}
+            <span>🎞️ NASA Frames</span>
           </button>
           <button
             onClick={() => setActiveTab('learn')}
-            style={{
-              padding: '6px 14px',
-              borderRadius: 8,
-              border: 'none',
-              fontSize: 13,
-              fontWeight: 700,
-              cursor: 'pointer',
-              background: activeTab === 'learn' ? 'linear-gradient(135deg, #0B3D91 0%, #00D4FF 100%)' : 'transparent',
-              color: activeTab === 'learn' ? '#FFFFFF' : 'var(--text-secondary, #CBD5E1)',
-              transition: 'all 0.15s ease',
-            }}
+            className={`neon-tab-item ${activeTab === 'learn' ? 'active' : ''}`}
+            aria-pressed={activeTab === 'learn'}
           >
-            🎓 Learn
+            {activeTab === 'learn' && <span className="neon-pulse-dot" />}
+            <span>🎓 Learn</span>
           </button>
         </nav>
 

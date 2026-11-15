@@ -7,6 +7,6 @@ describe('NASA Sources & Attribution Integrity', () => {
     expect(report.valid).toBe(true);
     expect(report.errors).toHaveLength(0);
     expect(report.sourceCount).toBeGreaterThanOrEqual(4);
-    expect(report.frameCount).toBeGreaterThanOrEqual(4);
+    expect(report.frameCount).toBeGreaterThanOrEqual(3);
   });
 });

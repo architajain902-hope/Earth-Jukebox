@@ -18,7 +18,7 @@
 
 Earth observation visualizations created by NASA are visually stunning, but they can feel abstract on 2D charts and remain inaccessible to visually impaired audiences.
 
-**SONIX: The Earth Information Jukebox** pairs **NASA Earth Information Center (EIC) visual frames** with **dynamic real-time sonification**. Every year's authentic NASA surface temperature anomaly from 1880 to 2025 is mapped to an exact, deterministic musical pitch: **higher temperature = higher pitch**.
+**SONIX: The Earth Information Jukebox** pairs **NASA Earth Information Center (EIC) visual frames** with **dynamic real-time sonification**. Every year's authentic NASA surface temperature anomaly from 1880 to 2025 is mapped to an exact, fixed-rule musical pitch: **higher temperature = higher pitch**.
 
 Unlike subjective "climate music", SONIX upholds **strict scientific honesty**:
 - Zero randomized notes or artistic approximations.
@@ -64,7 +64,7 @@ Unlike subjective "climate music", SONIX upholds **strict scientific honesty**:
 
 ---
 
-## 4. Exact Deterministic Sonification Rule
+## 4. Exact Fixed-Rule Sonification Rule
 
 $$\text{Frequency (Hz)} = 220.0 + \left(\frac{\text{clamp}(\text{Anomaly}, -0.5, 1.3) - (-0.5)}{1.3 - (-0.5)}\right) \times (880.0 - 220.0)$$
 

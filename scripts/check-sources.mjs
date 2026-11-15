@@ -2,7 +2,7 @@
  * check-sources.mjs
  * NASA Space Apps Challenge 2026 Source & Attribution Integrity Gate.
  * Verifies that:
- * 1. Every frame in public/frames/frames.json has a valid source entry (or "unknown" with TODO).
+ * 1. Every frame in public/frames/frames.json has a valid source entry in sources.json.
  * 2. Every sourceUrl in public/frames/sources.json is a valid https URL.
  * 3. Every verified SVS URL in documentation matches sources.json exactly.
  */
@@ -49,7 +49,7 @@ export function checkSourcesIntegrity() {
     if (!frame.id) errors.push(`Frame missing id: ${JSON.stringify(frame)}`);
     if (!frame.sourceId) {
       errors.push(`Frame ${frame.id} missing sourceId`);
-    } else if (frame.sourceId !== 'unknown' && !sources[frame.sourceId]) {
+    } else if (!sources[frame.sourceId]) {
       errors.push(`Frame ${frame.id} references non-existent sourceId: "${frame.sourceId}"`);
     }
 

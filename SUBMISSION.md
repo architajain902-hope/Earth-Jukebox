@@ -40,7 +40,7 @@ Our pipeline script (`scripts/fetch-data.mjs`) automatically downloads NASA Godd
 - All numbers finite floating-point bounds.
 The dataset is bundled into `public/data/gistemp.json` with fetch timestamps and citations, guaranteeing 100% offline functionality.
 
-##### 2. Exact Deterministic Sonification Formula
+##### 2. Exact Fixed-Rule Sonification Formula
 Frequency is computed using a linear interpolation mapping, clamped strictly between −0.50 °C and +1.30 °C:
 $$\text{Frequency (Hz)} = 220.0 + \left(\frac{\text{clamp}(\text{Anomaly}, -0.5, 1.3) - (-0.5)}{1.3 - (-0.5)}\right) \times (880.0 - 220.0)$$
 - **−0.50 °C:** 220.0 Hz (Musical note **A3**)

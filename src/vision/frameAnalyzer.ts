@@ -8,7 +8,7 @@
  * - Sobel edge density (visual detail/complexity)
  * - Brightness centroid (spatial weight)
  * - Column-by-column profile for time-swept sonification
- * - Accessible natural-language description for screen readers and judges
+ * - Accessible natural-language description based on verified source description and measured pixels
  */
 
 export interface ColumnProfile {
@@ -24,7 +24,7 @@ export interface FrameAnalysisResult {
   width: number;
   height: number;
   dominantHue: number;          // 0 to 360 degrees
-  dominantHueName: string;      // e.g. "Deep Blue", "Amber/Orange"
+  dominantHueName: string;      // e.g. "Deep Blue", "Amber", "Orange"
   averageSaturation: number;    // 0 to 1
   averageBrightness: number;    // 0 to 1
   warmCoolRatio: number;        // 0 (100% cool) to 1 (100% warm)
@@ -36,6 +36,25 @@ export interface FrameAnalysisResult {
   accessibleDescription: string;
 }
 
+export const SCALE_MOODS: Record<'pentatonic' | 'dorian' | 'lydian' | 'aeolian', { label: string; tooltip: string }> = {
+  lydian: {
+    label: 'Lydian (bright and open)',
+    tooltip: 'A major scale with a raised 4th, creating an airy, uplifting feel.',
+  },
+  dorian: {
+    label: 'Dorian (spacious and calm)',
+    tooltip: 'A balanced minor scale with a raised 6th, conveying calm reflection.',
+  },
+  aeolian: {
+    label: 'Aeolian (poignant and serious)',
+    tooltip: 'The natural minor scale, conveying dramatic and climatic weight.',
+  },
+  pentatonic: {
+    label: 'Pentatonic (clear and harmonious)',
+    tooltip: 'A five-note scale with open intervals and no dissonance.',
+  },
+};
+
 const HUE_BIN_NAMES = [
   'Red',
   'Orange',
@@ -45,7 +64,7 @@ const HUE_BIN_NAMES = [
   'Green',
   'Teal/Cyan',
   'Sky Blue',
-  'Ocean Blue',
+  'Deep Blue',
   'Indigo',
   'Violet',
   'Magenta',
@@ -84,25 +103,13 @@ export function rgbToHsl(r: number, g: number, b: number): [number, number, numb
   return [h, s, l];
 }
 
-/** Analyze any visual canvas, image, or video element */
-export function analyzeFrame(
-  source: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement,
+/** Analyze raw pixel data array (RGBA) */
+export function analyzePixelData(
+  data: Uint8ClampedArray | number[] | Uint8Array,
   targetWidth = 96,
-  targetHeight = 48
+  targetHeight = 48,
+  sourceDescription?: string
 ): FrameAnalysisResult {
-  const canvas = document.createElement('canvas');
-  canvas.width = targetWidth;
-  canvas.height = targetHeight;
-  const ctx = canvas.getContext('2d');
-
-  if (!ctx) {
-    throw new Error('Could not create 2D canvas context for frame analysis');
-  }
-
-  ctx.drawImage(source, 0, 0, targetWidth, targetHeight);
-  const imgData = ctx.getImageData(0, 0, targetWidth, targetHeight);
-  const data = imgData.data;
-
   const totalPixels = targetWidth * targetHeight;
   const hueBins = new Array(12).fill(0);
   const luminanceGrid: number[][] = Array.from({ length: targetHeight }, () =>
@@ -216,7 +223,7 @@ export function analyzeFrame(
   const avgBri = totalBri / totalPixels;
 
   // Dominant Hue
-  let maxBinIndex = 8; // Default Ocean Blue
+  let maxBinIndex = 8; // Default Deep Blue
   let maxBinCount = -1;
   for (let i = 0; i < 12; i++) {
     if (hueBins[i] > maxBinCount) {
@@ -251,14 +258,17 @@ export function analyzeFrame(
   const warmPct = Math.round(warmCoolRatio * 100);
   const coolPct = 100 - warmPct;
   const complexityWord =
-    edgeDensity > 0.5 ? 'high visual complexity and detailed features' :
-    edgeDensity > 0.25 ? 'moderate visual texture' : 'smooth, sweeping gradients';
+    edgeDensity > 0.5 ? 'high detail level' :
+    edgeDensity > 0.25 ? 'moderate detail level' : 'low detail level (smooth gradients)';
+
+  const baseDesc = sourceDescription?.trim()
+    ? sourceDescription.trim()
+    : 'NASA visual frame.';
 
   const accessibleDescription =
-    `NASA visualization frame: Dominant color ${dominantHueName} (~${dominantHue}°), ` +
-    `color palette consists of ${coolPct}% cool tones (oceans, ice, atmosphere) and ${warmPct}% warm tones (land, thermal anomalies). ` +
-    `Average brightness is ${Math.round(avgBri * 100)}% with ${complexityWord} (edge density ${(edgeDensity * 100).toFixed(1)}%). ` +
-    `Acoustically mapped into the ${recommendedScale.toUpperCase()} scale centered at the current annual anomaly pitch.`;
+    `${baseDesc} Measured values: main colour is ${dominantHueName} (${Math.round(dominantHue)}°), ` +
+    `${warmPct}% warm and ${coolPct}% cool tones. Average brightness is ${Math.round(avgBri * 100)}% with ${complexityWord} ` +
+    `(${(edgeDensity * 100).toFixed(1)}% edge density). Music mood: ${recommendedScale}.`;
 
   return {
     width: targetWidth,
@@ -275,4 +285,25 @@ export function analyzeFrame(
     recommendedScale,
     accessibleDescription,
   };
+}
+
+/** Analyze any visual canvas, image, or video element */
+export function analyzeFrame(
+  source: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement,
+  targetWidth = 96,
+  targetHeight = 48,
+  sourceDescription?: string
+): FrameAnalysisResult {
+  const canvas = document.createElement('canvas');
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
+  const ctx = canvas.getContext('2d');
+
+  if (!ctx) {
+    throw new Error('Could not create 2D canvas context for frame analysis');
+  }
+
+  ctx.drawImage(source, 0, 0, targetWidth, targetHeight);
+  const imgData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+  return analyzePixelData(imgData.data, targetWidth, targetHeight, sourceDescription);
 }

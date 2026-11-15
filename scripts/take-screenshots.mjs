@@ -58,11 +58,28 @@ async function run() {
   });
   await new Promise((r) => setTimeout(r, 400));
 
-  // 1. Earth Tab Screenshot (Desktop 1440px)
+  // Helper functions for tab switching
+  const switchTab = async (tabName) => {
+    await page.evaluate((name) => {
+      const btn = Array.from(document.querySelectorAll('button')).find((b) => b.innerText.includes(name));
+      if (btn) btn.click();
+    }, tabName);
+    await new Promise((r) => setTimeout(r, 800));
+  };
+
+  const toggleTheme = async () => {
+    await page.evaluate(() => {
+      const btn = Array.from(document.querySelectorAll('button')).find((b) => b.getAttribute('aria-label') === 'Toggle visual theme');
+      if (btn) btn.click();
+    });
+    await new Promise((r) => setTimeout(r, 600));
+  };
+
+  // 1. Earth Tab (Desktop 1440px Dark)
   console.log('Capturing 01-earth-tab.png...');
   await page.screenshot({ path: join(SCREENSHOT_DIR, '01-earth-tab.png') });
 
-  // 2. Accessibility Dropdown
+  // 2. Accessibility Menu
   console.log('Capturing 05-accessibility-menu.png...');
   await page.evaluate(() => {
     const btn = Array.from(document.querySelectorAll('button')).find((b) => b.innerText.includes('Accessibility'));
@@ -70,7 +87,6 @@ async function run() {
   });
   await new Promise((r) => setTimeout(r, 600));
   await page.screenshot({ path: join(SCREENSHOT_DIR, '05-accessibility-menu.png') });
-  // Close it
   await page.evaluate(() => {
     const btn = Array.from(document.querySelectorAll('button')).find((b) => b.innerText.includes('Accessibility'));
     if (btn) btn.click();
@@ -85,65 +101,65 @@ async function run() {
   });
   await new Promise((r) => setTimeout(r, 800));
   await page.screenshot({ path: join(SCREENSHOT_DIR, '04-more-drawer.png') });
-  // Close drawer
   await page.evaluate(() => {
     const btn = Array.from(document.querySelectorAll('button')).find((b) => b.getAttribute('aria-label') === 'Close menu');
     if (btn) btn.click();
   });
   await new Promise((r) => setTimeout(r, 400));
 
-  // 4. NASA Frames Tab
+  // 4. NASA Frames Tab (Desktop 1440px Dark)
   console.log('Capturing 02-nasa-frames-tab.png...');
-  await page.evaluate(() => {
-    const btn = Array.from(document.querySelectorAll('button')).find((b) => b.innerText.includes('NASA Frames'));
-    if (btn) btn.click();
-  });
-  await new Promise((r) => setTimeout(r, 1200));
+  await switchTab('NASA Frames');
   await page.screenshot({ path: join(SCREENSHOT_DIR, '02-nasa-frames-tab.png') });
 
-  // 5. Learn Tab
+  // NASA Frames Tab Light
+  console.log('Capturing 02-nasa-frames-tab-light.png...');
+  await toggleTheme();
+  await page.screenshot({ path: join(SCREENSHOT_DIR, '02-nasa-frames-tab-light.png') });
+  await toggleTheme(); // Back to dark
+
+  // 5. Learn Tab (Desktop 1440px Dark)
   console.log('Capturing 03-learn-tab.png...');
-  await page.evaluate(() => {
-    const btn = Array.from(document.querySelectorAll('button')).find((b) => b.innerText.includes('Learn'));
-    if (btn) btn.click();
-  });
-  await new Promise((r) => setTimeout(r, 1000));
+  await switchTab('Learn');
   await page.screenshot({ path: join(SCREENSHOT_DIR, '03-learn-tab.png') });
 
-  // 6. Light Theme (Daylight)
+  // Learn Tab Light
+  console.log('Capturing 03-learn-tab-light.png...');
+  await toggleTheme();
+  await page.screenshot({ path: join(SCREENSHOT_DIR, '03-learn-tab-light.png') });
+  await toggleTheme(); // Back to dark
+
+  // 6. Earth Light Theme (Daylight)
   console.log('Capturing 06-light-theme.png...');
-  // Go back to Earth tab
-  await page.evaluate(() => {
-    const btn = Array.from(document.querySelectorAll('button')).find((b) => b.innerText.includes('Earth'));
-    if (btn) btn.click();
-  });
-  await new Promise((r) => setTimeout(r, 600));
-  // Toggle theme
-  await page.evaluate(() => {
-    const btn = Array.from(document.querySelectorAll('button')).find((b) => b.getAttribute('aria-label') === 'Toggle visual theme');
-    if (btn) btn.click();
-  });
-  await new Promise((r) => setTimeout(r, 600));
+  await switchTab('Earth');
+  await toggleTheme();
   await page.screenshot({ path: join(SCREENSHOT_DIR, '06-light-theme.png') });
+  await toggleTheme(); // Back to dark
 
-  // Toggle theme back to dark
-  await page.evaluate(() => {
-    const btn = Array.from(document.querySelectorAll('button')).find((b) => b.getAttribute('aria-label') === 'Toggle visual theme');
-    if (btn) btn.click();
-  });
-  await new Promise((r) => setTimeout(r, 400));
-
-  // 7. Tablet View (768px viewport)
-  console.log('Capturing 08-tablet-768px.png...');
+  // 7. Tablet View (768px)
+  console.log('Capturing 08-tablet-768px.png, tablet Learn & Frames...');
   await page.setViewport({ width: 768, height: 1024, deviceScaleFactor: 1 });
   await new Promise((r) => setTimeout(r, 800));
   await page.screenshot({ path: join(SCREENSHOT_DIR, '08-tablet-768px.png') });
 
-  // 8. Mobile View (360px viewport)
-  console.log('Capturing 07-mobile-360px.png...');
+  await switchTab('NASA Frames');
+  await page.screenshot({ path: join(SCREENSHOT_DIR, '02-nasa-frames-tab-768px.png') });
+
+  await switchTab('Learn');
+  await page.screenshot({ path: join(SCREENSHOT_DIR, '03-learn-tab-768px.png') });
+
+  // 8. Mobile View (360px)
+  console.log('Capturing 07-mobile-360px.png, mobile Learn & Frames...');
   await page.setViewport({ width: 360, height: 740, deviceScaleFactor: 1 });
   await new Promise((r) => setTimeout(r, 800));
+  await switchTab('Earth');
   await page.screenshot({ path: join(SCREENSHOT_DIR, '07-mobile-360px.png') });
+
+  await switchTab('NASA Frames');
+  await page.screenshot({ path: join(SCREENSHOT_DIR, '02-nasa-frames-tab-360px.png') });
+
+  await switchTab('Learn');
+  await page.screenshot({ path: join(SCREENSHOT_DIR, '03-learn-tab-360px.png') });
 
   await browser.close();
   console.log('All screenshots captured successfully in docs/screenshots/!');

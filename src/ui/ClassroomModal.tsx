@@ -103,7 +103,7 @@ export default function ClassroomModal({
       ],
       correctIndex: 1,
       explanationOnAnswer:
-        'Brilliant! Scientific honesty is our core pillar: every frequency is calculated deterministically from verified NASA data, translating sight into sound.',
+        'Brilliant! Scientific honesty is our core pillar: every frequency is calculated using a fixed rule from verified NASA data, translating sight into sound.',
     },
   ];
 

@@ -113,7 +113,7 @@ export default function AboutModal({ onClose }: AboutModalProps) {
                 <strong>Pairs Visuals with Dynamic Sonification:</strong> Connects NASA Earth Information Center (EIC) visual frames with real-time Web Audio API synthesis.
               </li>
               <li>
-                <strong>Translates Sight into Sound:</strong> Maps 146 years (1880–2025) of empirical NASA GISTEMP v4 anomaly records to deterministic audio frequencies (220 to 880 Hz).
+                <strong>Translates Sight into Sound:</strong> Maps 146 years (1880–2025) of empirical NASA GISTEMP v4 anomaly records to fixed-rule audio frequencies (220 to 880 Hz).
               </li>
               <li>
                 <strong>Strict Scientific Honesty:</strong> 100% mathematically generated in real time in the user's browser—zero pre-recorded audio, zero randomized notes.

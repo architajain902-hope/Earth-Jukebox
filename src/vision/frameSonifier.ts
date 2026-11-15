@@ -104,7 +104,7 @@ export class FrameSonifier {
     col: { saturation: number; brightness: number; edgeEnergy: number },
     freq: number
   ): void {
-    const ctx = (audioEngine as unknown as { ctx: AudioContext | null }).ctx;
+    const ctx = (audioEngine as any).ctx;
     const analyser = audioEngine.analyser;
     if (!ctx || !analyser) return;
 
@@ -120,8 +120,10 @@ export class FrameSonifier {
     let pannerNode: StereoPannerNode | null = null;
     if ('createStereoPanner' in ctx) {
       pannerNode = ctx.createStereoPanner();
-      const panVal = (this.currentColumn / 96) * 1.8 - 0.9; // -0.9 (left) to +0.9 (right)
-      pannerNode.pan.setValueAtTime(panVal, now);
+      if (pannerNode) {
+        const panVal = (this.currentColumn / 96) * 1.8 - 0.9; // -0.9 (left) to +0.9 (right)
+        pannerNode.pan.setValueAtTime(panVal, now);
+      }
     }
 
     const osc = ctx.createOscillator();

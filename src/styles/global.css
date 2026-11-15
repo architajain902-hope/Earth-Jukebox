@@ -327,3 +327,30 @@ button {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Styled Filmstrip Scrollbar matching theme (no bright white scrollbar) */
+.filmstrip-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 212, 255, 0.4) rgba(5, 11, 26, 0.6);
+}
+.filmstrip-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.filmstrip-scroll::-webkit-scrollbar-track {
+  background: rgba(5, 11, 26, 0.6);
+  border-radius: 4px;
+}
+.filmstrip-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 212, 255, 0.35);
+  border-radius: 4px;
+}
+.filmstrip-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 212, 255, 0.7);
+}
+
+@media (max-width: 900px) {
+  .nasa-frames-main-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+

@@ -16,7 +16,7 @@
 | :--- | :---: | :--- | :--- |
 | **Top Navigation Bar** | **PASS** | Cluttered header with loose buttons and no tab distinction. | Redesigned to slim top bar (max 5 items): Brand Logo, 3 Primary Tabs (`Earth`, `NASA Frames`, `Learn`), Theme Toggle, Accessibility Dropdown, About, and More Drawer trigger. |
 | **3D Earth Globe** | **PASS** | Dark scene lighting; grey moon in orbit; red pulse rings; excessive red atmosphere on high anomalies. | Lifted ambient light to 0.92, set ACES Filmic exposure to 1.22; completely removed grey moon; removed red pulse rings; atmosphere is now celestial cyan-blue rim with warm golden terminator tint; data tint subtle (max 35%). |
-| **Earth Display Presets** | **PASS** | No visual presets. | Added Natural (realistic Blue Marble), Vivid (lush greens & ocean blues), and High-Contrast presets. |
+| **Earth Display Presets** | **PASS** | No visual presets. | Added Natural (realistic Blue Marble), Vivid (lush greens & deep blues), and High-Contrast presets. |
 | **Sound Engine & Mapping** | **PASS** | Only basic toggle; no multi-instrument mixing or arrangement presets. | Preserved exact linear formula ($-0.5\ ^\circ\text{C} \to 220\text{ Hz}$ to $+1.3\ ^\circ\text{C} \to 880\text{ Hz}$). Added 4-voice Sound Mixer (Soft Pad, Plucked Bell, Sub Drone, Harmonic Shimmer) and presets (Calm, Cinematic, Urgent). |
 | **Sound Check Utility** | **PASS** | Missing quick audio audition tool. | Added "Sound Check" button in Sound Mixer that safely auditions 440 Hz reference tone. |
 | **NASA Frames Tab** | **PASS** | Hidden as secondary sub-modal. | Promoted to primary top-level tab featuring horizontal filmstrip for SVS 5313, 3912, and 5425, scanline computer vision sonification, and sticky NASA SVS attribution. |

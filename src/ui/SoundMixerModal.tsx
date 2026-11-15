@@ -163,7 +163,7 @@ export default function SoundMixerModal({
             </div>
           ) : (
             <div style={{ fontSize: 11, color: '#38BDF8', fontFamily: 'var(--font-mono)' }}>
-              Deterministic linear pitch: −0.5 °C (220 Hz) to +1.3 °C (880 Hz). Clamped outside range.
+              Fixed-rule linear pitch: −0.5 °C (220 Hz) to +1.3 °C (880 Hz). Clamped outside range.
             </div>
           )}
         </div>

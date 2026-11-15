@@ -100,7 +100,7 @@ No pre-recorded MP3 or WAV samples are loaded. Every sound is mathematically syn
 
 Accessibility is not an afterthought; it is woven into every layer:
 1. **Web Speech API Screen Reader:** A dedicated toggle speaks aloud the year, signed anomaly, and exact Hertz value upon selection.
-2. **Natural-Language Frame Synthesis (`aria-live="polite"`):** The computer vision engine translates every visual frame into rich descriptive prose for screen reader users (e.g., *"Visual frame shows 74% cool ocean blues with 26% warm terrestrial amber. Moderate visual texture with edge density 28.4%..."*).
+2. **Natural-Language Frame Synthesis (`aria-live="polite"`):** The computer vision engine translates every visual frame into rich descriptive prose for screen reader users (e.g., *"Visual frame shows 74% cool deep blues with 26% warm terrestrial amber. Moderate visual texture with edge density 28.4%..."*).
 3. **Reduced Motion Mode:** Toggles off globe auto-rotation, starfield scintillation, and CSS layout transitions for vestibular disorder accessibility.
 4. **High Contrast Mode:** Amplifies color contrasts, borders, and luminance gradients to satisfy WCAG AAA criteria.
 5. **Color-Blind Safe Warming Stripes:** Built using Professor Ed Hawkins' verified climate stripes palette, incorporating luminance contrasts alongside hue shifts.

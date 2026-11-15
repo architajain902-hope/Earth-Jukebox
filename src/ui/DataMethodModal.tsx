@@ -156,7 +156,7 @@ export default function DataMethodModal({
           {/* Exact Mathematical Mapping Formula */}
           <div>
             <h3 style={{ fontSize: 13, color: '#00D4FF', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6, margin: 0 }}>
-              Exact Deterministic Sonification Formula
+              Exact Fixed-Rule Sonification Formula
             </h3>
             <p style={{ margin: 0, marginBottom: 8 }}>
               Our mapping function is strictly linear, monotonically increasing, and hard-clamped at range limits:

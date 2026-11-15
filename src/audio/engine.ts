@@ -64,7 +64,7 @@ export class AudioEngine {
     }
     const AudioContextClass =
       window.AudioContext ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      (window as any).webkitAudioContext;
     this.ctx = new AudioContextClass();
 
     // Visualizer analyser (1024 FFT bins)

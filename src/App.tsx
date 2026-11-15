@@ -29,7 +29,7 @@ export default function App() {
         setScreen('start');
       })
       .catch((err) => {
-        setErrorMessage(err.message || 'Unknown data initialization error');
+        setErrorMessage(err.message || 'Failed to initialize climate data');
         setScreen('error');
       });
   }, []);

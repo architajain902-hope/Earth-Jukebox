@@ -1,36 +1,41 @@
 import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
-import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
 import { Stars, OrbitControls } from '@react-three/drei';
 import type { GistempDataset } from '../data/types';
 import { audioEngine } from '../audio/engine';
-import { anomalyToFrequency, frequencyToNoteName } from '../audio/sonify';
+import { frequencyToNoteName, type MusicalScaleType } from '../audio/sonify';
 import { getRecordForYear } from '../data/loadData';
 import { setUrlState, copyShareableLink, type AppUrlState } from '../utils/urlState';
 import { demoScreenRecorder } from '../utils/screenRecorder';
-import EarthGlobe from '../globe/EarthGlobe';
+import EarthGlobe, { type EarthDisplayPreset } from '../globe/EarthGlobe';
 import YearDisplay from './YearDisplay';
 import TimelineSlider from './TimelineSlider';
-import TemperatureChart from './TemperatureChart';
-import TransportControls, { type SpeedOption } from './TransportControls';
 import AudioVisualizer from './AudioVisualizer';
 import JukeboxTab from './JukeboxTab';
-import DataBadge from './DataBadge';
+import LearnTab from './LearnTab';
+import QuickJumps from './QuickJumps';
 import ExplainerModal from './ExplainerModal';
 import CompareModal from './CompareModal';
 import AboutModal from './AboutModal';
 import AutoTour from './AutoTour';
 import BirthYearModal from './BirthYearModal';
 import ClassroomModal from './ClassroomModal';
-import EICModal from './EICModal';
 import FutureEarthModal from './FutureEarthModal';
 import DataMethodModal from './DataMethodModal';
 import ExportModal from './ExportModal';
+import SourcesModal from './SourcesModal';
+import SoundMixerModal from './SoundMixerModal';
+import AccessibilityDropdown from './AccessibilityDropdown';
+import CoachMark from './CoachMark';
+import MoreDrawer from './MoreDrawer';
 
 interface MainExperienceProps {
   dataset: GistempDataset;
   initialParams?: AppUrlState;
 }
+
+export type PrimaryTab = 'earth' | 'frames' | 'learn';
+export type SpeedOption = 'slow' | 'normal' | 'fast';
 
 const SPEED_MS: Record<SpeedOption, number> = {
   slow: 400,
@@ -44,10 +49,13 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
   const minYear = years[0] ?? 1880;
   const maxYear = years[years.length - 1] ?? 2025;
 
-  // View mode: 'globe' (3D planetary view) vs 'jukebox' (EIC visual frames)
-  const [viewMode, setViewMode] = useState<'globe' | 'jukebox'>('globe');
+  // Active Primary Tab: 'earth' | 'frames' | 'learn'
+  const [activeTab, setActiveTab] = useState<PrimaryTab>(() => {
+    if (initialParams?.mode === 'classroom') return 'learn';
+    return 'earth';
+  });
 
-  // Selected year state (default from URL or 2024)
+  // Selected year state
   const [selectedYear, setSelectedYear] = useState<number>(initialParams?.year ?? 2024);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [speed, setSpeed] = useState<SpeedOption>(initialParams?.speed ?? 'normal');
@@ -56,37 +64,50 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
   const [muted, setMuted] = useState<boolean>(false);
   const [looping, setLooping] = useState<boolean>(false);
 
-  // Sound mode: 'musical' (harmonious scales) vs 'scientific' (exact raw pitch)
-  const [soundMode, setSoundMode] = useState<'musical' | 'scientific'>('musical');
+  // Sound mode & musical scale
+  const [soundMode, setSoundMode] = useState<'scientific' | 'musical'>('musical');
+  const [musicalScale, setMusicalScale] = useState<MusicalScaleType>('dorian');
+  const [showSoundMixer, setShowSoundMixer] = useState<boolean>(false);
 
-  // Theme: Deep Space ('dark') vs Daylight ('light')
+  // Earth display preset
+  const [displayPreset, setDisplayPreset] = useState<EarthDisplayPreset>('natural');
+
+  // Theme: Dark ('dark') vs Daylight ('light')
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     return (localStorage.getItem('earth_jukebox_theme') as 'dark' | 'light') || 'dark';
   });
 
-  // Demo clip video recording
+  // First-run coach-mark
+  const [showCoachMark, setShowCoachMark] = useState<boolean>(() => {
+    return !localStorage.getItem('earth_jukebox_coach_dismissed');
+  });
+
+  // Advanced controls collapsible drawer
+  const [showAdvancedControls, setShowAdvancedControls] = useState<boolean>(false);
+
+  // More drawer
+  const [showMoreDrawer, setShowMoreDrawer] = useState<boolean>(false);
+
+  // Video recording
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [recordElapsedSec, setRecordElapsedSec] = useState<number>(0);
 
-  // Pulse animation on the 3D globe
-  const [pulseTrigger, setPulseTrigger] = useState<number>(0);
-
-  // Modals & Panels
+  // Modals
   const [showExplainer, setShowExplainer] = useState<boolean>(false);
   const [showCompare, setShowCompare] = useState<boolean>(false);
   const [showAbout, setShowAbout] = useState<boolean>(false);
   const [showBirthYear, setShowBirthYear] = useState<boolean>(initialParams?.mode === 'birthyear');
-  const [showClassroom, setShowClassroom] = useState<boolean>(initialParams?.mode === 'classroom');
-  const [showEIC, setShowEIC] = useState<boolean>(false);
+  const [showClassroom, setShowClassroom] = useState<boolean>(false);
   const [showFutureEarth, setShowFutureEarth] = useState<boolean>(false);
   const [showDataMethod, setShowDataMethod] = useState<boolean>(false);
   const [showExport, setShowExport] = useState<boolean>(false);
+  const [showSources, setShowSources] = useState<boolean>(false);
   const [isAutoTourActive, setIsAutoTourActive] = useState<boolean>(false);
 
-  // Link copy toast
+  // Toast
   const [linkCopiedToast, setLinkCopiedToast] = useState<boolean>(false);
 
-  // Accessibility settings
+  // Accessibility
   const [speechEnabled, setSpeechEnabled] = useState<boolean>(false);
   const [reduceMotion, setReduceMotion] = useState<boolean>(false);
   const [highContrast, setHighContrast] = useState<boolean>(false);
@@ -94,6 +115,7 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
   // Timelapse timer ref
   const timelapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevAnomalyRef = useRef<number | undefined>(undefined);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
 
   // Apply Theme
   useEffect(() => {
@@ -101,10 +123,11 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
     localStorage.setItem('earth_jukebox_theme', theme);
   }, [theme]);
 
-  // Sync sound mode with audio engine
+  // Sync sound mode & scale with audio engine
   useEffect(() => {
     audioEngine.soundMode = soundMode;
-  }, [soundMode]);
+    audioEngine.musicalScale = musicalScale;
+  }, [soundMode, musicalScale]);
 
   // Current record
   const currentRecord = getRecordForYear(data, selectedYear) ?? data[data.length - 1];
@@ -115,7 +138,7 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
   // Synchronize URL parameters
   useEffect(() => {
     let mode: 'jukebox' | 'classroom' | 'birthyear' = 'jukebox';
-    if (showClassroom) mode = 'classroom';
+    if (activeTab === 'learn') mode = 'classroom';
     else if (showBirthYear) mode = 'birthyear';
 
     setUrlState({
@@ -123,7 +146,7 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
       speed,
       mode,
     });
-  }, [selectedYear, speed, showClassroom, showBirthYear]);
+  }, [selectedYear, speed, activeTab, showBirthYear]);
 
   // Sync volume / mute with audio engine
   useEffect(() => {
@@ -149,10 +172,9 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
     [speechEnabled]
   );
 
-  // Play single year tone (1.6 seconds rich phrase)
+  // Play single-year rich tone
   const handlePlayTone = useCallback(() => {
-    const freq = audioEngine.playTone(currentAnomaly, 1.6);
-    setPulseTrigger(Date.now());
+    const freq = audioEngine.playTone(currentAnomaly, 1.8);
     speakCurrent(selectedYear, currentAnomaly, freq);
   }, [currentAnomaly, selectedYear, speakCurrent]);
 
@@ -163,25 +185,21 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
     const decadeRecords = data.filter((d) => d.year >= decadeStart && d.year <= decadeEnd);
 
     if (decadeRecords.length > 0) {
-      setPulseTrigger(Date.now());
       audioEngine.playDecadeChord(decadeRecords, (arpYear) => {
         setSelectedYear(arpYear);
       });
     }
   }, [data, selectedYear]);
 
-  // Trigger sound when jumping years manually
+  // Handle Year Change
   const handleYearChange = useCallback(
     (year: number) => {
       setSelectedYear(year);
       const rec = getRecordForYear(data, year);
-      if (rec) {
-        if (!isPlaying) {
-          audioEngine.playNote(rec.anomaly, 190, prevAnomalyRef.current, glide);
-          setPulseTrigger(Date.now());
-          prevAnomalyRef.current = rec.anomaly;
-          speakCurrent(year, rec.anomaly, audioEngine.getPitchForAnomaly(rec.anomaly));
-        }
+      if (rec && !isPlaying) {
+        audioEngine.playNote(rec.anomaly, 190, prevAnomalyRef.current, glide);
+        prevAnomalyRef.current = rec.anomaly;
+        speakCurrent(year, rec.anomaly, audioEngine.getPitchForAnomaly(rec.anomaly));
       }
     },
     [data, isPlaying, glide, speakCurrent]
@@ -201,103 +219,82 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
     if (isRecording) {
       demoScreenRecorder.stopRecording();
       setIsRecording(false);
-    } else {
-      const canvas = document.querySelector('canvas');
-      if (!canvas) {
-        alert('Could not find active canvas for recording.');
-        return;
-      }
-      setIsRecording(true);
       setRecordElapsedSec(0);
-      demoScreenRecorder.startRecording(
-        canvas,
-        (sec) => setRecordElapsedSec(sec),
-        (_blob, url) => {
-          setIsRecording(false);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `Earth616-Submission-Demo-${Date.now()}.webm`;
-          a.click();
-        }
-      );
-    }
-  };
-
-  // Timelapse playback loop
-  useEffect(() => {
-    if (!isPlaying) {
-      if (timelapseTimerRef.current) clearTimeout(timelapseTimerRef.current);
-      audioEngine.stopDrone();
       return;
     }
 
-    audioEngine.startDrone(55);
-    const intervalMs = SPEED_MS[speed];
+    const canvas = document.querySelector('canvas') as HTMLCanvasElement | null;
+    if (!canvas) {
+      alert('3D WebGL Canvas not detected.');
+      return;
+    }
 
-    const step = (yr: number) => {
-      if (!isPlaying) return;
-      setSelectedYear(yr);
-      const rec = getRecordForYear(data, yr);
-      if (rec) {
-        audioEngine.playNote(rec.anomaly, intervalMs * 0.9, prevAnomalyRef.current, glide);
-        setPulseTrigger(Date.now());
-        prevAnomalyRef.current = rec.anomaly;
+    const started = demoScreenRecorder.startRecording(
+      canvas,
+      (elapsed) => setRecordElapsedSec(elapsed),
+      (_blob, _url) => {
+        setIsRecording(false);
+        setRecordElapsedSec(0);
       }
+    );
 
-      const nextYear = yr + 1;
-      if (nextYear > maxYear) {
+    if (started) {
+      setIsRecording(true);
+    }
+  };
+
+  // Time-lapse loop
+  const stepTimelapse = useCallback(() => {
+    setSelectedYear((curr) => {
+      const idx = data.findIndex((d) => d.year === curr);
+      if (idx === -1 || idx >= data.length - 1) {
         if (looping) {
-          timelapseTimerRef.current = setTimeout(() => step(minYear), intervalMs + 60);
+          const firstRec = data[0];
+          audioEngine.playNote(firstRec.anomaly, SPEED_MS[speed] * 0.9, prevAnomalyRef.current, glide);
+          prevAnomalyRef.current = firstRec.anomaly;
+          return minYear;
         } else {
           setIsPlaying(false);
           audioEngine.stopDrone();
-          prevAnomalyRef.current = undefined;
+          return curr;
         }
-      } else {
-        timelapseTimerRef.current = setTimeout(() => step(nextYear), intervalMs);
+      }
+
+      const nextRec = data[idx + 1];
+      audioEngine.playNote(nextRec.anomaly, SPEED_MS[speed] * 0.9, prevAnomalyRef.current, glide);
+      prevAnomalyRef.current = nextRec.anomaly;
+      return nextRec.year;
+    });
+  }, [data, speed, glide, looping, minYear]);
+
+  // Time-lapse ticker
+  useEffect(() => {
+    if (isPlaying) {
+      audioEngine.startDrone(55);
+      timelapseTimerRef.current = setTimeout(stepTimelapse, SPEED_MS[speed]);
+    } else {
+      audioEngine.stopDrone();
+      if (timelapseTimerRef.current) {
+        clearTimeout(timelapseTimerRef.current);
+        timelapseTimerRef.current = null;
+      }
+    }
+    return () => {
+      if (timelapseTimerRef.current) {
+        clearTimeout(timelapseTimerRef.current);
       }
     };
-
-    step(selectedYear);
-
-    return () => {
-      if (timelapseTimerRef.current) clearTimeout(timelapseTimerRef.current);
-      audioEngine.stopDrone();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPlaying, speed, glide, looping]);
+  }, [isPlaying, selectedYear, speed, stepTimelapse]);
 
   // Global Keyboard Navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') {
+        return;
+      }
 
       switch (e.key) {
-        case 'ArrowLeft':
-          e.preventDefault();
-          handleYearChange(Math.max(minYear, selectedYear - 1));
-          break;
-        case 'ArrowRight':
-          e.preventDefault();
-          handleYearChange(Math.min(maxYear, selectedYear + 1));
-          break;
-        case 'Home':
-          e.preventDefault();
-          handleYearChange(minYear);
-          break;
-        case 'End':
-          e.preventDefault();
-          handleYearChange(maxYear);
-          break;
-        case 'PageUp':
-          e.preventDefault();
-          handleYearChange(Math.min(maxYear, selectedYear + 10));
-          break;
-        case 'PageDown':
-          e.preventDefault();
-          handleYearChange(Math.max(minYear, selectedYear - 10));
-          break;
         case ' ':
           e.preventDefault();
           handlePlayTone();
@@ -307,22 +304,40 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
           e.preventDefault();
           setIsPlaying((prev) => !prev);
           break;
-        case 'm':
-        case 'M':
+        case 'ArrowLeft':
           e.preventDefault();
-          setMuted((prev) => !prev);
+          handleYearChange(Math.max(minYear, selectedYear - 1));
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          handleYearChange(Math.min(maxYear, selectedYear + 1));
+          break;
+        case 'PageUp':
+          e.preventDefault();
+          handleYearChange(Math.max(minYear, selectedYear - 10));
+          break;
+        case 'PageDown':
+          e.preventDefault();
+          handleYearChange(Math.min(maxYear, selectedYear + 10));
+          break;
+        case 'Home':
+          e.preventDefault();
+          handleYearChange(minYear);
+          break;
+        case 'End':
+          e.preventDefault();
+          handleYearChange(maxYear);
           break;
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedYear, minYear, maxYear, handleYearChange, handlePlayTone]);
+  }, [selectedYear, minYear, maxYear, handlePlayTone, handleYearChange]);
 
-  const formatRecordTime = (sec: number) => {
-    const mins = Math.floor(sec / 60);
-    const remaining = sec % 60;
-    return `${mins.toString().padStart(2, '0')}:${remaining.toString().padStart(2, '0')}`;
+  const dismissCoachMark = () => {
+    setShowCoachMark(false);
+    localStorage.setItem('earth_jukebox_coach_dismissed', 'true');
   };
 
   return (
@@ -330,426 +345,592 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
       style={{
         width: '100vw',
         height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
+        position: 'relative',
         overflow: 'hidden',
-        background: theme === 'light' ? '#E2E8F0' : 'var(--color-bg, #040A18)',
-        color: theme === 'light' ? '#0F172A' : '#FFFFFF',
-        fontFamily: 'var(--font-sans)',
-        filter: highContrast ? 'contrast(1.35)' : 'none',
+        background: 'var(--bg-solid, #050B1A)',
       }}
     >
-      {/* Top Navigation Bar */}
+      {/* Screen Reader ARIA Live Region */}
+      <div
+        aria-live="polite"
+        aria-atomic="true"
+        style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}
+      >
+        Year {selectedYear}, Anomaly {currentAnomaly >= 0 ? '+' : ''}{currentAnomaly.toFixed(2)} degrees Celsius, pitch {Math.round(currentFreq)} Hertz, note {currentNote}.
+      </div>
+
+      {/* TOP BAR: Max 5 Visible Items */}
       <header
+        className="glass app-header"
         style={{
+          position: 'absolute',
+          top: 10,
+          left: 12,
+          right: 12,
+          height: 52,
+          zIndex: 100,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '8px 16px',
-          background: theme === 'light' ? 'rgba(255, 255, 255, 0.85)' : 'rgba(5, 12, 28, 0.8)',
-          borderBottom: '1px solid rgba(0, 212, 255, 0.15)',
-          backdropFilter: 'blur(16px)',
-          zIndex: 40,
-          gap: 12,
-          flexWrap: 'wrap',
+          padding: '0 16px',
+          borderRadius: 14,
         }}
       >
-        {/* Title, Badge & Primary Mode Switch */}
+        {/* 1. Brand Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 22 }}>🌍</span>
-            <span
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontWeight: 800,
-                fontSize: 16,
-                letterSpacing: 0.5,
-              }}
-            >
+          <span style={{ fontSize: 24, cursor: 'pointer' }} onClick={() => setActiveTab('earth')}>🌍</span>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary, #FFFFFF)', letterSpacing: -0.3, lineHeight: 1 }}>
               Earth 616
-            </span>
-          </div>
-
-          <DataBadge dataset={dataset} />
-
-          {/* View Mode Switcher: 3D Globe vs Frame Jukebox */}
-          <div
-            style={{
-              display: 'flex',
-              background: 'rgba(4, 10, 24, 0.4)',
-              borderRadius: 6,
-              padding: 2,
-              border: '1px solid rgba(0, 212, 255, 0.25)',
-            }}
-          >
-            <button
-              onClick={() => setViewMode('globe')}
-              style={{
-                ...navBtnStyle,
-                background: viewMode === 'globe' ? 'rgba(0, 212, 255, 0.25)' : 'transparent',
-                borderColor: viewMode === 'globe' ? '#00D4FF' : 'transparent',
-                color: viewMode === 'globe' ? '#00D4FF' : '#94A3B8',
-                fontWeight: viewMode === 'globe' ? 700 : 500,
-              }}
-            >
-              🌐 3D Globe
-            </button>
-            <button
-              onClick={() => setViewMode('jukebox')}
-              style={{
-                ...navBtnStyle,
-                background: viewMode === 'jukebox' ? 'rgba(249, 115, 22, 0.3)' : 'transparent',
-                borderColor: viewMode === 'jukebox' ? '#F97316' : 'transparent',
-                color: viewMode === 'jukebox' ? '#F97316' : '#94A3B8',
-                fontWeight: viewMode === 'jukebox' ? 700 : 500,
-              }}
-              title="NASA Earth Information Center Frame Sonifier Jukebox"
-            >
-              🎨 EIC Frame Jukebox
-            </button>
+            </div>
+            <div style={{ fontSize: 10, color: '#00D4FF', fontFamily: 'var(--font-mono)', letterSpacing: 0.5 }}>
+              NASA Space Apps 2026
+            </div>
           </div>
         </div>
 
-        {/* Action Controls & Modals */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-          {/* Record Demo Clip Button */}
+        {/* 2. Primary Tabs: Earth | NASA Frames | Learn */}
+        <nav style={{ display: 'flex', background: 'rgba(2, 6, 17, 0.6)', borderRadius: 10, padding: 3, border: '1px solid rgba(0, 212, 255, 0.2)' }}>
           <button
-            onClick={handleToggleRecording}
+            onClick={() => setActiveTab('earth')}
             style={{
-              ...navBtnStyle,
-              background: isRecording ? 'rgba(239, 68, 68, 0.3)' : 'rgba(255, 255, 255, 0.08)',
-              borderColor: isRecording ? '#EF4444' : 'rgba(255, 255, 255, 0.2)',
-              color: isRecording ? '#EF4444' : '#E2E8F0',
+              padding: '6px 14px',
+              borderRadius: 8,
+              border: 'none',
+              fontSize: 12.5,
               fontWeight: 700,
+              cursor: 'pointer',
+              background: activeTab === 'earth' ? 'linear-gradient(135deg, #0B3D91 0%, #00D4FF 100%)' : 'transparent',
+              color: activeTab === 'earth' ? '#FFFFFF' : 'var(--text-secondary, #94A3B8)',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            🌐 Earth
+          </button>
+          <button
+            onClick={() => setActiveTab('frames')}
+            style={{
+              padding: '6px 14px',
+              borderRadius: 8,
+              border: 'none',
+              fontSize: 12.5,
+              fontWeight: 700,
+              cursor: 'pointer',
+              background: activeTab === 'frames' ? 'linear-gradient(135deg, #0B3D91 0%, #00D4FF 100%)' : 'transparent',
+              color: activeTab === 'frames' ? '#FFFFFF' : 'var(--text-secondary, #94A3B8)',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            🎞️ NASA Frames
+          </button>
+          <button
+            onClick={() => setActiveTab('learn')}
+            style={{
+              padding: '6px 14px',
+              borderRadius: 8,
+              border: 'none',
+              fontSize: 12.5,
+              fontWeight: 700,
+              cursor: 'pointer',
+              background: activeTab === 'learn' ? 'linear-gradient(135deg, #0B3D91 0%, #00D4FF 100%)' : 'transparent',
+              color: activeTab === 'learn' ? '#FFFFFF' : 'var(--text-secondary, #94A3B8)',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            🎓 Learn
+          </button>
+        </nav>
+
+        {/* 3. Right Utility Icons: Theme, Accessibility Dropdown, About, More Drawer */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* Theme Toggle */}
+          <button
+            onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 8,
+              background: 'rgba(11, 29, 58, 0.5)',
+              border: '1px solid rgba(0, 212, 255, 0.25)',
+              color: 'var(--text-primary, #FFFFFF)',
+              fontSize: 15,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            title={theme === 'dark' ? 'Switch to Daylight Light Theme' : 'Switch to Deep Space Dark Theme'}
+            aria-label="Toggle visual theme"
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+
+          {/* 4. Accessibility Dropdown */}
+          <AccessibilityDropdown
+            speechEnabled={speechEnabled}
+            onToggleSpeech={() => setSpeechEnabled(!speechEnabled)}
+            highContrast={highContrast}
+            onToggleHighContrast={() => setHighContrast(!highContrast)}
+            reduceMotion={reduceMotion}
+            onToggleReduceMotion={() => setReduceMotion(!reduceMotion)}
+          />
+
+          {/* 5. About Button */}
+          <button
+            onClick={() => setShowAbout(true)}
+            style={{
+              padding: '7px 12px',
+              borderRadius: 8,
+              background: 'rgba(11, 29, 58, 0.5)',
+              border: '1px solid rgba(0, 212, 255, 0.25)',
+              color: 'var(--text-primary, #FFFFFF)',
+              fontSize: 12.5,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+            className="hide-on-mobile"
+          >
+            About
+          </button>
+
+          {/* "More" Drawer Trigger */}
+          <button
+            onClick={() => setShowMoreDrawer(true)}
+            style={{
               display: 'flex',
               alignItems: 'center',
               gap: 6,
-            }}
-            title="Records a high-quality video/audio clip of your canvas for submission demo"
-          >
-            <span
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                background: isRecording ? '#EF4444' : '#94A3B8',
-                boxShadow: isRecording ? '0 0 8px #EF4444' : 'none',
-                animation: isRecording ? 'pulse 1s infinite alternate' : 'none',
-              }}
-            />
-            <span>{isRecording ? `REC ${formatRecordTime(recordElapsedSec)} / 02:00` : '📹 Record Clip'}</span>
-          </button>
-
-          {/* NASA EIC Info */}
-          <button
-            onClick={() => setShowEIC(true)}
-            style={{
-              ...navBtnStyle,
-              background: 'rgba(0, 212, 255, 0.12)',
-              borderColor: 'rgba(0, 212, 255, 0.35)',
-              color: '#00D4FF',
-            }}
-            title="See it in NASA's Earth Information Center (EIC)"
-          >
-            🏛️ NASA EIC
-          </button>
-
-          {/* Hear Your Birth Year */}
-          <button
-            onClick={() => setShowBirthYear(true)}
-            style={navBtnStyle}
-            title="Hear Your Birth Year (Personalized comparison)"
-          >
-            🎂 Birth Year
-          </button>
-
-          {/* Classroom Guided Mode */}
-          <button
-            onClick={() => setShowClassroom(true)}
-            style={navBtnStyle}
-            title="Classroom / Guided Mode (5-step interactive lesson)"
-          >
-            🎓 Classroom
-          </button>
-
-          {/* What am I hearing? button */}
-          <button
-            onClick={() => setShowExplainer(true)}
-            style={navBtnStyle}
-            title="What am I hearing? (Bilingual scientific explainer)"
-          >
-            🎧 What am I hearing?
-          </button>
-
-          {/* Compare button */}
-          <button
-            onClick={() => setShowCompare(true)}
-            style={navBtnStyle}
-            title="Compare two years back-to-back"
-          >
-            ⚖️ Compare
-          </button>
-
-          {/* Data & Method */}
-          <button
-            onClick={() => setShowDataMethod(true)}
-            style={navBtnStyle}
-            title="Data & Method (Formulas, live calculation, limitations)"
-          >
-            🔬 Method
-          </button>
-
-          {/* Export Audio / PNG */}
-          <button
-            onClick={() => setShowExport(true)}
-            style={navBtnStyle}
-            title="Export time-lapse as WAV audio or chart as PNG"
-          >
-            💾 Export
-          </button>
-
-          {/* Future Earth Teaser */}
-          <button
-            onClick={() => setShowFutureEarth(true)}
-            style={navBtnStyle}
-            title="Future Earth Roadmap (Wind, precipitation, wildfire sonification)"
-          >
-            🚀 Future
-          </button>
-
-          {/* Shareable Link Button */}
-          <button
-            onClick={handleCopyLink}
-            style={{
-              ...navBtnStyle,
-              borderColor: linkCopiedToast ? '#22C55E' : 'rgba(0, 212, 255, 0.3)',
-              color: linkCopiedToast ? '#22C55E' : '#E0F2FE',
-            }}
-            title="Copy shareable link with current year and settings"
-          >
-            {linkCopiedToast ? '✓ Copied!' : '🔗 Share'}
-          </button>
-
-          {/* 100-Second Auto-Tour */}
-          <button
-            onClick={() => setIsAutoTourActive(true)}
-            style={{
-              ...navBtnStyle,
-              background: 'rgba(252, 61, 33, 0.25)',
-              borderColor: '#FC3D21',
+              padding: '7px 14px',
+              borderRadius: 8,
+              background: 'linear-gradient(135deg, #0B3D91 0%, #00D4FF 100%)',
+              border: 'none',
               color: '#FFFFFF',
+              fontSize: 12.5,
               fontWeight: 700,
+              cursor: 'pointer',
             }}
-            title="Start 100-second automated video presentation tour"
+            aria-label="Open mission control menu"
           >
-            ▶ Auto-Tour (100s)
+            <span>☰</span>
+            <span>More</span>
           </button>
-
-          {/* About / Credits */}
-          <button
-            onClick={() => setShowAbout(true)}
-            style={navBtnStyle}
-            title="About the project, challenge alignment, and team"
-          >
-            ℹ️ About
-          </button>
-
-          {/* Theme Toggle Button (Day / Space) */}
-          <button
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            title={theme === 'dark' ? 'Switch to Daylight Theme' : 'Switch to Deep Space Theme'}
-            style={{
-              ...iconToggleStyle,
-              background: theme === 'dark' ? 'rgba(0, 212, 255, 0.15)' : 'rgba(255, 176, 32, 0.2)',
-            }}
-          >
-            {theme === 'dark' ? '🌙' : '☀️'}
-          </button>
-
-          {/* Accessibility Toggles */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginLeft: 2 }}>
-            <button
-              onClick={() => setSpeechEnabled(!speechEnabled)}
-              title={speechEnabled ? 'Spoken narration enabled' : 'Enable spoken narration (Web Speech API)'}
-              aria-pressed={speechEnabled}
-              style={{
-                ...iconToggleStyle,
-                background: speechEnabled ? 'rgba(0, 212, 255, 0.3)' : 'transparent',
-                color: speechEnabled ? '#00D4FF' : '#94A3B8',
-              }}
-            >
-              🗣️
-            </button>
-
-            <button
-              onClick={() => setReduceMotion(!reduceMotion)}
-              title={reduceMotion ? 'Reduced motion active' : 'Reduce motion'}
-              aria-pressed={reduceMotion}
-              style={{
-                ...iconToggleStyle,
-                background: reduceMotion ? 'rgba(0, 212, 255, 0.3)' : 'transparent',
-                color: reduceMotion ? '#00D4FF' : '#94A3B8',
-              }}
-            >
-              🚸
-            </button>
-
-            <button
-              onClick={() => setHighContrast(!highContrast)}
-              title={highContrast ? 'High contrast active' : 'Toggle high contrast mode'}
-              aria-pressed={highContrast}
-              style={{
-                ...iconToggleStyle,
-                background: highContrast ? 'rgba(0, 212, 255, 0.3)' : 'transparent',
-                color: highContrast ? '#00D4FF' : '#94A3B8',
-              }}
-            >
-              👁️
-            </button>
-          </div>
         </div>
       </header>
 
-      {/* Main Workspace */}
-      <div style={{ flex: 1, display: 'flex', position: 'relative', overflow: 'hidden' }}>
-        {viewMode === 'jukebox' ? (
-          <JukeboxTab
-            dataset={dataset}
-            selectedYear={selectedYear}
-            onClose={() => setViewMode('globe')}
-            getCanvasElement={() => document.querySelector('canvas')}
-          />
-        ) : (
-          <>
-            {/* 3D Scene Viewport */}
-            <div style={{ flex: 1, position: 'relative', height: '100%' }}>
-              <Canvas
-                gl={{
-                  antialias: true,
-                  toneMapping: THREE.ACESFilmicToneMapping,
-                  toneMappingExposure: 1.15,
-                }}
-                camera={{ position: [0, 0, 3.1], fov: 45 }}
-                style={{ width: '100%', height: '100%', background: 'transparent' }}
-              >
-                <Stars radius={120} depth={60} count={3500} factor={4} saturation={0} fade />
-                <ambientLight intensity={0.12} />
-                <hemisphereLight args={['#1E3A6E', '#040A18', 0.55]} />
-                <directionalLight position={[5.5, 2.0, 4.0]} intensity={1.85} color="#FFF8EE" castShadow />
-
-                <Suspense fallback={null}>
-                  <EarthGlobe
-                    anomaly={currentAnomaly}
-                    isPlaying={isPlaying}
-                    pulseTrigger={pulseTrigger}
-                    pulseFreq={currentFreq}
-                    reduceMotion={reduceMotion}
-                  />
-                </Suspense>
-
+      {/* VIEWPORT BODY */}
+      {activeTab === 'earth' && (
+        <>
+          {/* 3D WebGL Earth Canvas */}
+          <div ref={canvasContainerRef} style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }}>
+            <Canvas
+              camera={{ position: [0, 0, 2.75], fov: 45, near: 0.1, far: 1000 }}
+              gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
+              style={{ width: '100%', height: '100%' }}
+            >
+              <Suspense fallback={null}>
+                <Stars radius={180} depth={60} count={3500} factor={4} saturation={0} fade speed={reduceMotion ? 0 : 0.6} />
+                <EarthGlobe
+                  anomaly={currentAnomaly}
+                  isPlaying={isPlaying}
+                  reduceMotion={reduceMotion}
+                  displayPreset={displayPreset}
+                />
                 <OrbitControls
                   enablePan={false}
-                  minDistance={2.0}
-                  maxDistance={7.0}
-                  autoRotate={!isPlaying && !reduceMotion}
-                  autoRotateSpeed={0.35}
-                  makeDefault
+                  enableZoom={true}
+                  minDistance={1.75}
+                  maxDistance={6.0}
+                  rotateSpeed={0.65}
+                  autoRotate={false}
                 />
-              </Canvas>
+              </Suspense>
+            </Canvas>
+          </div>
 
-              {/* Floating Now Playing Card HUD (Top Left) */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 18,
-                  left: 18,
-                  zIndex: 20,
-                  pointerEvents: 'none',
-                }}
-              >
-                <YearDisplay
-                  year={selectedYear}
-                  anomaly={currentAnomaly}
-                  frequency={currentFreq}
-                  noteName={currentNote}
-                  isPlaying={isPlaying}
-                  soundMode={soundMode}
-                  onToggleSoundMode={() =>
-                    setSoundMode(soundMode === 'musical' ? 'scientific' : 'musical')
-                  }
-                />
-              </div>
+          {/* Floating HUD: Upper Left Quick Year Display */}
+          <div
+            className="glass app-hud-overlay hide-on-mobile"
+            style={{
+              position: 'absolute',
+              top: 72,
+              left: 16,
+              padding: '12px 18px',
+              borderRadius: 14,
+              zIndex: 30,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 6,
+              maxWidth: 260,
+            }}
+          >
+            <YearDisplay
+              year={selectedYear}
+              anomaly={currentAnomaly}
+              frequency={currentFreq}
+              noteName={currentNote}
+            />
+            {/* Subtle scientific badge */}
+            <div style={{ fontSize: 10, color: '#94A3B8', fontFamily: 'var(--font-mono)', display: 'flex', justifyContent: 'space-between' }}>
+              <span>Baseline: 1951–1980</span>
+              <span style={{ color: '#00D4FF' }}>NASA GISTEMP v4</span>
             </div>
+            <div style={{ fontSize: 9.5, color: '#64748B', fontStyle: 'italic' }}>
+              Atmosphere rim: Artistic indicator, not a measurement
+            </div>
+          </div>
 
-            {/* Right Sidebar Control Deck */}
-            <aside
-              style={{
-                width: 'clamp(330px, 26vw, 385px)',
-                minWidth: 320,
-                maxHeight: '100%',
-                overflowY: 'auto',
-                padding: '14px 12px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 10,
-                background: theme === 'light' ? 'rgba(248, 250, 252, 0.9)' : 'rgba(7, 18, 38, 0.85)',
-                borderLeft: '1px solid rgba(0, 212, 255, 0.15)',
-                backdropFilter: 'blur(16px)',
-                zIndex: 30,
-                boxSizing: 'border-box',
-              }}
-            >
-              {/* Transport Controls */}
-              <TransportControls
-                isPlaying={isPlaying}
-                onPlayPause={() => setIsPlaying(!isPlaying)}
-                onPrev={() => handleYearChange(Math.max(minYear, selectedYear - 1))}
-                onNext={() => handleYearChange(Math.min(maxYear, selectedYear + 1))}
-                onPlayTone={handlePlayTone}
-                onPlayDecadeChord={handlePlayDecadeChord}
-                speed={speed}
-                onSpeedChange={setSpeed}
-                glide={glide}
-                onGlideChange={setGlide}
-                volume={volume}
-                onVolumeChange={setVolume}
-                muted={muted}
-                onMuteChange={setMuted}
-                looping={looping}
-                onLoopingChange={setLooping}
-              />
+          {/* Floating HUD: Upper Right Live Oscilloscope */}
+          <div
+            className="glass hide-on-tablet"
+            style={{
+              position: 'absolute',
+              top: 72,
+              right: 16,
+              padding: '10px 14px',
+              borderRadius: 14,
+              zIndex: 30,
+              width: 240,
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: '#00D4FF', letterSpacing: 1, textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>
+                Audio Waveform
+              </span>
+              <span style={{ fontSize: 10, color: '#94A3B8', fontFamily: 'var(--font-mono)' }}>
+                {soundMode === 'musical' ? `Musical (${musicalScale})` : 'Exact (Hz)'}
+              </span>
+            </div>
+            <AudioVisualizer isPlaying={isPlaying} />
+          </div>
 
-              {/* Real-time Oscilloscope */}
-              <AudioVisualizer isPlaying={isPlaying} />
-
-              {/* Timeline and Warming Stripes */}
+          {/* Primary Bottom Control Deck */}
+          <div
+            className="glass app-control-deck"
+            style={{
+              position: 'absolute',
+              bottom: 12,
+              left: 12,
+              right: 12,
+              zIndex: 80,
+              padding: '12px 20px',
+              borderRadius: 16,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10,
+              maxWidth: 1100,
+              margin: '0 auto',
+            }}
+          >
+            {/* Row 1: Scrubber with Ed Hawkins Warming Stripes */}
+            <div style={{ width: '100%' }}>
               <TimelineSlider
                 years={years}
                 selectedYear={selectedYear}
                 data={data}
                 onChange={handleYearChange}
               />
+            </div>
 
-              {/* Temperature Anomaly Line Chart */}
-              <TemperatureChart
-                data={data}
-                selectedYear={selectedYear}
-                onYearClick={handleYearChange}
-              />
-            </aside>
-          </>
-        )}
-      </div>
+            {/* Row 2: Transport Buttons, Mode Toggle, Sound Mixer, Advanced Toggle */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+              {/* Playback Transport */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                {/* Big Primary Play/Pause Button */}
+                <button
+                  onClick={() => setIsPlaying(!isPlaying)}
+                  style={{
+                    padding: '10px 22px',
+                    borderRadius: 10,
+                    background: isPlaying ? 'linear-gradient(135deg, #FC3D21 0%, #B91C1C 100%)' : 'linear-gradient(135deg, #0B3D91 0%, #00D4FF 100%)',
+                    border: 'none',
+                    color: '#FFFFFF',
+                    fontSize: 14,
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    boxShadow: isPlaying ? '0 0 20px rgba(252,61,33,0.45)' : '0 0 20px rgba(0,212,255,0.35)',
+                    transition: 'transform 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.03)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1.0)')}
+                >
+                  <span>{isPlaying ? '⏸ Pause' : '▶ Play Timeline'}</span>
+                </button>
 
-      {/* Modals & Auto-tour overlay */}
-      {showExplainer && (
-        <ExplainerModal
-          year={selectedYear}
-          data={data}
-          onClose={() => setShowExplainer(false)}
+                {/* Hear One Year Tone */}
+                <button
+                  onClick={handlePlayTone}
+                  style={{
+                    padding: '9px 16px',
+                    borderRadius: 10,
+                    background: 'rgba(11, 29, 58, 0.65)',
+                    border: '1px solid rgba(0, 212, 255, 0.3)',
+                    color: '#FFFFFF',
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                  title="Audition full single-year tone"
+                >
+                  🎵 Hear One Year
+                </button>
+
+                {/* Exact vs Musical Segmented Toggle */}
+                <div style={{ display: 'inline-flex', background: 'rgba(2, 6, 17, 0.65)', borderRadius: 8, padding: 3, border: '1px solid rgba(0, 212, 255, 0.2)' }}>
+                  <button
+                    onClick={() => setSoundMode('scientific')}
+                    style={{
+                      padding: '5px 12px',
+                      borderRadius: 6,
+                      border: 'none',
+                      fontSize: 11.5,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      background: soundMode === 'scientific' ? 'linear-gradient(135deg, #0B3D91 0%, #00D4FF 100%)' : 'transparent',
+                      color: soundMode === 'scientific' ? '#FFFFFF' : '#94A3B8',
+                    }}
+                  >
+                    Exact
+                  </button>
+                  <button
+                    onClick={() => setSoundMode('musical')}
+                    style={{
+                      padding: '5px 12px',
+                      borderRadius: 6,
+                      border: 'none',
+                      fontSize: 11.5,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      background: soundMode === 'musical' ? 'linear-gradient(135deg, #0B3D91 0%, #00D4FF 100%)' : 'transparent',
+                      color: soundMode === 'musical' ? '#FFFFFF' : '#94A3B8',
+                    }}
+                  >
+                    Musical
+                  </button>
+                </div>
+
+                {/* Sound Mixer Modal Trigger */}
+                <button
+                  onClick={() => setShowSoundMixer(true)}
+                  style={{
+                    padding: '8px 12px',
+                    borderRadius: 8,
+                    background: 'rgba(11, 29, 58, 0.5)',
+                    border: '1px solid rgba(0, 212, 255, 0.25)',
+                    color: '#00D4FF',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  🎛️ Sound Mixer
+                </button>
+              </div>
+
+              {/* Earth Display Presets & Advanced Controls Toggle */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                {/* Earth Visual Preset */}
+                <select
+                  value={displayPreset}
+                  onChange={(e) => setDisplayPreset(e.target.value as EarthDisplayPreset)}
+                  style={{
+                    padding: '6px 10px',
+                    borderRadius: 6,
+                    background: 'rgba(2, 6, 17, 0.8)',
+                    border: '1px solid rgba(0, 212, 255, 0.25)',
+                    color: '#FFFFFF',
+                    fontSize: 11.5,
+                    cursor: 'pointer',
+                  }}
+                  className="hide-on-mobile"
+                  aria-label="Earth visual display preset"
+                >
+                  <option value="natural">Earth: Natural</option>
+                  <option value="vivid">Earth: Vivid Oceans</option>
+                  <option value="high-contrast">Earth: High Contrast</option>
+                </select>
+
+                {/* Advanced Controls Toggle */}
+                <button
+                  onClick={() => setShowAdvancedControls(!showAdvancedControls)}
+                  style={{
+                    padding: '7px 12px',
+                    borderRadius: 8,
+                    background: showAdvancedControls ? 'rgba(0, 212, 255, 0.2)' : 'rgba(11, 29, 58, 0.45)',
+                    border: '1px solid rgba(0, 212, 255, 0.25)',
+                    color: '#CBD5E1',
+                    fontSize: 11.5,
+                    cursor: 'pointer',
+                  }}
+                >
+                  ⚙️ {showAdvancedControls ? 'Hide Controls' : 'Advanced Controls'}
+                </button>
+              </div>
+            </div>
+
+            {/* Collapsible Advanced Controls Drawer */}
+            {showAdvancedControls && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: 12,
+                  paddingTop: 8,
+                  borderTop: '1px solid rgba(255,255,255,0.08)',
+                }}
+              >
+                {/* Speed Controls */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 11.5, color: '#94A3B8' }}>Time-lapse Speed:</span>
+                  {(['slow', 'normal', 'fast'] as SpeedOption[]).map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setSpeed(s)}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: 6,
+                        border: 'none',
+                        fontSize: 11,
+                        textTransform: 'capitalize',
+                        cursor: 'pointer',
+                        background: speed === s ? '#00D4FF' : 'rgba(255,255,255,0.1)',
+                        color: speed === s ? '#040A14' : '#CBD5E1',
+                        fontWeight: 600,
+                      }}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Glide (Portamento) & Loop Toggles */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5, color: '#CBD5E1', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={glide}
+                      onChange={(e) => setGlide(e.target.checked)}
+                      style={{ accentColor: '#00D4FF' }}
+                    />
+                    <span>Portamento Pitch Glide</span>
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5, color: '#CBD5E1', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={looping}
+                      onChange={(e) => setLooping(e.target.checked)}
+                      style={{ accentColor: '#00D4FF' }}
+                    />
+                    <span>Loop Playback</span>
+                  </label>
+                </div>
+
+                {/* Quick Inflection Year Buttons */}
+                <div className="hide-on-mobile">
+                  <QuickJumps data={data} selectedYear={selectedYear} onSelectYear={handleYearChange} />
+                </div>
+              </div>
+            )}
+
+            {/* Visible Build Marker Footer */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                fontSize: 10,
+                color: '#64748B',
+                fontFamily: 'var(--font-mono)',
+                paddingTop: 4,
+                borderTop: '1px solid rgba(255,255,255,0.06)',
+              }}
+            >
+              <span>
+                v1.1.0 • Built: {typeof __BUILD_TIME__ !== 'undefined' ? __BUILD_TIME__.slice(0, 10) : '2026-11-15'} • NASA GISTEMP v4
+              </span>
+              <span>
+                Independent student project using NASA data and imagery. Not endorsed by NASA.
+              </span>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* VIEWPORT: NASA Frames Tab */}
+      {activeTab === 'frames' && (
+        <JukeboxTab
+          dataset={dataset}
+          selectedYear={selectedYear}
+          onClose={() => setActiveTab('earth')}
+          getCanvasElement={() => document.querySelector('canvas')}
         />
       )}
 
+      {/* VIEWPORT: Learn Tab */}
+      {activeTab === 'learn' && (
+        <LearnTab
+          dataset={dataset}
+          selectedYear={selectedYear}
+          onSetYear={(yr) => {
+            setSelectedYear(yr);
+            setActiveTab('earth');
+          }}
+          onClose={() => setActiveTab('earth')}
+        />
+      )}
+
+      {/* Onboarding Coach-Mark */}
+      <CoachMark visible={showCoachMark} onDismiss={dismissCoachMark} />
+
+      {/* Sound Mixer Modal */}
+      {showSoundMixer && (
+        <SoundMixerModal
+          soundMode={soundMode}
+          onSoundModeChange={setSoundMode}
+          musicalScale={musicalScale}
+          onScaleChange={setMusicalScale}
+          onClose={() => setShowSoundMixer(false)}
+        />
+      )}
+
+      {/* More Drawer */}
+      <MoreDrawer
+        isOpen={showMoreDrawer}
+        onClose={() => setShowMoreDrawer(false)}
+        onOpenBirthYear={() => setShowBirthYear(true)}
+        onOpenCompare={() => setShowCompare(true)}
+        onOpenDecadeChord={handlePlayDecadeChord}
+        onOpenFutureEarth={() => setShowFutureEarth(true)}
+        onOpenExplainer={() => setShowExplainer(true)}
+        onOpenClassroom={() => setShowClassroom(true)}
+        onOpenDataMethod={() => setShowDataMethod(true)}
+        onCopyLink={handleCopyLink}
+        onOpenExport={() => setShowExport(true)}
+        onToggleRecording={handleToggleRecording}
+        isRecording={isRecording}
+        onOpenAutoTour={() => setIsAutoTourActive(true)}
+        onOpenSources={() => setShowSources(true)}
+        onOpenAbout={() => setShowAbout(true)}
+      />
+
+      {/* Modals */}
+      {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
+      {showSources && <SourcesModal onClose={() => setShowSources(false)} />}
+      {showBirthYear && (
+        <BirthYearModal
+          data={data}
+          onSelectYear={(yr) => {
+            handleYearChange(yr);
+            setShowBirthYear(false);
+          }}
+          onClose={() => setShowBirthYear(false)}
+        />
+      )}
       {showCompare && (
         <CompareModal
           data={data}
@@ -758,31 +939,23 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
           onClose={() => setShowCompare(false)}
         />
       )}
-
-      {showBirthYear && (
-        <BirthYearModal
+      {showExplainer && (
+        <ExplainerModal
+          year={selectedYear}
           data={data}
-          onSelectYear={handleYearChange}
-          onClose={() => setShowBirthYear(false)}
+          onClose={() => setShowExplainer(false)}
         />
       )}
-
       {showClassroom && (
         <ClassroomModal
           data={data}
-          onSetYear={handleYearChange}
+          onSetYear={(yr) => {
+            handleYearChange(yr);
+            setShowClassroom(false);
+          }}
           onClose={() => setShowClassroom(false)}
         />
       )}
-
-      {showEIC && (
-        <EICModal onClose={() => setShowEIC(false)} />
-      )}
-
-      {showFutureEarth && (
-        <FutureEarthModal onClose={() => setShowFutureEarth(false)} />
-      )}
-
       {showDataMethod && (
         <DataMethodModal
           dataset={dataset}
@@ -790,48 +963,38 @@ export default function MainExperience({ dataset, initialParams }: MainExperienc
           onClose={() => setShowDataMethod(false)}
         />
       )}
-
-      {showExport && (
-        <ExportModal
-          data={data}
-          onClose={() => setShowExport(false)}
-        />
-      )}
-
-      {showAbout && (
-        <AboutModal onClose={() => setShowAbout(false)} />
-      )}
-
+      {showFutureEarth && <FutureEarthModal onClose={() => setShowFutureEarth(false)} />}
+      {showExport && <ExportModal data={data} onClose={() => setShowExport(false)} />}
       {isAutoTourActive && (
         <AutoTour
           data={data}
-          onSetYear={(yr) => setSelectedYear(yr)}
+          onSetYear={handleYearChange}
           onOpenExplainer={() => setShowExplainer(true)}
           onClose={() => setIsAutoTourActive(false)}
         />
       )}
+
+      {/* Link Copied Toast */}
+      {linkCopiedToast && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: 84,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'rgba(0, 212, 255, 0.95)',
+            color: '#040A14',
+            padding: '8px 18px',
+            borderRadius: 8,
+            fontSize: 12,
+            fontWeight: 700,
+            zIndex: 300,
+            boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+          }}
+        >
+          ✓ Shareable link copied to clipboard!
+        </div>
+      )}
     </div>
   );
 }
-
-const navBtnStyle: React.CSSProperties = {
-  background: 'rgba(11, 61, 145, 0.4)',
-  border: '1px solid rgba(0, 212, 255, 0.3)',
-  borderRadius: 6,
-  color: '#E0F2FE',
-  fontSize: 11,
-  fontFamily: 'var(--font-mono)',
-  padding: '4px 8px',
-  cursor: 'pointer',
-  transition: 'all 0.15s ease',
-  whiteSpace: 'nowrap',
-};
-
-const iconToggleStyle: React.CSSProperties = {
-  background: 'transparent',
-  border: '1px solid rgba(255, 255, 255, 0.15)',
-  borderRadius: 6,
-  padding: '3px 6px',
-  fontSize: 12,
-  cursor: 'pointer',
-};

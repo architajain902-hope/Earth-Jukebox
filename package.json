@@ -12,7 +12,7 @@
     "postinstall": "node -e \"const fs=require('fs'); if(fs.existsSync('node_modules/@rollup/wasm-node/dist')){ fs.cpSync('node_modules/@rollup/wasm-node/dist/wasm-node','node_modules/rollup/dist/wasm-node',{recursive:true}); fs.copyFileSync('node_modules/@rollup/wasm-node/dist/native.js','node_modules/rollup/dist/native.js'); console.log('Applied Rollup WASM patch'); }\"",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint src --ext .ts,.tsx"
+    "lint": "npx --yes oxlint src"
   },
   "dependencies": {
     "@react-three/drei": "^9.117.3",
@@ -29,6 +29,7 @@
     "@types/react-dom": "^18.3.1",
     "@types/three": "^0.169.0",
     "@vitejs/plugin-react": "^4.3.3",
+    "oxlint": "^0.15.11",
     "puppeteer-core": "^25.17.0",
     "typescript": "^5.6.3",
     "vite": "^5.4.11",

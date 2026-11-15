@@ -8,6 +8,7 @@ import {
   FREQ_MIN,
   FREQ_MAX,
 } from '../src/audio/sonify';
+import { audioEngine } from '../src/audio/engine';
 
 describe('Sonification Mapping', () => {
   it('maps +0.90 °C to approximately 733.33 Hz', () => {
@@ -45,6 +46,17 @@ describe('Sonification Mapping', () => {
     }
   });
 
+  it('never outputs NaN or non-finite numbers', () => {
+    const edgeValues = [-999, -0.5, 0, 1.3, 999];
+    edgeValues.forEach((val) => {
+      const f = anomalyToFrequency(val);
+      expect(Number.isFinite(f)).toBe(true);
+      expect(isNaN(f)).toBe(false);
+      expect(f).toBeGreaterThanOrEqual(FREQ_MIN);
+      expect(f).toBeLessThanOrEqual(FREQ_MAX);
+    });
+  });
+
   it('converts common frequencies to nearest note names', () => {
     expect(frequencyToNoteName(440)).toBe('A4');
     expect(frequencyToNoteName(880)).toBe('A5');
@@ -78,6 +90,52 @@ describe('Sonification Mapping', () => {
       const midFreq = anomalyToMusicalFrequency(0.4, 'pentatonic');
       expect(midFreq).toBeGreaterThanOrEqual(220.0);
       expect(midFreq).toBeLessThanOrEqual(880.0);
+    });
+
+    it('never produces NaN for extreme inputs in musical scales', () => {
+      scales.forEach((s) => {
+        const low = anomalyToMusicalFrequency(-50, s);
+        const high = anomalyToMusicalFrequency(50, s);
+        expect(Number.isFinite(low)).toBe(true);
+        expect(Number.isFinite(high)).toBe(true);
+      });
+    });
+  });
+
+  describe('Sound Engine & Gain Ceiling', () => {
+    it('enforces safe master volume bounds [0, 1]', () => {
+      audioEngine.volume = 2.5;
+      expect(audioEngine.volume).toBeLessThanOrEqual(1.0);
+      audioEngine.volume = -0.5;
+      expect(audioEngine.volume).toBeGreaterThanOrEqual(0.0);
+      audioEngine.volume = 0.65; // restore normal
+    });
+
+    it('preserves instrument level ranges between 0 and 1', () => {
+      const levels = audioEngine.instrumentLevels;
+      expect(levels.pad).toBeGreaterThanOrEqual(0);
+      expect(levels.pad).toBeLessThanOrEqual(1);
+      expect(levels.bell).toBeGreaterThanOrEqual(0);
+      expect(levels.bell).toBeLessThanOrEqual(1);
+      expect(levels.drone).toBeGreaterThanOrEqual(0);
+      expect(levels.drone).toBeLessThanOrEqual(1);
+      expect(levels.arp).toBeGreaterThanOrEqual(0);
+      expect(levels.arp).toBeLessThanOrEqual(1);
+    });
+
+    it('supports presets without throwing or altering pitch logic', () => {
+      audioEngine.applyArrangementPreset('calm');
+      expect(audioEngine.arrangement).toBe('calm');
+      audioEngine.applyArrangementPreset('urgent');
+      expect(audioEngine.arrangement).toBe('urgent');
+      audioEngine.applyArrangementPreset('cinematic');
+      expect(audioEngine.arrangement).toBe('cinematic');
+
+      // Test pitch invariance under presets
+      const pitch1 = audioEngine.getPitchForAnomaly(0.5);
+      audioEngine.applyArrangementPreset('calm');
+      const pitch2 = audioEngine.getPitchForAnomaly(0.5);
+      expect(pitch1).toBe(pitch2);
     });
   });
 });

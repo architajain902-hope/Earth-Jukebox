@@ -99,6 +99,21 @@ export default function SourcesModal({ onClose }: SourcesModalProps) {
           </button>
         </div>
 
+        <div
+          style={{
+            padding: '10px 14px',
+            borderRadius: 8,
+            background: 'rgba(0, 212, 255, 0.1)',
+            border: '1px solid rgba(0, 212, 255, 0.3)',
+            color: '#38BDF8',
+            fontSize: 12,
+            fontWeight: 600,
+            marginBottom: 16,
+          }}
+        >
+          Independent student project using NASA data and imagery. Not endorsed by NASA.
+        </div>
+
         <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 0, marginBottom: 16, lineHeight: 1.5 }}>
           All NASA Earth Information Center (EIC) visual frames and Scientific Visualization Studio (SVS) media used in Earth 616 are verified directly from NASA servers. We followed each page's explicit credit request (see the NASA Reproduction Guidelines linked on each SVS page). Exported soundscapes are our own derived work from NASA media and data.
         </p>

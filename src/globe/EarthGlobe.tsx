@@ -1,46 +1,26 @@
 import React, { useRef, useMemo, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
+
+export type EarthDisplayPreset = 'natural' | 'vivid' | 'high-contrast';
 
 interface EarthGlobeProps {
   anomaly: number;
   isPlaying: boolean;
-  pulseTrigger?: number;
-  pulseFreq?: number;
   reduceMotion?: boolean;
   sunPosition?: [number, number, number];
+  displayPreset?: EarthDisplayPreset;
 }
 
-// Fixed 4-token color gradient according to exact specification:
-// -0.5 °C -> #3AA0FF (deep blue)
-//  0.0 °C -> #9FE8FF (neutral cyan)
-// +0.6 °C -> #FFB020 (warm amber)
-// +1.3 °C -> #FF4D2E (orange-red)
-export function getAtmosphereColor(anomaly: number): THREE.Color {
-  const cCool = new THREE.Color('#3AA0FF');
-  const cNeutral = new THREE.Color('#9FE8FF');
-  const cWarm = new THREE.Color('#FFB020');
-  const cHot = new THREE.Color('#FF4D2E');
-
-  if (anomaly <= 0.0) {
-    const t = Math.max(0, Math.min(1, (anomaly - (-0.5)) / 0.5));
-    return new THREE.Color().lerpColors(cCool, cNeutral, t);
-  } else if (anomaly <= 0.6) {
-    const t = Math.max(0, Math.min(1, anomaly / 0.6));
-    return new THREE.Color().lerpColors(cNeutral, cWarm, t);
-  } else {
-    const t = Math.max(0, Math.min(1, (anomaly - 0.6) / 0.7));
-    return new THREE.Color().lerpColors(cWarm, cHot, t);
-  }
-}
-
-// Atmosphere Fresnel Vertex & Fragment Shaders
+// Fresnel Atmosphere Shaders: Luminous celestial blue rim with warm amber terminator tint
 const atmosphereVertexShader = `
   varying vec3 vNormal;
   varying vec3 vViewPosition;
+  varying vec3 vWorldNormal;
   void main() {
     vNormal = normalize(normalMatrix * normal);
+    vWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
     vViewPosition = -mvPosition.xyz;
     gl_Position = projectionMatrix * mvPosition;
@@ -48,43 +28,59 @@ const atmosphereVertexShader = `
 `;
 
 const atmosphereFragmentShader = `
-  uniform vec3 uColor;
+  uniform vec3 uBaseColor;
+  uniform vec3 uWarmColor;
+  uniform vec3 uSunDir;
   uniform float uIntensity;
   uniform float uPower;
   varying vec3 vNormal;
   varying vec3 vViewPosition;
+  varying vec3 vWorldNormal;
 
   void main() {
     vec3 normal = normalize(vNormal);
     vec3 viewDir = normalize(vViewPosition);
-    // For BackSide rendering, normal points inward
+    vec3 worldNorm = normalize(vWorldNormal);
+
+    // Rim Fresnel glow for BackSide
     float rim = clamp(1.0 - dot(viewDir, -normal), 0.0, 1.0);
     float glow = pow(rim, uPower) * uIntensity;
-    gl_FragColor = vec4(uColor, glow);
+
+    // Subtle warm sunset tint along the day/night terminator boundary
+    float sunDot = dot(worldNorm, uSunDir);
+    float terminatorMask = smoothstep(-0.25, 0.25, sunDot) * smoothstep(0.6, 0.0, sunDot);
+    vec3 blendedColor = mix(uBaseColor, uWarmColor, terminatorMask * 0.42);
+
+    gl_FragColor = vec4(blendedColor, glow);
   }
 `;
 
 export default function EarthGlobe({
   anomaly,
   isPlaying,
-  pulseTrigger = 0,
-  pulseFreq = 440,
   reduceMotion = false,
   sunPosition = [5.5, 2.0, 4.0],
+  displayPreset = 'natural',
 }: EarthGlobeProps) {
+  const { gl } = useThree();
+
+  // Configure ACES Filmic Tone Mapping and lifted exposure ~1.2 for bright, beautiful Earth
+  useEffect(() => {
+    gl.toneMapping = THREE.ACESFilmicToneMapping;
+    gl.toneMappingExposure = 1.22;
+  }, [gl]);
+
   // Scene references
   const tiltGroupRef = useRef<THREE.Group>(null);
   const earthMeshRef = useRef<THREE.Mesh>(null);
   const cloudsMeshRef = useRef<THREE.Mesh>(null);
-  const moonOrbitRef = useRef<THREE.Group>(null);
   const atmosphereRef = useRef<THREE.Mesh>(null);
   const outerHaloRef = useRef<THREE.Mesh>(null);
-  const pulseRingsRef = useRef<THREE.Group>(null);
 
-  // Pulse ring animation states (supports multiple simultaneous wavelets)
-  const activePulses = useRef<{ id: number; scale: number; alpha: number; color: THREE.Color; speed: number }[]>([]);
+  // Normalized sun direction vector
+  const sunDir = useMemo(() => new THREE.Vector3(...sunPosition).normalize(), [sunPosition]);
 
-  // Load verified NASA / Three.js textures
+  // Load NASA / Three.js textures
   const [dayMap, normalMap, specularMap, cloudsMap, lightsMap] = useTexture([
     '/textures/earth_day.jpg',
     '/textures/earth_normal.jpg',
@@ -93,7 +89,6 @@ export default function EarthGlobe({
     '/textures/earth_lights.png',
   ]);
 
-  // Texture filter and anisotropy settings
   useMemo(() => {
     [dayMap, normalMap, specularMap, cloudsMap, lightsMap].forEach((tex) => {
       tex.colorSpace = THREE.SRGBColorSpace;
@@ -101,25 +96,49 @@ export default function EarthGlobe({
     });
   }, [dayMap, normalMap, specularMap, cloudsMap, lightsMap]);
 
-  // Target atmosphere color
-  const targetGlowColor = useMemo(() => getAtmosphereColor(anomaly), [anomaly]);
-  const currentGlowColor = useRef<THREE.Color>(targetGlowColor.clone());
+  // Atmosphere color: Luminous oceanic cyan-blue with subtle, restrained anomaly tint (max 35%)
+  const { atmosphereBaseColor, terminatorWarmColor } = useMemo(() => {
+    // Subtle data tint (max 35% modulation):
+    // Cold (<0) leans icy azure; Warm (>0.6) leans golden cyan; never flat red
+    const coolBlue = new THREE.Color('#38BDF8');
+    const warmCyan = new THREE.Color('#67E8F9');
+    const terminatorGold = new THREE.Color('#FDBA74');
 
-  // Earth surface material with Black Marble night lights blend on shadow side
+    const t = Math.max(0, Math.min(1, (anomaly - (-0.5)) / 1.8)); // 0 to 1
+    const base = new THREE.Color().lerpColors(coolBlue, warmCyan, t * 0.35);
+
+    return {
+      atmosphereBaseColor: base,
+      terminatorWarmColor: terminatorGold,
+    };
+  }, [anomaly]);
+
+  // Display preset material parameters
+  const presetParams = useMemo(() => {
+    if (displayPreset === 'vivid') {
+      return { roughness: 0.45, metalness: 0.15, normalScale: 0.95, lightIntensity: 2.6 };
+    }
+    if (displayPreset === 'high-contrast') {
+      return { roughness: 0.35, metalness: 0.22, normalScale: 1.15, lightIntensity: 2.8 };
+    }
+    // natural default
+    return { roughness: 0.62, metalness: 0.1, normalScale: 0.8, lightIntensity: 2.2 };
+  }, [displayPreset]);
+
+  // Earth surface material with Black Marble night lights on shadow side
   const earthMaterial = useMemo(() => {
     const mat = new THREE.MeshStandardMaterial({
       map: dayMap,
       normalMap: normalMap,
-      normalScale: new THREE.Vector2(0.8, 0.8),
+      normalScale: new THREE.Vector2(presetParams.normalScale, presetParams.normalScale),
       roughnessMap: specularMap,
-      roughness: 0.65,
-      metalness: 0.1,
+      roughness: presetParams.roughness,
+      metalness: presetParams.metalness,
     });
 
-    // Inject night lights via onBeforeCompile
     mat.onBeforeCompile = (shader) => {
       shader.uniforms.uNightLights = { value: lightsMap };
-      shader.uniforms.uSunDir = { value: new THREE.Vector3(...sunPosition).normalize() };
+      shader.uniforms.uSunDir = { value: sunDir };
 
       shader.fragmentShader = `
         uniform sampler2D uNightLights;
@@ -131,173 +150,125 @@ export default function EarthGlobe({
         '#include <dithering_fragment>',
         `
         #include <dithering_fragment>
-        // Calculate night light emission on the unlit hemisphere
         vec3 worldNorm = normalize(vNormal);
         float sunDot = dot(worldNorm, uSunDir);
-        float nightMask = smoothstep(0.15, -0.25, sunDot);
-        vec3 nightColor = texture2D(uNightLights, vMapUv).rgb * vec3(1.0, 0.82, 0.55) * 2.2 * nightMask;
+        float nightMask = smoothstep(0.12, -0.25, sunDot);
+        vec3 nightColor = texture2D(uNightLights, vMapUv).rgb * vec3(1.0, 0.85, 0.58) * 2.4 * nightMask;
         gl_FragColor.rgb += nightColor;
         `
       );
     };
 
     return mat;
-  }, [dayMap, normalMap, specularMap, lightsMap, sunPosition]);
+  }, [dayMap, normalMap, specularMap, lightsMap, sunDir, presetParams]);
 
-  // Atmosphere inner rim shader
+  // Inner Fresnel Rim Atmosphere Shader
   const atmosphereMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       vertexShader: atmosphereVertexShader,
       fragmentShader: atmosphereFragmentShader,
       uniforms: {
-        uColor: { value: targetGlowColor.clone() },
-        uIntensity: { value: 1.1 },
-        uPower: { value: 3.2 },
+        uBaseColor: { value: atmosphereBaseColor.clone() },
+        uWarmColor: { value: terminatorWarmColor.clone() },
+        uSunDir: { value: sunDir },
+        uIntensity: { value: 1.25 },
+        uPower: { value: 3.0 },
       },
       side: THREE.BackSide,
       blending: THREE.AdditiveBlending,
       transparent: true,
       depthWrite: false,
     });
-  }, []);
+  }, [atmosphereBaseColor, terminatorWarmColor, sunDir]);
 
-  // Faint second outer halo
+  // Soft Outer Halo Shader
   const outerHaloMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       vertexShader: atmosphereVertexShader,
       fragmentShader: atmosphereFragmentShader,
       uniforms: {
-        uColor: { value: targetGlowColor.clone() },
-        uIntensity: { value: 0.35 },
-        uPower: { value: 2.2 },
+        uBaseColor: { value: atmosphereBaseColor.clone() },
+        uWarmColor: { value: terminatorWarmColor.clone() },
+        uSunDir: { value: sunDir },
+        uIntensity: { value: 0.38 },
+        uPower: { value: 2.1 },
       },
       side: THREE.BackSide,
       blending: THREE.AdditiveBlending,
       transparent: true,
       depthWrite: false,
     });
-  }, []);
+  }, [atmosphereBaseColor, terminatorWarmColor, sunDir]);
 
-  // Trigger pulse wave on note play
-  useEffect(() => {
-    if (pulseTrigger > 0) {
-      // Frequency scales propagation speed and reach
-      const freqFactor = (pulseFreq - 220) / (880 - 220); // 0 to 1
-      activePulses.current.push({
-        id: Date.now() + Math.random(),
-        scale: 1.01,
-        alpha: 0.8,
-        color: targetGlowColor.clone(),
-        speed: 0.5 + freqFactor * 0.7,
-      });
-      // Limit to 4 pulses max
-      if (activePulses.current.length > 4) {
-        activePulses.current.shift();
-      }
-    }
-  }, [pulseTrigger, pulseFreq, targetGlowColor]);
-
-  // Animation frame loop
+  // Animation frame loop: Earth & drifting clouds rotation with axial tilt
   useFrame((_, delta) => {
-    // 1. Earth & Clouds continuous rotation with axial tilt
     if (!reduceMotion) {
-      // Base rotation: 1 revolution per ~75 seconds (0.084 rad/s)
-      const baseSpeed = isPlaying ? 0.11 : 0.07;
+      const baseSpeed = isPlaying ? 0.09 : 0.055;
       if (earthMeshRef.current) {
         earthMeshRef.current.rotation.y += delta * baseSpeed;
       }
       if (cloudsMeshRef.current) {
-        // Clouds drift slightly faster (simulating atmospheric trade winds)
-        cloudsMeshRef.current.rotation.y += delta * (baseSpeed * 1.18);
-      }
-      if (moonOrbitRef.current) {
-        // Tiny moon orbits slowly around Earth
-        moonOrbitRef.current.rotation.y += delta * 0.025;
+        // Clouds drift slightly faster (atmospheric trade winds)
+        cloudsMeshRef.current.rotation.y += delta * (baseSpeed * 1.16);
       }
     }
 
-    // 2. Smooth 600ms transition for atmosphere glow color
-    currentGlowColor.current.lerp(targetGlowColor, delta * 3.5);
-    if (atmosphereMaterial.uniforms?.uColor) {
-      atmosphereMaterial.uniforms.uColor.value.copy(currentGlowColor.current);
+    if (atmosphereMaterial.uniforms?.uBaseColor) {
+      atmosphereMaterial.uniforms.uBaseColor.value.lerp(atmosphereBaseColor, delta * 3.0);
     }
-    if (outerHaloMaterial.uniforms?.uColor) {
-      outerHaloMaterial.uniforms.uColor.value.copy(currentGlowColor.current);
-    }
-
-    // 3. Update pulse ring wavelets
-    for (let i = activePulses.current.length - 1; i >= 0; i--) {
-      const pulse = activePulses.current[i];
-      pulse.scale += delta * pulse.speed;
-      pulse.alpha -= delta * 1.2;
-      if (pulse.alpha <= 0.01) {
-        activePulses.current.splice(i, 1);
-      }
+    if (outerHaloMaterial.uniforms?.uBaseColor) {
+      outerHaloMaterial.uniforms.uBaseColor.value.lerp(atmosphereBaseColor, delta * 3.0);
     }
   });
 
-  // Earth's real axial tilt: 23.44 degrees = 0.4091 radians
+  // Earth's real axial tilt: 23.44 degrees
   const axialTiltRad = (23.44 * Math.PI) / 180;
 
   return (
     <group>
-      {/* Group with Earth's 23.4° Axial Tilt */}
+      {/* Lifted scene lighting */}
+      <ambientLight intensity={0.92} color="#E0F2FE" />
+      <directionalLight
+        position={sunPosition}
+        intensity={presetParams.lightIntensity}
+        color="#FFFFFF"
+        castShadow
+      />
+      {/* Soft fill light from dark hemisphere */}
+      <directionalLight position={[-sunPosition[0], -sunPosition[1], -sunPosition[2]]} intensity={0.22} color="#0F172A" />
+
+      {/* Earth Group with 23.44° Axial Tilt */}
       <group ref={tiltGroupRef} rotation={[0, 0, -axialTiltRad]}>
-        {/* Main Earth Sphere (Lit by Sun + Night lights on dark side) */}
+        {/* Main Earth Sphere (Day + Normal + Specular + Night lights) */}
         <mesh ref={earthMeshRef} castShadow receiveShadow>
           <sphereGeometry args={[1, 64, 64]} />
           <primitive object={earthMaterial} attach="material" />
         </mesh>
 
-        {/* Drifting Clouds Shell (Transparent Alpha Layer) */}
+        {/* Soft Drifting Clouds Layer */}
         <mesh ref={cloudsMeshRef}>
           <sphereGeometry args={[1.014, 64, 64]} />
           <meshStandardMaterial
             map={cloudsMap}
             transparent={true}
-            opacity={0.34}
+            opacity={0.32}
             blending={THREE.NormalBlending}
             roughness={1.0}
             depthWrite={false}
           />
         </mesh>
 
-        {/* Primary Atmosphere Feathered Fresnel Shell (Scale 1.045) */}
+        {/* Primary Atmosphere Fresnel Rim (Scale 1.045) */}
         <mesh ref={atmosphereRef} scale={[1.045, 1.045, 1.045]}>
           <sphereGeometry args={[1, 64, 64]} />
           <primitive object={atmosphereMaterial} attach="material" />
         </mesh>
 
-        {/* Soft Second Outer Halo (Scale 1.072) */}
+        {/* Soft Outer Halo (Scale 1.072) */}
         <mesh ref={outerHaloRef} scale={[1.072, 1.072, 1.072]}>
           <sphereGeometry args={[1, 48, 48]} />
           <primitive object={outerHaloMaterial} attach="material" />
         </mesh>
-
-        {/* Acoustic Pulse Ripples */}
-        <group ref={pulseRingsRef}>
-          {activePulses.current.map((p) => (
-            <mesh key={p.id} scale={[p.scale, p.scale, p.scale]}>
-              <sphereGeometry args={[1, 32, 32]} />
-              <meshBasicMaterial
-                color={p.color}
-                wireframe={true}
-                transparent={true}
-                opacity={p.alpha}
-                depthWrite={false}
-                blending={THREE.AdditiveBlending}
-              />
-            </mesh>
-          ))}
-        </group>
-
-        {/* Tiny Orbiting Moon */}
-        <group ref={moonOrbitRef}>
-          <mesh position={[3.6, 0.4, 0]} scale={[0.12, 0.12, 0.12]}>
-            <sphereGeometry args={[1, 24, 24]} />
-            <meshStandardMaterial color="#A8AAB2" roughness={0.9} metalness={0.05} />
-          </mesh>
-        </group>
       </group>
     </group>
   );

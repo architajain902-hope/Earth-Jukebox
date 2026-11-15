@@ -1,6 +1,6 @@
 /* =========================================================
    Earth 616: The Earth Information Jukebox
-   Global Styles, Dual Themes (Deep Space / Daylight), & NASA System
+   Global Styles, Dual Themes (Deep Space / Daylight), & System Design
 ========================================================= */
 
 *, *::before, *::after {
@@ -10,19 +10,19 @@
 }
 
 :root {
-  /* Data Colour Tokens (Exact across text, chart, stripes, glow) */
+  /* Data Colour Tokens */
   --color-cool: #3AA0FF;     /* ~ -0.5 °C */
   --color-neutral: #9FE8FF;  /* ~ 0.0 °C */
   --color-warm: #FFB020;     /* ~ +0.6 °C */
   --color-hot: #FF4D2E;      /* ~ +1.3 °C */
 
-  /* NASA Brand Colours */
+  /* NASA System Colours */
   --nasa-blue: #0B3D91;
   --nasa-red: #FC3D21;
   --cyan-accent: #00D4FF;
 
   /* Typography */
-  --font-heading: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-heading: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'Space Mono', 'SF Mono', monospace;
 
@@ -56,7 +56,7 @@
   --text-muted: #64748B;
   --card-backdrop: blur(16px);
   --header-bg: rgba(5, 11, 26, 0.85);
-  --panel-bg: rgba(5, 11, 26, 0.75);
+  --panel-bg: rgba(5, 11, 26, 0.85);
   --chart-grid: rgba(255, 255, 255, 0.08);
   --chart-grid-text: #64748B;
   --chart-zero-line: rgba(255, 255, 255, 0.35);
@@ -65,26 +65,26 @@
 }
 
 /* ---------------------------------------------------------
-   Light Theme ("Daylight")
+   Light Theme ("Daylight" - WCAG 2.1 AA Contrast)
 --------------------------------------------------------- */
 [data-theme="light"] {
-  --bg-gradient: radial-gradient(circle at 50% 30%, #FFFFFF 0%, #F4F7FC 65%, #E6EEFA 100%);
-  --bg-solid: #F4F7FC;
-  --surface-glass: rgba(255, 255, 255, 0.82);
-  --surface-glass-active: rgba(235, 243, 255, 0.95);
-  --surface-border: rgba(11, 61, 145, 0.25);
-  --surface-border-subtle: rgba(11, 61, 145, 0.12);
-  --text-primary: #0B1D3A;
-  --text-secondary: #334155;
-  --text-muted: #64748B;
+  --bg-gradient: radial-gradient(circle at 50% 30%, #FFFFFF 0%, #F1F5F9 65%, #E2E8F0 100%);
+  --bg-solid: #F8FAFC;
+  --surface-glass: rgba(255, 255, 255, 0.92);
+  --surface-glass-active: rgba(241, 245, 249, 0.98);
+  --surface-border: rgba(11, 61, 145, 0.3);
+  --surface-border-subtle: rgba(11, 61, 145, 0.16);
+  --text-primary: #0A192F;
+  --text-secondary: #1E293B;
+  --text-muted: #334155;
   --card-backdrop: blur(16px);
-  --header-bg: rgba(244, 247, 252, 0.88);
-  --panel-bg: rgba(255, 255, 255, 0.85);
-  --chart-grid: rgba(11, 29, 58, 0.08);
-  --chart-grid-text: #475569;
-  --chart-zero-line: rgba(11, 61, 145, 0.45);
-  --scroll-track: rgba(226, 232, 240, 0.7);
-  --scroll-thumb: rgba(11, 61, 145, 0.35);
+  --header-bg: rgba(255, 255, 255, 0.94);
+  --panel-bg: rgba(255, 255, 255, 0.95);
+  --chart-grid: rgba(15, 23, 42, 0.12);
+  --chart-grid-text: #334155;
+  --chart-zero-line: rgba(11, 61, 145, 0.6);
+  --scroll-track: rgba(226, 232, 240, 0.8);
+  --scroll-thumb: rgba(11, 61, 145, 0.45);
 }
 
 html, body {
@@ -97,7 +97,7 @@ html, body {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.35s ease, color 0.35s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #root {
@@ -113,8 +113,8 @@ html, body {
   backdrop-filter: var(--card-backdrop);
   -webkit-backdrop-filter: var(--card-backdrop);
   border-radius: var(--radius-md);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+  transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .glass-active {
@@ -130,7 +130,7 @@ html, body {
 
 /* Range Inputs */
 input[type="range"] {
-  accent-color: var(--color-hot);
+  accent-color: #00D4FF;
 }
 
 button {
@@ -196,13 +196,32 @@ button {
   animation: globe-spin 8s linear infinite;
 }
 
-/* Responsive Hide Utilities */
-@media (max-width: 900px) {
+/* Responsive Grid / Layout Breakpoints */
+@media (max-width: 480px) {
+  .app-control-deck {
+    padding: 10px 12px !important;
+    gap: 8px !important;
+  }
+  .app-hud-overlay {
+    top: 56px !important;
+    left: 8px !important;
+    right: 8px !important;
+  }
   .hide-on-mobile {
     display: none !important;
   }
 }
-@media (min-width: 901px) {
+
+@media (max-width: 768px) {
+  .app-header {
+    padding: 8px 12px !important;
+  }
+  .hide-on-tablet {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
   .hide-on-desktop {
     display: none !important;
   }

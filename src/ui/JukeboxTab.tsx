@@ -70,18 +70,9 @@ export default function JukeboxTab({
       .catch((err) => {
         console.error('Failed to load frames manifest:', err);
       });
-  }, []);
+  }, [selectedFrameId]);
 
   const activeItem = frames.find((f) => f.id === selectedFrameId);
-
-  // Warn in console if frame has unknown source
-  useEffect(() => {
-    if (activeItem && activeItem.sourceId === 'unknown') {
-      console.warn(
-        `[Frame Source Warning] Frame "${activeItem.id}" has no verified SVS source (sourceId: "unknown"). Marked as source TODO.`
-      );
-    }
-  }, [activeItem]);
 
   // Process and analyze active frame
   const processFrame = useCallback(
@@ -90,7 +81,6 @@ export default function JukeboxTab({
         const result = analyzeFrame(source, 96, 48);
         setAnalysis(result);
 
-        // Draw preview onto display canvas
         const canvas = previewCanvasRef.current;
         if (canvas) {
           const ctx = canvas.getContext('2d');
@@ -115,94 +105,62 @@ export default function JukeboxTab({
       return;
     }
 
-    if (selectedFrameId === 'custom' && customImageSrc) {
+    if (customImageSrc) {
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      img.onload = () => processFrame(img);
+      img.onload = () => {
+        imageElementRef.current = img;
+        processFrame(img);
+      };
       img.src = customImageSrc;
       return;
     }
 
-    const frameItem = frames.find((f) => f.id === selectedFrameId);
-    if (!frameItem) return;
-
-    if (frameItem.thumbnail === 'synthetic-stripes') {
-      // Generate warming stripes canvas dynamically
-      const cvs = document.createElement('canvas');
-      cvs.width = 192;
-      cvs.height = 96;
-      const ctx = cvs.getContext('2d')!;
-      const data = dataset.data;
-      const stripeW = cvs.width / data.length;
-
-      data.forEach((d, i) => {
-        const t = Math.max(0, Math.min(1, (d.anomaly + 0.5) / 1.8));
-        const r = Math.round(t * 255);
-        const b = Math.round((1 - t) * 255);
-        const g = Math.round(Math.sin(t * Math.PI) * 120);
-        ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-        ctx.fillRect(i * stripeW, 0, Math.ceil(stripeW), cvs.height);
-      });
-
-      processFrame(cvs);
-      return;
+    if (activeItem) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        imageElementRef.current = img;
+        processFrame(img);
+      };
+      img.onerror = () => {
+        console.warn(`Could not load frame asset: ${activeItem.file}`);
+      };
+      img.src = activeItem.file;
     }
+  }, [selectedFrameId, activeItem, customImageSrc, getCanvasElement, processFrame]);
 
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      imageElementRef.current = img;
-      processFrame(img);
-    };
-    img.src = frameItem.thumbnail;
-  }, [selectedFrameId, frames, customImageSrc, dataset, getCanvasElement, processFrame]);
-
-  // Clean up sound on unmount
-  useEffect(() => {
-    return () => {
-      frameSonifier.stop();
-    };
-  }, []);
-
-  const handleTogglePlay = () => {
+  // Sonification playhead
+  const togglePlay = () => {
     if (isPlaying) {
       frameSonifier.stop();
       setIsPlaying(false);
-    } else {
-      if (!analysis) return;
-      setIsPlaying(true);
-      frameSonifier.start(analysis, currentAnomaly, (col, freq) => {
-        setActiveColumn(col);
-        setActiveFreq(freq);
-      });
+      return;
     }
-  };
 
-  const handleExportWav = async () => {
     if (!analysis) return;
-    setIsExporting(true);
-    try {
-      const wavBlob = await frameSonifier.exportSoundscapeWav(analysis, currentAnomaly);
-      const url = URL.createObjectURL(wavBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `NASA-EIC-Soundscape-${selectedFrameId}-${selectedYear}.wav`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('WAV export error:', err);
-    } finally {
-      setIsExporting(false);
-    }
+
+    setIsPlaying(true);
+    frameSonifier.start(
+      analysis,
+      currentAnomaly,
+      (colIdx: number, freq: number) => {
+        setActiveColumn(colIdx);
+        setActiveFreq(freq);
+      }
+    );
   };
 
+  // Custom frame upload
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (event) => {
-      setCustomImageSrc(event.target?.result as string);
-      setSelectedFrameId('custom');
+      if (typeof event.target?.result === 'string') {
+        setCustomImageSrc(event.target.result);
+        setSelectedFrameId('custom-upload');
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -210,459 +168,343 @@ export default function JukeboxTab({
   return (
     <div
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        flex: 1,
-        height: '100%',
-        minHeight: 0,
-        width: '100%',
+        position: 'absolute',
+        inset: 0,
+        background: 'var(--bg-solid, #050B1A)',
+        zIndex: 20,
         overflowY: 'auto',
-        background: 'rgba(5, 12, 28, 0.95)',
-        backdropFilter: 'blur(20px)',
-        color: '#FFFFFF',
-        padding: '16px 20px',
-        boxSizing: 'border-box',
-        gap: 14,
+        padding: '20px 24px 80px',
       }}
-      role="region"
-      aria-label="NASA Earth Information Center Frame Sonification Jukebox"
     >
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 24 }}>🏛️</span>
-            <h1
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: 18,
-                fontWeight: 700,
-                margin: 0,
-                letterSpacing: 0.5,
-              }}
-            >
-              Earth Information Jukebox: Frame Sonifier
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        {/* Top Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <div>
+            <div style={{ fontSize: 11, color: '#00D4FF', fontFamily: 'var(--font-mono)', letterSpacing: 1.5, textTransform: 'uppercase' }}>
+              NASA Earth Information Center (EIC) Visual Frames
+            </div>
+            <h1 style={{ fontSize: 'clamp(22px, 3.5vw, 28px)', fontWeight: 800, color: 'var(--text-primary, #FFFFFF)', margin: '4px 0 0' }}>
+              Computer Vision Frame Sonifier
             </h1>
           </div>
-          <p style={{ margin: '3px 0 0 0', fontSize: 11.5, color: '#94A3B8' }}>
-            Pairing NASA Earth Information Center (EIC) visual frames with real-time dynamic soundscapes.
-          </p>
-        </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button
-            onClick={() => setShowSourcesModal(true)}
-            style={{
-              background: 'rgba(0, 212, 255, 0.15)',
-              border: '1px solid #00D4FF',
-              borderRadius: 6,
-              color: '#00D4FF',
-              padding: '6px 12px',
-              cursor: 'pointer',
-              fontFamily: 'var(--font-mono)',
-              fontSize: 11.5,
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-            }}
-            title="View verified NASA SVS sources, visualizers, datasets, and credits"
-          >
-            <span>📜</span>
-            <span>Sources & Credits</span>
-          </button>
-
-          {onClose && (
+          <div style={{ display: 'flex', gap: 10 }}>
             <button
-              onClick={onClose}
+              onClick={() => setShowSourcesModal(true)}
               style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: 6,
-                color: '#FFFFFF',
-                padding: '6px 12px',
-                cursor: 'pointer',
-                fontFamily: 'var(--font-mono)',
-                fontSize: 12,
-              }}
-            >
-              ✕ Back to 3D Globe
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Frame Selection Gallery */}
-      <div
-        className="snap-scroll-x"
-        style={{
-          display: 'flex',
-          gap: 10,
-          overflowX: 'auto',
-          paddingBottom: 4,
-          flexShrink: 0,
-          minHeight: 62,
-        }}
-      >
-        {frames.map((item) => {
-          const isSelected = item.id === selectedFrameId;
-          return (
-            <button
-              key={item.id}
-              onClick={() => {
-                if (isPlaying) frameSonifier.stop();
-                setIsPlaying(false);
-                setSelectedFrameId(item.id);
-              }}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                padding: '8px 12px',
+                padding: '7px 14px',
                 borderRadius: 8,
-                background: isSelected ? 'rgba(0, 212, 255, 0.15)' : 'rgba(11, 29, 58, 0.5)',
-                border: isSelected ? '1px solid #00D4FF' : '1px solid rgba(255, 255, 255, 0.1)',
-                color: '#FFFFFF',
+                background: 'rgba(0, 212, 255, 0.12)',
+                border: '1px solid rgba(0, 212, 255, 0.35)',
+                color: '#00D4FF',
+                fontSize: 12,
+                fontWeight: 600,
                 cursor: 'pointer',
-                textAlign: 'left',
-                minWidth: 180,
-                flexShrink: 0,
-                transition: 'all 0.15s ease',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: isSelected ? '#00D4FF' : '#E0F2FE' }}>
-                  {item.title}
-                </span>
-                {import.meta.env.DEV && item.sourceId === 'unknown' && (
-                  <span
-                    style={{
-                      background: '#DC2626',
-                      color: '#FFF',
-                      fontSize: 8.5,
-                      fontWeight: 700,
-                      padding: '1px 4px',
-                      borderRadius: 3,
-                      fontFamily: 'var(--font-mono)',
-                    }}
-                  >
-                    TODO
-                  </span>
-                )}
-              </div>
-              <span style={{ fontSize: 9.5, color: '#94A3B8', marginTop: 2 }}>
-                {item.credit || item.agency}
-              </span>
+              🏛️ Sources & Credits
             </button>
-          );
-        })}
+            {onClose && (
+              <button
+                onClick={onClose}
+                style={{
+                  padding: '7px 14px',
+                  borderRadius: 8,
+                  background: 'rgba(11, 29, 58, 0.6)',
+                  border: '1px solid rgba(0, 212, 255, 0.25)',
+                  color: '#FFFFFF',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                ← Back to Earth
+              </button>
+            )}
+          </div>
+        </div>
 
-        {/* Upload Custom NASA Frame */}
-        <label
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: '8px 14px',
-            borderRadius: 8,
-            border: '1px dashed rgba(0, 212, 255, 0.4)',
-            background: 'rgba(0, 212, 255, 0.05)',
-            cursor: 'pointer',
-            minWidth: 140,
-            flexShrink: 0,
-          }}
-        >
-          <span style={{ fontSize: 16 }}>📤</span>
-          <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: '#00D4FF', marginTop: 4 }}>
-            Upload Frame
-          </span>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileUpload}
-            style={{ display: 'none' }}
-          />
-        </label>
-      </div>
-
-      {/* Main Interactive Stage */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(320px, 1.2fr) minmax(280px, 1fr)', gap: 18 }}>
-        {/* Left Column: Visual Frame with Sweeping Playhead */}
-        <div
-          className="glass"
-          style={{
-            padding: 16,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 12,
-            borderRadius: 12,
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#94A3B8', textTransform: 'uppercase' }}>
-              Computer Vision Scan & Playhead
-            </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#38BDF8' }}>
-              Column {activeColumn + 1} / 96
-            </span>
+        {/* Filmstrip of NASA SVS Frames */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#94A3B8', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1, fontFamily: 'var(--font-mono)' }}>
+            Select Visual Frame (Filmstrip):
           </div>
 
           <div
             style={{
-              position: 'relative',
-              width: '100%',
-              aspectRatio: '2 / 1',
-              borderRadius: 8,
-              overflow: 'hidden',
-              background: '#040A18',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
+              display: 'flex',
+              gap: 12,
+              overflowX: 'auto',
+              paddingBottom: 8,
+              scrollbarWidth: 'thin',
             }}
           >
-            <canvas
-              ref={previewCanvasRef}
-              width={384}
-              height={192}
-              style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover' }}
-            />
+            {frames.map((item) => {
+              const isSelected = selectedFrameId === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setSelectedFrameId(item.id);
+                    setCustomImageSrc(null);
+                  }}
+                  style={{
+                    flex: '0 0 200px',
+                    padding: 8,
+                    borderRadius: 12,
+                    border: isSelected ? '2px solid #00D4FF' : '1px solid rgba(255,255,255,0.12)',
+                    background: isSelected ? 'rgba(0, 212, 255, 0.15)' : 'rgba(11, 29, 58, 0.45)',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <div
+                    style={{
+                      height: 100,
+                      borderRadius: 8,
+                      overflow: 'hidden',
+                      marginBottom: 8,
+                      background: '#040A14',
+                    }}
+                  >
+                    <img
+                      src={item.thumbnail}
+                      alt={item.title}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: isSelected ? '#00D4FF' : '#FFFFFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {item.title}
+                  </div>
+                  <div style={{ fontSize: 10, color: '#94A3B8', marginTop: 2 }}>
+                    {item.sourceId.toUpperCase()} • {item.category}
+                  </div>
+                </button>
+              );
+            })}
 
-            {/* Sweeping Vertical Scanline */}
-            {isPlaying && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  bottom: 0,
-                  left: `${(activeColumn / 96) * 100}%`,
-                  width: 2,
-                  background: '#00D4FF',
-                  boxShadow: '0 0 10px #00D4FF, 0 0 20px #00D4FF',
-                  pointerEvents: 'none',
-                  transition: 'left 0.04s linear',
-                }}
-              />
-            )}
+            {/* Custom File Upload Card */}
+            <label
+              style={{
+                flex: '0 0 160px',
+                padding: 8,
+                borderRadius: 12,
+                border: '1px dashed rgba(0, 212, 255, 0.35)',
+                background: 'rgba(11, 29, 58, 0.25)',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+              }}
+            >
+              <span style={{ fontSize: 24, marginBottom: 4 }}>📤</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#00D4FF' }}>Upload Frame</span>
+              <span style={{ fontSize: 10, color: '#64748B' }}>PNG / JPG</span>
+              <input type="file" accept="image/*" onChange={handleFileUpload} style={{ display: 'none' }} />
+            </label>
           </div>
+        </div>
 
-          {/* SVS Source Citation & Credit Line */}
-          {activeItem && (
+        {/* Main Frame Viewer & Scanline Sonifier */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 24, marginBottom: 24 }}>
+          {/* Visual Display with Scanline Playhead */}
+          <div
+            className="glass"
+            style={{
+              padding: 16,
+              borderRadius: 16,
+              border: '1px solid rgba(0, 212, 255, 0.3)',
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
+          >
             <div
               style={{
-                padding: '10px 12px',
-                borderRadius: 8,
-                background: 'rgba(4, 10, 24, 0.75)',
-                border: '1px solid rgba(0, 212, 255, 0.25)',
-                fontSize: 11,
-                lineHeight: 1.5,
-                color: '#CBD5E1',
+                position: 'relative',
+                width: '100%',
+                maxWidth: 580,
+                aspectRatio: '2 / 1',
+                borderRadius: 10,
+                overflow: 'hidden',
+                background: '#040A14',
+                boxShadow: '0 8px 30px rgba(0,0,0,0.6)',
               }}
-              role="contentinfo"
-              aria-label="Image frame citation"
             >
-              <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
-                <span style={{ color: '#94A3B8', fontWeight: 600 }}>Source:</span>
+              <canvas
+                ref={previewCanvasRef}
+                width={576}
+                height={288}
+                style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+              />
+
+              {/* Vertical Scanline Indicator */}
+              {isPlaying && analysis && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    bottom: 0,
+                    left: `${(activeColumn / (analysis.width || 96)) * 100}%`,
+                    width: 2,
+                    background: '#00D4FF',
+                    boxShadow: '0 0 12px #00D4FF, 0 0 24px #38BDF8',
+                    pointerEvents: 'none',
+                    transition: 'left 0.04s linear',
+                  }}
+                />
+              )}
+            </div>
+
+            {/* Playback Controls */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginTop: 14 }}>
+              <button
+                onClick={togglePlay}
+                style={{
+                  padding: '10px 24px',
+                  borderRadius: 8,
+                  background: isPlaying ? 'linear-gradient(135deg, #FC3D21 0%, #B91C1C 100%)' : 'linear-gradient(135deg, #0B3D91 0%, #00D4FF 100%)',
+                  border: 'none',
+                  color: '#FFFFFF',
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <span>{isPlaying ? '⏹ Stop Sonification' : '▶ Sonify Visual Frame'}</span>
+              </button>
+
+              <div style={{ textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
+                <span style={{ fontSize: 11, color: '#94A3B8' }}>Frequency: </span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#00D4FF' }}>
+                  {Math.round(activeFreq)} Hz
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Computer Vision Metrics & Analysis Breakdown */}
+          <div
+            className="glass"
+            style={{
+              padding: 20,
+              borderRadius: 16,
+              border: '1px solid rgba(0, 212, 255, 0.25)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+            }}
+          >
+            <div>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#FFFFFF', marginBottom: 12 }}>
+                Computer Vision Analysis (96 × 48 Matrix)
+              </h3>
+
+              {analysis ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 12.5 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: '#94A3B8' }}>Dominant Hue:</span>
+                    <span style={{ fontWeight: 600, color: '#38BDF8' }}>{analysis.dominantHueName} ({Math.round(analysis.dominantHue)}°)</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: '#94A3B8' }}>Warm / Cool Ratio:</span>
+                    <span style={{ fontWeight: 600, color: '#FFFFFF' }}>{Math.round(analysis.warmCoolRatio * 100)}% warm</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: '#94A3B8' }}>Sobel Edge Gradient:</span>
+                    <span style={{ fontWeight: 600, color: '#FFFFFF' }}>{Math.round(analysis.edgeDensity * 100)}% detail density</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: '#94A3B8' }}>Average Brightness:</span>
+                    <span style={{ fontWeight: 600, color: '#FFFFFF' }}>{Math.round(analysis.averageBrightness * 100)}%</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: '#94A3B8' }}>Recommended Musical Scale:</span>
+                    <span style={{ fontWeight: 700, color: '#00D4FF', textTransform: 'capitalize' }}>{analysis.recommendedScale}</span>
+                  </div>
+
+                  <div style={{ marginTop: 12, padding: 12, borderRadius: 8, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <div style={{ fontSize: 11, color: '#64748B', marginBottom: 4, textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>
+                      Accessible Audio Description
+                    </div>
+                    <div style={{ fontSize: 12, color: '#CBD5E1', lineHeight: 1.5 }}>
+                      {analysis.accessibleDescription}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ color: '#94A3B8', fontSize: 13 }}>Analyzing frame...</div>
+              )}
+            </div>
+
+            <div style={{ marginTop: 16, fontSize: 11, color: '#64748B', fontFamily: 'var(--font-mono)' }}>
+              Scanline sweep sonifies pixel brightness into pitch, edge density into harmonics, and spatial centroid into stereo panning.
+            </div>
+          </div>
+        </div>
+
+        {/* Sticky Verified NASA Credit Line Under Every Frame */}
+        {activeItem && (
+          <div
+            className="glass"
+            style={{
+              padding: '16px 20px',
+              borderRadius: 12,
+              border: '1px solid rgba(0, 212, 255, 0.25)',
+              background: 'rgba(11, 29, 58, 0.55)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10 }}>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF', marginBottom: 4 }}>
+                  {activeItem.sourceTitle}
+                </div>
+                <div style={{ fontSize: 11.5, color: '#CBD5E1', lineHeight: 1.5 }}>
+                  <strong>Credit:</strong> {activeItem.credit} • <strong>Visualizers:</strong> {activeItem.visualizers} • <strong>Scientists:</strong> {activeItem.scientists}
+                </div>
+                {activeItem.datasetCredits && (
+                  <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 4 }}>
+                    <strong>Dataset:</strong> {activeItem.datasetCredits}
+                  </div>
+                )}
+              </div>
+
+              {activeItem.sourceUrl && (
                 <a
                   href={activeItem.sourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
-                    color: '#38BDF8',
-                    textDecoration: 'underline',
+                    padding: '6px 14px',
+                    borderRadius: 6,
+                    background: 'rgba(0, 212, 255, 0.12)',
+                    border: '1px solid rgba(0, 212, 255, 0.35)',
+                    color: '#00D4FF',
+                    fontSize: 11.5,
+                    textDecoration: 'none',
                     fontWeight: 600,
+                    whiteSpace: 'nowrap',
                   }}
-                  title={`Open official NASA page for ${activeItem.sourceTitle || activeItem.title}`}
                 >
-                  {activeItem.sourceTitle || activeItem.title} ↗
+                  View on NASA SVS ↗
                 </a>
-                {import.meta.env.DEV && activeItem.sourceId === 'unknown' && (
-                  <span
-                    style={{
-                      background: '#DC2626',
-                      color: '#FFFFFF',
-                      fontSize: 9,
-                      fontWeight: 700,
-                      padding: '1px 6px',
-                      borderRadius: 4,
-                      fontFamily: 'var(--font-mono)',
-                      letterSpacing: 0.5,
-                    }}
-                    title="Dev Mode Warning: this frame has no verified SVS source entry"
-                  >
-                    source TODO
-                  </span>
-                )}
-              </div>
-              <div style={{ marginTop: 2, fontSize: 10.5, color: '#94A3B8' }}>
-                <span><strong>Credit:</strong> {activeItem.credit}. </span>
-                {activeItem.visualizers && (
-                  <span><strong>Visualizer:</strong> {activeItem.visualizers}.</span>
-                )}
-              </div>
-              {activeItem.notes && (
-                <div style={{ marginTop: 4, fontSize: 10, color: '#FCD34D', background: 'rgba(251, 191, 36, 0.08)', padding: '4px 6px', borderRadius: 4 }}>
-                  <strong>Notes:</strong> {activeItem.notes}
-                </div>
               )}
             </div>
-          )}
-
-          {/* Transport Bar */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <button
-              onClick={handleTogglePlay}
-              style={{
-                flex: 1,
-                padding: '10px 16px',
-                borderRadius: 8,
-                background: isPlaying ? 'rgba(252, 61, 33, 0.4)' : 'rgba(0, 212, 255, 0.25)',
-                border: isPlaying ? '1px solid #FC3D21' : '1px solid #00D4FF',
-                color: '#FFFFFF',
-                fontFamily: 'var(--font-mono)',
-                fontSize: 13,
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 8,
-              }}
-            >
-              <span>{isPlaying ? '⏸' : '▶'}</span>
-              <span>{isPlaying ? 'Stop Soundscape' : 'Play Frame Soundscape'}</span>
-            </button>
-
-            <button
-              onClick={handleExportWav}
-              disabled={isExporting}
-              style={{
-                padding: '10px 14px',
-                borderRadius: 8,
-                background: 'rgba(11, 29, 58, 0.8)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                color: '#E0F2FE',
-                fontFamily: 'var(--font-mono)',
-                fontSize: 12,
-                cursor: 'pointer',
-              }}
-              title="Synthesizes a 24-second high-fidelity WAV soundscape"
-            >
-              {isExporting ? '⏳ Rendering...' : '💾 Export WAV'}
-            </button>
           </div>
-
-          {/* Current Acoustic Output Pill */}
-          <div
-            style={{
-              padding: '8px 12px',
-              borderRadius: 6,
-              background: 'rgba(4, 10, 24, 0.5)',
-              border: '1px solid rgba(0, 212, 255, 0.1)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              fontFamily: 'var(--font-mono)',
-              fontSize: 11,
-              color: '#94A3B8',
-            }}
-          >
-            <span>Live Scan Pitch: <strong style={{ color: '#00D4FF' }}>{Math.round(activeFreq)} Hz</strong></span>
-            <span>Scale: <strong style={{ color: '#FBBF24' }}>{analysis?.recommendedScale.toUpperCase() ?? 'DORIAN'}</strong></span>
-          </div>
-        </div>
-
-        {/* Right Column: Computer Vision Analysis & Educational Split Card */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {/* Analysis Metrics */}
-          <div className="glass" style={{ padding: 14, borderRadius: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#94A3B8', textTransform: 'uppercase' }}>
-              Extracted Visual Parameters
-            </span>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              <div style={{ background: 'rgba(4, 10, 24, 0.4)', padding: '6px 10px', borderRadius: 6 }}>
-                <div style={{ fontSize: 9.5, color: '#64748B' }}>Dominant Hue</div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: '#38BDF8', marginTop: 2 }}>
-                  {analysis?.dominantHueName ?? 'Ocean Blue'} (~{analysis?.dominantHue ?? 210}°)
-                </div>
-              </div>
-
-              <div style={{ background: 'rgba(4, 10, 24, 0.4)', padding: '6px 10px', borderRadius: 6 }}>
-                <div style={{ fontSize: 9.5, color: '#64748B' }}>Edge Density (Detail)</div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: '#FBBF24', marginTop: 2 }}>
-                  {((analysis?.edgeDensity ?? 0) * 100).toFixed(1)}%
-                </div>
-              </div>
-            </div>
-
-            {/* Warm vs Cool Palette Bar */}
-            <div style={{ marginTop: 4 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9.5, color: '#64748B', marginBottom: 3 }}>
-                <span>Cool Tones (Oceans/Atmosphere): {Math.round((1 - (analysis?.warmCoolRatio ?? 0.5)) * 100)}%</span>
-                <span>Warm Tones (Land/Thermal): {Math.round((analysis?.warmCoolRatio ?? 0.5) * 100)}%</span>
-              </div>
-              <div style={{ height: 6, borderRadius: 3, overflow: 'hidden', display: 'flex', background: '#0F172A' }}>
-                <div style={{ width: `${(1 - (analysis?.warmCoolRatio ?? 0.5)) * 100}%`, background: '#38BDF8' }} />
-                <div style={{ width: `${(analysis?.warmCoolRatio ?? 0.5) * 100}%`, background: '#FC3D21' }} />
-              </div>
-            </div>
-          </div>
-
-          {/* The Split Educational Card */}
-          <div
-            className="glass"
-            style={{
-              padding: 14,
-              borderRadius: 10,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 8,
-              border: '1px solid rgba(0, 212, 255, 0.25)',
-            }}
-          >
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#00D4FF', textTransform: 'uppercase', letterSpacing: 0.8 }}>
-              Scientific Sonification Architecture
-            </span>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <div style={{ padding: '8px 10px', background: 'rgba(11, 29, 58, 0.6)', borderRadius: 6, borderLeft: '3px solid #38BDF8' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#E0F2FE' }}>1. What the DATA Decides (Unyielding Ground Truth)</div>
-                <div style={{ fontSize: 10, color: '#94A3B8', marginTop: 2 }}>
-                  NASA GISTEMP {selectedYear} anomaly ({currentAnomaly >= 0 ? '+' : ''}{currentAnomaly.toFixed(2)} °C) anchors the fundamental tonal root at {Math.round(rootHz)} Hz. Higher temperature = higher pitch, never distorted.
-                </div>
-              </div>
-
-              <div style={{ padding: '8px 10px', background: 'rgba(11, 29, 58, 0.6)', borderRadius: 6, borderLeft: '3px solid #F59E0B' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#E0F2FE' }}>2. What the FRAME Decides (Harmonic Atmosphere)</div>
-                <div style={{ fontSize: 10, color: '#94A3B8', marginTop: 2 }}>
-                  Computer vision extracts the dominant hue to select scale mode ({analysis?.recommendedScale.toUpperCase()}), edge density to drive arpeggio tempo, and vertical centroid to pan chimes across stereo space.
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Accessible Natural-Language Description for Judges & Screen Readers */}
-          <div
-            style={{
-              padding: '10px 12px',
-              borderRadius: 8,
-              background: 'rgba(4, 10, 24, 0.6)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              fontSize: 10.5,
-              lineHeight: 1.5,
-              color: '#CBD5E1',
-            }}
-            role="status"
-            aria-live="polite"
-          >
-            <span style={{ fontWeight: 700, color: '#00D4FF' }}>Accessibility Synthesis: </span>
-            {analysis?.accessibleDescription ?? 'Loading frame description...'}
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* Sources & Credits Modal */}
-      {showSourcesModal && (
-        <SourcesModal onClose={() => setShowSourcesModal(false)} />
-      )}
+      {showSourcesModal && <SourcesModal onClose={() => setShowSourcesModal(false)} />}
     </div>
   );
 }

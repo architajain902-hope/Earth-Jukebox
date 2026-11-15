@@ -1,6 +1,7 @@
 "use client"
 
 import { PeakChart } from "@/components/ui/peak-chart"
+import GlassWorkspaceDemo from "@/components/ui/glass-workspace-demo"
 
 export function PeakChartDemo() {
   return (
@@ -14,4 +15,5 @@ export function PeakChartDemo() {
   )
 }
 
-export default PeakChartDemo
+export { GlassWorkspaceDemo }
+export default GlassWorkspaceDemo

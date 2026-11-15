@@ -19,6 +19,7 @@ interface MoreDrawerProps {
   onOpenSources: () => void;
   onOpenAbout: () => void;
   onOpenPeakChart?: () => void;
+  onOpenGlassWorkspace?: () => void;
 }
 
 export default function MoreDrawer({
@@ -39,6 +40,7 @@ export default function MoreDrawer({
   onOpenSources,
   onOpenAbout,
   onOpenPeakChart,
+  onOpenGlassWorkspace,
 }: MoreDrawerProps) {
   if (!isOpen) return null;
 
@@ -144,6 +146,14 @@ export default function MoreDrawer({
                     title="Peak Trends (Peak Chart)"
                     desc="Interactive cubic spline chart with live glow field"
                     onClick={() => { onClose(); onOpenPeakChart(); }}
+                  />
+                )}
+                {onOpenGlassWorkspace && (
+                  <DrawerButton
+                    icon="🪟"
+                    title="Glass Workspace"
+                    desc="Adjustable glassmorphic blur, tint & mission controls"
+                    onClick={() => { onClose(); onOpenGlassWorkspace(); }}
                   />
                 )}
               </div>

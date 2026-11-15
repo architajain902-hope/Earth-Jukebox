@@ -28,6 +28,7 @@ import AccessibilityDropdown from './AccessibilityDropdown';
 import SoundMixerModal from './SoundMixerModal';
 import CoachMark from './CoachMark';
 import PeakChartModal from './PeakChartModal';
+import GlassWorkspaceModal from './GlassWorkspaceModal';
 
 import JukeboxTab from './JukeboxTab';
 import LearnTab from './LearnTab';
@@ -109,6 +110,7 @@ export default function MainExperience({
   const [showExport, setShowExport] = useState<boolean>(false);
   const [showSources, setShowSources] = useState<boolean>(false);
   const [showPeakChart, setShowPeakChart] = useState<boolean>(false);
+  const [showGlassWorkspace, setShowGlassWorkspace] = useState<boolean>(false);
   const [isAutoTourActive, setIsAutoTourActive] = useState<boolean>(false);
 
   // Toast
@@ -1134,6 +1136,12 @@ export default function MainExperience({
         />
       )}
 
+      {showGlassWorkspace && (
+        <GlassWorkspaceModal
+          onClose={() => setShowGlassWorkspace(false)}
+        />
+      )}
+
       <MoreDrawer
         isOpen={showMoreDrawer}
         onClose={() => setShowMoreDrawer(false)}
@@ -1149,6 +1157,7 @@ export default function MainExperience({
         onOpenSources={() => setShowSources(true)}
         onOpenAbout={() => setShowAbout(true)}
         onOpenPeakChart={() => setShowPeakChart(true)}
+        onOpenGlassWorkspace={() => setShowGlassWorkspace(true)}
         onCopyLink={handleCopyLink}
         onToggleRecording={handleToggleRecording}
         isRecording={isRecording}
